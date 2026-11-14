@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import type { CrewId, Position } from './fd30';
 import { CrewCharacter } from './CrewCharacter';
@@ -19,16 +19,22 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   const t = useT().fd30;
   const frame = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
-  const [focused, setFocused] = useState(false);
+  const infoButton = useRef<HTMLButtonElement>(null);
+  // The info card is on demand: it starts closed and only the info button (or a move in progress) shows it.
+  const [infoOpen, setInfoOpen] = useState(false);
   const [moving, setMoving] = useState(false);
   const [dragPoint, setDragPoint] = useState<Point | null>(null);
   const initialBounds = { x: 8, y: 180, width: window.innerWidth - 16, height: Math.max(0, window.innerHeight - 188) };
-  const [geometry, setGeometry] = useState({ bounds: initialBounds, preferenceBounds: initialBounds, size: { width: 100, height: 160 }, notice: { width: 220, height: 120 }, obstacles: [] as Box[] });
+  // Geometry lives in a ref and is read at render. A measurement overwrites it (latest wins) and bumps a counter to re-render.
+  // A functional setState replaying an older DOM snapshot after a newer one made measure and render chase each other.
+  const geometryRef = useRef({ bounds: initialBounds, preferenceBounds: initialBounds, size: { width: 100, height: 160 }, notice: { width: 220, height: 120 }, obstacles: [] as Box[] });
+  const [, rerender] = useReducer((n: number) => n + 1, 0);
+  const geometry = geometryRef.current;
   const gesture = useRef<{ id: number; start: Point; base: Point; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
   const measure = useCallback(() => {
     const root = document.querySelector('.fd30');
-    if (!root || !frame.current || !bubble.current) return;
+    if (!root || !frame.current) return;
     const viewport = window.visualViewport;
     const x = (viewport?.offsetLeft ?? 0) + 8;
     const y = Math.max((viewport?.offsetTop ?? 0) + 8, root.querySelector('.fd-demo')!.getBoundingClientRect().bottom + 8);
@@ -44,9 +50,12 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     const bounds = { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
     const obstacles = [...root.querySelectorAll('.fd-main a, .fd-main button, .fd-main input, .fd-main select, .fd-main summary')]
       .map(e => asBox(e.getBoundingClientRect())).filter(r => r.width && r.height && r.y < bottom && r.y + r.height > y);
-    const rect = frame.current.getBoundingClientRect(), notice = bubble.current.getBoundingClientRect();
-    const next = { bounds, preferenceBounds, size: { width: rect.width, height: rect.height }, notice: { width: notice.width, height: notice.height }, obstacles };
-    setGeometry(old => JSON.stringify(old) === JSON.stringify(next) ? old : next);
+    const rect = frame.current.getBoundingClientRect(), notice = bubble.current?.getBoundingClientRect();
+    const old = geometryRef.current;
+    const next = { bounds, preferenceBounds, size: { width: rect.width, height: rect.height }, notice: notice ? { width: notice.width, height: notice.height } : old.notice, obstacles };
+    if (JSON.stringify(old) === JSON.stringify(next)) return;
+    geometryRef.current = next;
+    rerender();
   }, []);
   useLayoutEffect(() => { measure(); });
   useLayoutEffect(() => {
@@ -58,7 +67,19 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     window.visualViewport?.addEventListener('resize', measure);
     window.visualViewport?.addEventListener('scroll', measure);
     return () => { observer.disconnect(); window.removeEventListener('resize', measure); window.removeEventListener('scroll', measure, true); window.visualViewport?.removeEventListener('resize', measure); window.visualViewport?.removeEventListener('scroll', measure); };
-  }, [measure]);
+  }, [measure, infoOpen, moving]);
+  // Escape closes the card and returns focus to the info button. It yields to move mode (Escape cancels the move) and to
+  // the chat when focus is inside it, so one Escape never closes two things.
+  useEffect(() => {
+    if (!infoOpen || moving) return;
+    const escape = (e: KeyboardEvent) => {
+      const target = e.target as Node | null;
+      if (e.key !== 'Escape' || e.defaultPrevented || (target !== document.body && !frame.current?.contains(target))) return;
+      e.preventDefault(); setInfoOpen(false); infoButton.current?.focus();
+    };
+    window.addEventListener('keydown', escape, true);
+    return () => window.removeEventListener('keydown', escape, true);
+  }, [infoOpen, moving]);
   // Only viewport/chat constraints affect the resting anchor. Scroll changes bubble placement,
   // while main controls have paint/hit-test priority if they pass underneath the character.
   const point = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size);
@@ -78,25 +99,12 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
   };
   const actualPose = moving || dragPoint ? 'interaction' : pose;
+  const cardOpen = infoOpen || moving;
+  const act = (action: () => void) => () => { action(); setInfoOpen(false); };
   return (
     <div className={`fd-floating fd-pose-${actualPose}${moving ? ' fd-key-moving' : ''}`} ref={frame} style={{ left: point.x, top: point.y }} data-owner={crew.id}>
-      <div className="fd-floating-notice" ref={bubble} id="fd-floating-notice" style={{ left: noticePoint.x, top: noticePoint.y, maxHeight: geometry.bounds.height }}>
-        {moving ? <>
-          <strong>{t.moveCompanion}</strong>
-          <p>{t.moveInstructions}</p>
-        </> : <>
-          <span className="fd-presence-status">{actualPose === 'interaction' ? t.interaction : news ? t.news : t.idle}</span>
-          <p aria-live="polite" aria-atomic="true">{actualPose === 'interaction' ? t.interactionText : news ? newsText : t.idleText}</p>
-          {hasSummary && <button className="fd-link fd-summary-action" type="button" onClick={onSummary}>{t.summary}<span aria-hidden="true">→</span></button>}
-          <a className="fd-link" href="#/onboard/personal/laboratory" onClick={e => { e.preventDefault(); onLaboratory(); }}>{t.openLaboratory}<span aria-hidden="true">→</span></a>
-          <a className="fd-link" href="#/onboard/personal/exercise" onClick={e => { e.preventDefault(); onExercise(); }}>{t.openExercise}<span aria-hidden="true">→</span></a>
-          <a className="fd-link" href="#/onboard/personal/sleep" onClick={e => { e.preventDefault(); onSleep(); }}>{t.openSleep}<span aria-hidden="true">→</span></a>
-          {focused && <p className="fd-keyboard-hint">{t.keyboardHint}</p>}
-        </>}
-      </div>
       <span className="sr-only" id="fd-keyboard-help">{t.keyboardHint} {t.moveInstructions}</span>
       <button className="fd-character" ref={characterRef} type="button" aria-label={`${t.openChat} · ${crew.character}`} aria-expanded={chatOpen} aria-describedby="fd-keyboard-help" aria-keyshortcuts="m Home" aria-controls={chatOpen ? 'fd-chat-panel' : undefined}
-        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         onPointerDown={e => {
           if (moving || e.button !== 0 || !e.isPrimary) return;
           suppressClick.current = false;
@@ -123,8 +131,28 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
           if (delta) setDragPoint(dropAt({ x: point.x + delta[0], y: point.y + delta[1] }));
           if (e.key === 'Enter' || e.key === 'Escape') { if (e.key === 'Enter') commit(point); setDragPoint(null); setMoving(false); }
         }}>
-        <CrewCharacter shape={crew.shape} pose={actualPose} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
+        <CrewCharacter shape={crew.shape} pose={actualPose} greeting={chatOpen} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
       </button>
+      <button className="fd-info" ref={infoButton} type="button" aria-expanded={infoOpen} aria-controls={cardOpen ? 'fd-companion-card' : undefined}
+        aria-label={news && !infoOpen ? `${t.companionInfo} · ${t.news}` : t.companionInfo} onClick={() => setInfoOpen(open => !open)}>
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.6" /><circle cx="10" cy="6.2" r="1.15" fill="currentColor" /><path d="M10 9V14.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+        {news && !infoOpen && <span className="fd-info-badge" aria-hidden="true">!</span>}
+      </button>
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{news ? `${t.news}. ${newsText}` : ''}</span>
+      {cardOpen && <div className="fd-floating-notice" ref={bubble} id="fd-companion-card" role="region" aria-label={t.companionInfo} style={{ left: noticePoint.x, top: noticePoint.y, maxHeight: geometry.bounds.height }}>
+        {moving ? <>
+          <strong>{t.moveCompanion}</strong>
+          <p>{t.moveInstructions}</p>
+        </> : <>
+          <span className="fd-presence-status">{actualPose === 'interaction' ? t.interaction : news ? t.news : t.idle}</span>
+          <p>{actualPose === 'interaction' ? t.interactionText : news ? newsText : t.idleText}</p>
+          {hasSummary && <button className="fd-link fd-summary-action" type="button" onClick={act(onSummary)}>{t.summary}<span aria-hidden="true">→</span></button>}
+          <a className="fd-link" href="#/onboard/personal/laboratory" onClick={e => { e.preventDefault(); act(onLaboratory)(); }}>{t.openLaboratory}<span aria-hidden="true">→</span></a>
+          <a className="fd-link" href="#/onboard/personal/exercise" onClick={e => { e.preventDefault(); act(onExercise)(); }}>{t.openExercise}<span aria-hidden="true">→</span></a>
+          <a className="fd-link" href="#/onboard/personal/sleep" onClick={e => { e.preventDefault(); act(onSleep)(); }}>{t.openSleep}<span aria-hidden="true">→</span></a>
+          <p className="fd-keyboard-hint">{t.keyboardHint}</p>
+        </>}
+      </div>}
     </div>
   );
 }
