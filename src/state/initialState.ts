@@ -8,7 +8,7 @@ export const SCENARIOS: Record<MissionId, ScenarioFile> = {
 };
 
 export const DEFAULT_ROUTES: { onboard: Route; ground: Route } = {
-  onboard: { view: 'onboard', page: 'today' },
+  onboard: { view: 'onboard', page: 'wellbeing' },
   ground: { view: 'ground', missionId: 'iss', page: 'agenda' },
 };
 

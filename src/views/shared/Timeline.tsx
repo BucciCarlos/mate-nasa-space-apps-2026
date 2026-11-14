@@ -1,5 +1,6 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import type { BlockMove, CrewMember, Interval, ScheduleBlock } from '../../state/types';
+import type { CSSProperties } from 'react';
 import { useLocale, useT } from '../../i18n/I18nProvider';
 import { fmtClock, fmtDate, fmtInterval } from '../../i18n/format';
 import { HOUR_MS, toMs } from '../../domain/time';
@@ -14,6 +15,7 @@ export interface TimelineProps {
   selectedId?: string | null;
   onSelect?: (block: ScheduleBlock) => void;
   compact?: boolean;
+  operations?: boolean;
 }
 
 function pct(ms: number, range: Interval): number {
@@ -23,10 +25,11 @@ function pct(ms: number, range: Interval): number {
 }
 
 /** Crew lanes × time, with a list alternative (03 §6). */
-export function Timeline({ range, lanes, moves = [], highlightBlockId = null, nowMs = null, selectedId = null, onSelect, compact = false }: TimelineProps) {
+export function Timeline({ range, lanes, moves = [], highlightBlockId = null, nowMs = null, selectedId = null, onSelect, compact = false, operations = false }: TimelineProps) {
   const t = useT();
   const locale = useLocale();
   const [asList, setAsList] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const startMs = toMs(range.start);
   const endMs = toMs(range.end);
   const hours: number[] = [];
@@ -37,6 +40,15 @@ export function Timeline({ range, lanes, moves = [], highlightBlockId = null, no
   const labelled = hours.filter((h) => (h / HOUR_MS) % labelStep === 0);
   const moveOf = (id: string) => moves.find((m) => m.blockId === id);
   const visible = (i: Interval) => toMs(i.end) > startMs && toMs(i.start) < endMs;
+
+  useLayoutEffect(() => {
+    const scroller = scrollRef.current;
+    if (!operations || !scroller) return;
+    const marker = scroller.querySelector('.tl-now');
+    scroller.scrollLeft = marker
+      ? Math.max(0, marker.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft - scroller.clientWidth / 3)
+      : 0;
+  }, [operations, startMs, endMs, asList]);
 
   const renderBlock = (b: ScheduleBlock, lane: CrewMember) => {
     const mv = moveOf(b.id);
@@ -54,6 +66,7 @@ export function Timeline({ range, lanes, moves = [], highlightBlockId = null, no
         <span className="blk-kind">{kindLabel}</span>
         <span className="blk-title">{title}</span>
         <span className="blk-time">{fmtClock(b.start)}–{fmtClock(b.end)}</span>
+        {operations && <span className="blk-short-time" aria-hidden="true">{fmtClock(b.start)}</span>}
         {changed && <span className="blk-flag">{t.agenda.changed} · {t.agenda.after}</span>}
         {b.movable && !compact && <span className="blk-movable">{t.ground.movable}</span>}
       </>
@@ -67,22 +80,23 @@ export function Timeline({ range, lanes, moves = [], highlightBlockId = null, no
           </div>
         )}
         {visible(b) && (onSelect ? (
-          <button type="button" className={cls} style={style} aria-label={label} aria-pressed={selectedId === b.id} onClick={() => onSelect(b)}>{inner}</button>
+          <button type="button" className={cls} style={style} title={operations ? label : undefined} aria-label={label} aria-pressed={selectedId === b.id} onClick={() => onSelect(b)}>{inner}</button>
         ) : (
-          <div className={cls} style={style} aria-label={label} role="img">{inner}</div>
+          <div className={cls} style={style} title={operations ? label : undefined} aria-label={label} role="img">{inner}</div>
         ))}
       </Fragment>
     );
   };
 
   return (
-    <div className="timeline-wrap">
+    <div className={`timeline-wrap${operations ? ' operations-timeline' : ''}`}>
       <div className="timeline-tools">
-        <span className="muted">{fmtDate(range.start, locale)} {fmtClock(range.start)} → {fmtDate(range.end, locale)} {fmtClock(range.end)} {t.common.utc}</span>
+        <span className="muted" aria-live={operations ? 'polite' : undefined}>{fmtDate(range.start, locale)} {fmtClock(range.start)} → {fmtDate(range.end, locale)} {fmtClock(range.end)} {t.common.utc}</span>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAsList((v) => !v)} aria-pressed={asList}>
           {asList ? t.common.showAsTimeline : t.common.showAsList}
         </button>
       </div>
+      {operations && !lanes.some(({ blocks }) => blocks.some(visible)) && <p className="empty">{t.operations.emptyWindow}</p>}
       {asList ? (
         <div className="timeline-list">
           {lanes.map(({ crew, blocks }) => (
@@ -95,7 +109,7 @@ export function Timeline({ range, lanes, moves = [], highlightBlockId = null, no
                     <li key={b.id} className={mv ? 'is-changed' : ''}>
                       <span className="blk-kind">{t.blocks[b.kind]}</span> {b.title[locale]} · {fmtInterval(b, locale)}
                       {mv && <> — <strong>{t.agenda.changed}</strong>: {t.agenda.before} {fmtInterval(mv.before, locale)} → {t.agenda.after} {fmtInterval(mv.after, locale)}</>}
-                      {onSelect && b.movable && <> <button type="button" className="btn btn-ghost btn-sm" onClick={() => onSelect(b)}>{t.ground.movable}</button></>}
+                      {onSelect && (operations || b.movable) && <> <button type="button" className="btn btn-ghost btn-sm" aria-label={operations ? t.operations.activityDetails({ title: b.title[locale] }) : undefined} onClick={() => onSelect(b)}>{b.movable ? t.ground.movable : t.operations.details}</button></>}
                     </li>
                   );
                 })}
@@ -104,24 +118,26 @@ export function Timeline({ range, lanes, moves = [], highlightBlockId = null, no
           ))}
         </div>
       ) : (
-        <div className={`timeline${compact ? ' is-compact' : ''}`} role="group" aria-label={t.agenda.timeline}>
-          <div className="tl-axis" aria-label={t.agenda.timeAxis}>
-            {labelled.map((h) => (
-              <span key={h} className="tl-tick" style={{ left: `${pct(h, range)}%` }}>{fmtClock(h)}</span>
+        <div ref={scrollRef} className="timeline-scroll" role="group" aria-label={t.agenda.timeline} tabIndex={0}>
+          <div className={`timeline${compact ? ' is-compact' : ''}`} style={operations ? { '--timeline-width': `${140 + spanHours * 108}px` } as CSSProperties : undefined}>
+            <div className="tl-axis" aria-label={t.agenda.timeAxis}>
+              {labelled.map((h) => (
+                <span key={h} className="tl-tick" style={{ left: `${pct(h, range)}%` }}>{fmtClock(h)}</span>
+              ))}
+            </div>
+            {lanes.map(({ crew, blocks }) => (
+              <div key={crew.id} className="tl-lane" aria-label={t.agenda.crewLane({ name: crew.name })}>
+                <div className="tl-lane-name">{crew.name}</div>
+                <div className="tl-lane-track">
+                  {hours.map((h) => <span key={h} className="tl-grid" style={{ left: `${pct(h, range)}%` }} aria-hidden="true" />)}
+                  {blocks.map((b) => renderBlock(b, crew))}
+                  {nowMs !== null && nowMs > startMs && nowMs < endMs && (
+                    <span className="tl-now" style={{ left: `${pct(nowMs, range)}%` }}><span className="tl-now-label">{t.ground.nowLine}</span></span>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
-          {lanes.map(({ crew, blocks }) => (
-            <div key={crew.id} className="tl-lane" aria-label={t.agenda.crewLane({ name: crew.name })}>
-              <div className="tl-lane-name">{crew.name}</div>
-              <div className="tl-lane-track">
-                {hours.map((h) => <span key={h} className="tl-grid" style={{ left: `${pct(h, range)}%` }} aria-hidden="true" />)}
-                {blocks.map((b) => renderBlock(b, crew))}
-                {nowMs !== null && nowMs > startMs && nowMs < endMs && (
-                  <span className="tl-now" style={{ left: `${pct(nowMs, range)}%` }}><span className="tl-now-label">{t.ground.nowLine}</span></span>
-                )}
-              </div>
-            </div>
-          ))}
         </div>
       )}
     </div>

@@ -51,14 +51,16 @@ export function GroundLink({ missionId, role }: { missionId: MissionId; role: Gr
           </button>
         ) : <p className="muted">{t.link.operatorOnly}</p>}
       </section>
-      <section className="panel" aria-labelledby="uplink-h">
-        <h2 id="uplink-h">{t.link.uplink}</h2>
-        {list('uplink')}
-      </section>
-      <section className="panel" aria-labelledby="downlink-h">
-        <h2 id="downlink-h">{t.link.downlink}</h2>
-        {list('downlink')}
-      </section>
+      <div className="operations-streams">
+        <section className="panel" aria-labelledby="uplink-h">
+          <h2 id="uplink-h">{t.link.uplink}</h2>
+          {list('uplink')}
+        </section>
+        <section className="panel" aria-labelledby="downlink-h">
+          <h2 id="downlink-h">{t.link.downlink}</h2>
+          {list('downlink')}
+        </section>
+      </div>
     </div>
   );
 }

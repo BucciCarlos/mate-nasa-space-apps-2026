@@ -53,7 +53,10 @@ interface MessageBase {
 }
 export interface PlanUpdateMessage extends MessageBase { direction: 'uplink'; kind: 'plan_update'; changeId: string; plan: PlanVersion }
 export interface CrewSummaryMessage extends MessageBase { direction: 'downlink'; kind: 'crew_summary'; summary: SharedSummary }
-export type LinkMessage = PlanUpdateMessage | CrewSummaryMessage;
+export interface MedicalReviewMessage extends MessageBase {
+  direction: 'downlink'; kind: 'medical_review'; crewId: string; sample: FlightSample;
+}
+export type LinkMessage = PlanUpdateMessage | CrewSummaryMessage | MedicalReviewMessage;
 export interface LinkState { status: 'up' | 'down'; transitMs: number; downSinceMs: number | null }
 
 export type ObservationTopic = 'schedule' | 'rest' | 'workload' | 'wellbeing' | 'other';
@@ -84,14 +87,14 @@ export interface Notice {
 }
 
 export type IntentId = 'schedule.what_changed' | 'schedule.show_change' | 'rest.how_much' | 'rest.effect_on_me'
-  | 'why.it_matters' | 'observation.start' | 'privacy.who_sees' | 'link.status' | 'help' | 'unknown';
+  | 'monitoring.explain' | 'why.it_matters' | 'observation.start' | 'privacy.who_sees' | 'link.status' | 'help' | 'unknown';
 export const INTENT_PRIORITY: IntentId[] = [
-  'schedule.show_change', 'rest.effect_on_me', 'rest.how_much', 'why.it_matters', 'schedule.what_changed',
+  'monitoring.explain', 'schedule.show_change', 'rest.effect_on_me', 'rest.how_much', 'why.it_matters', 'schedule.what_changed',
   'observation.start', 'privacy.who_sees', 'link.status', 'help',
 ];
 
-export type OnboardPage = 'today' | 'agenda' | 'observations';
-export type GroundPage = 'agenda' | 'link' | 'crew' | 'log';
+export type OnboardPage = 'wellbeing' | 'today' | 'agenda' | 'observations' | 'monitoring';
+export type GroundPage = 'agenda' | 'link' | 'crew' | 'log' | 'commander';
 export type Route =
   | { view: 'onboard'; page: OnboardPage }
   | { view: 'ground'; missionId: MissionId; page: GroundPage }
@@ -111,7 +114,7 @@ export type UiAction =
 export type ReplyStatus = 'ok' | 'no_evidence' | 'not_understood' | 'unavailable';
 export type CompanionTemplateId =
   | 'changeSummary' | 'changeNone' | 'changeNoneLinkDown' | 'showChange' | 'restDelta' | 'restUnchanged'
-  | 'noComparableRecords' | 'whyItMatters' | 'observationStart' | 'whoSees' | 'linkUp' | 'linkDown' | 'help' | 'notUnderstood';
+  | 'monitoringExplanation' | 'noComparableRecords' | 'whyItMatters' | 'observationStart' | 'whoSees' | 'linkUp' | 'linkDown' | 'help' | 'notUnderstood';
 export interface CompanionReply {
   templateId: CompanionTemplateId;
   params: Record<string, string | number>;
@@ -121,9 +124,10 @@ export interface CompanionReply {
   executed: boolean;
 }
 export type InputMode = 'text' | 'chip' | 'simulated_voice';
-export interface CompanionInput { mode: InputMode; text: UserText | null; intent: IntentId }
+export interface CompanionInput { mode: InputMode; text: UserText | null; intent: IntentId; metric?: FlightMetric }
 export interface CompanionTurn {
   id: string; atMs: number; speaker: 'user' | 'companion';
+  crewId?: string;
   input?: CompanionInput;
   reply?: CompanionReply;
 }
@@ -152,6 +156,38 @@ export interface MissionState {
 }
 
 export type CompanionColor = 'teal' | 'blue' | 'violet' | 'amber' | 'rose' | 'green';
+export type FlightMetric = 'pulse' | 'sleep' | 'reaction';
+export interface FlightSample { metric: FlightMetric; at: IsoUtc; value: number; source: 'simulated' }
+export type TrajectoryStage = 'evaluation' | 'training' | 'flight' | 'recovery';
+export interface CompanionPreferences {
+  name: string; color: CompanionColor; avatar: 'isotype' | 'initial' | 'orbit' | 'capsule'; style: 'brief' | 'guided';
+}
+export type WellbeingActivity = 'breathing' | 'quiet' | 'music' | 'reading' | 'group';
+export interface WellbeingCheckIn {
+  atMs: number;
+  feeling?: 'calm' | 'tired' | 'tense' | 'low' | 'good';
+  stress?: number;
+  taskId?: string;
+  satisfaction?: number;
+  fatigue?: number;
+}
+export interface WellbeingProfile {
+  hobby?: 'music' | 'reading' | 'quiet';
+  checkIns: WellbeingCheckIn[];
+  decisions: { atMs: number; activity: WellbeingActivity; decision: 'completed' | 'dismissed' }[];
+  familyRead?: boolean;
+  notes?: { atMs: number; text: UserText }[];
+}
+export interface FlightActivity {
+  id: string; atMs: number; metric: FlightMetric; kind: 'personal_break' | 'medical_review' | 'journal';
+  note?: UserText;
+}
+export interface MonitoringProfile {
+  companion?: CompanionPreferences;
+  stage?: TrajectoryStage;
+  activities: FlightActivity[];
+  wellbeing?: WellbeingProfile;
+}
 
 export interface AppState {
   schemaVersion: 1;
@@ -160,6 +196,7 @@ export interface AppState {
   sessionStartMs: number;
   missions: Record<MissionId, MissionState>;
   companion: { name: string; color: CompanionColor };
+  monitoring?: { profiles: Record<string, MonitoringProfile> };
   ui: {
     agendaRange: Interval | null;
     highlight: HighlightTarget | null;

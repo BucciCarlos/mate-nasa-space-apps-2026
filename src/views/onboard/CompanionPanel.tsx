@@ -1,8 +1,9 @@
+import { MateAvatar } from './MateAvatar';
 import { useEffect, useRef, useState } from 'react';
 import type { CompanionTurn, IntentId, InputMode, UiAction } from '../../state/types';
 import { ONBOARD_MISSION_ID } from '../../state/types';
 import { useApp } from '../../state/AppProvider';
-import { selectOnboard } from '../../state/selectors';
+import { selectCompanionPreferences, selectMonitoringProfile, selectOnboard } from '../../state/selectors';
 import { useLocale, useT } from '../../i18n/I18nProvider';
 import { renderReply } from '../../i18n/companionText';
 import { matchIntent } from '../../domain/companion/intents';
@@ -16,7 +17,9 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
   const { state, dispatch } = useApp();
   const t = useT();
   const locale = useLocale();
-  const { conversation, notices } = selectOnboard(state);
+  const { conversation, notices, user } = selectOnboard(state);
+  const preferences = selectCompanionPreferences(state, user.id);
+  const stage = selectMonitoringProfile(state, user.id).stage ?? 'flight';
   const open = state.ui.companionOpen;
   const [text, setText] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -88,7 +91,7 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
       const r = c.reply;
       return (
         <div key={c.id} className={`turn turn-companion status-${r.status}`}>
-          <span className="turn-who">{state.companion.name}</span>
+          <span className="turn-who">{preferences.name}</span>
           {r.status === 'no_evidence' && <span className="status status-noEvidence">{t.companion.noEvidence}</span>}
           {r.status === 'unavailable' && <span className="status status-noEvidence">{t.companion.unavailable}</span>}
           <p>{renderReply(r, state, ONBOARD_MISSION_ID, locale, t)}</p>
@@ -112,15 +115,23 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
   };
 
   return (
-    <aside className={`companion${open ? ' is-open' : ' is-collapsed'} color-${state.companion.color}`} aria-label={t.companion.panelTitle}>
-      <button type="button" className="companion-toggle" aria-expanded={open} aria-label={open ? t.companion.closePanel : t.companion.openPanel} onClick={() => dispatch({ type: 'ui/companion_toggle' })}>
-        <span className="avatar" aria-hidden="true">{state.companion.name.charAt(0)}</span>
-        <span className="companion-toggle-text">{open ? t.companion.closePanel : t.companion.askPlaceholder({ name: state.companion.name })}</span>
-      </button>
+    <aside className={`companion${open ? ' is-open' : ' is-collapsed'} color-${preferences.color}`} aria-label={t.companion.panelTitle({ name: preferences.name })}>
+      <div className="companion-heading">
+        <MateAvatar preferences={preferences} stage={stage} />
+        <span className="companion-toggle-text">{t.companion.panelTitle({ name: preferences.name })}</span>
+        <button type="button" id="companion-toggle" className="companion-toggle" aria-expanded={open} aria-controls={open ? 'companion-body' : undefined} aria-label={open ? t.companion.closePanel : t.companion.openPanel} onClick={() => dispatch({ type: 'ui/companion_toggle' })}>
+          <span aria-hidden="true">{open ? '⌄' : '⌃'}</span>
+        </button>
+      </div>
       {open && (
-        <div className="companion-body">
+        <div className="companion-body" id="companion-body">
+          <details className="companion-info">
+            <summary>{t.companion.about}</summary>
+            <p className="small">{t.monitoring.guided} · {t.monitoring.stages[stage]}</p>
+            <p className="small">{t.companion.limitations}</p>
+          </details>
+          {conversation.length === 0 && <p className="companion-welcome">{t.companion.intro({ name: user.name.split(/\s+/)[0] || user.name })}</p>}
           <div className="companion-scroll" ref={scrollRef} role="log" aria-label={t.a11y.conversation}>
-            <p className="turn turn-companion intro">{t.companion.intro({ name: state.companion.name })}</p>
             {latestNotice && !latestNotice.seen && <NoticeCard notice={latestNotice} chips={chipButtons(NOTICE_CHIPS, 'chip')} />}
             {conversation.map(renderTurn)}
           </div>
@@ -133,7 +144,7 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
             <span className="muted small">{t.companion.suggestions}</span>
             {chipButtons(chips, 'chip')}
             <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="ask-row">
-              <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t.companion.askPlaceholder({ name: state.companion.name })} aria-label={t.companion.askPlaceholder({ name: state.companion.name })} lang={locale} />
+              <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t.companion.askPlaceholder({ name: preferences.name })} aria-label={t.companion.askPlaceholder({ name: preferences.name })} lang={locale} />
               <button type="button" className="btn btn-ghost" aria-label={t.companion.micButton} aria-expanded={voiceOpen} onClick={() => setVoiceOpen(true)}><span aria-hidden="true">🎙</span></button>
               <button type="submit" className="btn btn-primary">{t.companion.send}</button>
             </form>

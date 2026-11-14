@@ -12,6 +12,7 @@ const T0 = 1_000_000;
 
 describe('U-COMP-01 matchIntent', () => {
   const samples: Record<Exclude<IntentId, 'unknown'>, string[]> = {
+    'monitoring.explain': ['Flight metrics', 'my metrics', 'explain metrics', 'Métricas en vuelo', 'Mis métricas', 'Explicame las métricas'],
     'schedule.show_change': ['Show me', 'show the change', 'Open my agenda', 'Mostrame', 'Mostrame qué cambió', 'Abrí la agenda'],
     'rest.effect_on_me': ['How will this affect me?', 'will i sleep', 'How did I sleep?', '¿Cómo me va a afectar?', 'como me afecta', '¿Voy a dormir?'],
     'rest.how_much': ['How much rest do I lose?', 'how much sleep', 'rest window?', '¿Cuánto descanso pierdo?', 'cuanto sueño', 'Ventana de descanso'],

@@ -1,13 +1,13 @@
 import type { GroundPage, MissionId, OnboardPage, Route } from '../state/types';
 
-const ONBOARD_PAGES: OnboardPage[] = ['today', 'agenda', 'observations'];
-const GROUND_PAGES: GroundPage[] = ['agenda', 'link', 'crew', 'log'];
+const ONBOARD_PAGES: OnboardPage[] = ['wellbeing', 'monitoring', 'today', 'agenda', 'observations'];
+const GROUND_PAGES: GroundPage[] = ['agenda', 'link', 'crew', 'log', 'commander'];
 const MISSIONS: MissionId[] = ['iss', 'cislunar'];
 
 export function parseRoute(hash: string): Route | null {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '').replace(/\/+$/, '');
   const parts = path.split('/').filter(Boolean);
-  if (parts.length === 0) return { view: 'onboard', page: 'today' };
+  if (parts.length === 0) return { view: 'onboard', page: 'wellbeing' };
   if (parts[0] === 'onboard') {
     const page = (parts[1] ?? 'today') as OnboardPage;
     return parts.length <= 2 && ONBOARD_PAGES.includes(page) ? { view: 'onboard', page } : null;

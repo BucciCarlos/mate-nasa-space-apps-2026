@@ -1,6 +1,10 @@
+import { wellbeingEs } from './wellbeing';
+import { monitoringEs } from './monitoring';
 import type { Messages } from './en';
 
 export const es: Messages = {
+  monitoring: monitoringEs,
+  wellbeing: wellbeingEs,
   common: {
     appName: 'M.A.T.E.',
     appTagline: 'Entorno Terapéutico y Médico para Astronautas',
@@ -43,6 +47,9 @@ export const es: Messages = {
     },
     mission: { label: 'Misión', iss: 'EEI', cislunar: 'Misión cislunar' },
     nav: {
+      wellbeing: wellbeingEs.title,
+      commander: 'Comandante',
+      monitoring: 'Monitoreo en vuelo',
       today: 'Hoy',
       agenda: 'Agenda',
       observations: 'Observaciones',
@@ -73,6 +80,22 @@ export const es: Messages = {
     queued: 'En cola — esperando enlace',
     inTransit: 'En tránsito',
     delivered: 'Entregado',
+  },
+  operations: {
+    title: "Operaciones de misión",
+    activities: "Actividades programadas",
+    pending: "Envíos pendientes",
+    timeControls: "Navegación temporal",
+    previous: "Anterior",
+    current: "Hora actual",
+    next: "Siguiente",
+    zoom: "Ventana temporal",
+    details: "Detalle de actividad",
+    nextActivity: "Actividad actual o próxima",
+    noActivities: "No quedan actividades programadas",
+    emptyWindow: "No hay actividades en esta ventana",
+    hours: (p) => `${p.hours} h`,
+    activityDetails: (p) => `Detalle de actividad · ${p.title}`,
   },
   ground: {
     title: 'Consola de Tierra',
@@ -124,7 +147,7 @@ export const es: Messages = {
     planningRule: 'Regla de planificación (simulada)',
     planningRuleBody: 'Al adelantar una tarea, la rutina al despertar se adelanta lo mismo y el bloque de sueño planificado termina antes. El inicio del sueño y los demás bloques nunca se mueven. Cualquier otra superposición es un conflicto.',
     noSleepRecords: 'No hay registros de sueño de este tripulante en el prototipo',
-    noSleepRecordsBody: 'M.A.T.E. no simula mediciones de sueño. Una ventana de descanso planificada es una agenda, no sueño medido.',
+    noSleepRecordsBody: 'Esta agenda muestra ventanas de descanso planificadas. Las mediciones simuladas de sueño están en Monitoreo en vuelo.',
     sleepRecords: 'Registros de sueño',
     whyMatters: 'Por qué importa',
     range: 'Período',
@@ -173,9 +196,11 @@ export const es: Messages = {
       `Tierra adelantó «${p.task}» ${p.minutes} min (plan versión ${p.from} → ${p.to}). La ventana de descanso planificada se recalculó con la regla de planificación simulada.`,
   },
   companion: {
-    panelTitle: 'Compañero',
-    openPanel: 'Abrir compañero',
-    closePanel: 'Plegar compañero',
+    panelTitle: (p) => `${p.name} · Tu compañero de misión`,
+    openPanel: 'Mostrar Mate',
+    closePanel: 'Ocultar Mate',
+    about: 'Acerca de Mate',
+    limitations: 'Mate usa respuestas guiadas. Las mediciones de sensores y la interacción por voz son simuladas. Mate puede explicar los registros disponibles y ofrecer actividades voluntarias. La interpretación médica corresponde al personal médico.',
     askPlaceholder: (p) => `Preguntale a ${p.name}…`,
     send: 'Enviar',
     micButton: 'Consulta de voz simulada',
@@ -197,7 +222,7 @@ export const es: Messages = {
       open_observation_form: 'Abrí el formulario de observación',
     },
     sources: 'Fuentes',
-    intro: (p) => `Soy ${p.name}, tu compañero. Te explico qué cambió en tu contexto y nunca adivino cómo te sentís.`,
+    intro: (p) => `¡Hola, ${p.name}! ¿Cómo va tu día? Podemos revisar tus registros o dedicar unos minutos a vos.`,
     t: {
       changeSummary: (p) =>
         `Tierra adelantó «${p.task}» ${p.advance}. ${p.hasRest ? `Tu ventana de descanso planificada cambia ${p.delta}.` : 'Tu ventana de descanso planificada no cambia.'}${p.linkDown ? ` El enlace está caído desde las ${p.since}; puede haber novedades esperando.` : ''}`,
@@ -218,6 +243,7 @@ export const es: Messages = {
     },
   },
   intents: {
+    'monitoring.explain': 'Explicame mis métricas en vuelo',
     'schedule.what_changed': '¿Qué cambió?',
     'schedule.show_change': 'Mostrame qué cambió',
     'rest.how_much': '¿Cuánto descanso pierdo?',
