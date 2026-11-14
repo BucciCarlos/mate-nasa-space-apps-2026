@@ -245,7 +245,10 @@ export const mateSlice = createSlice({
       state.companion = { name, color: action.payload.color };
     },
     scenarioReset: (state, action: PayloadAction<number>) => {
-      return createInitialState(action.payload, undefined, state.locale);
+      const next = createInitialState(action.payload, undefined, state.locale);
+      // Keep the user's last known routes so restart lands back where they were (02 §3.3).
+      next.ui.lastRoute = state.ui.lastRoute;
+      return next;
     },
   },
 });

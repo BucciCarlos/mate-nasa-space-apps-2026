@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useDispatch as useRd, useSelector, Provider } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
@@ -24,22 +24,21 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
   const state = useAppSelector((s) => s.mate) as AppState;
   const dispatch = useAppDispatch();
 
-  // Fetch scenarios from the backend on every mount. No sessionStorage —
-  // state lives only in Redux.
+  // Fetch scenarios from the backend on mount. A sessionStorage snapshot
+  // (hydrated in store.ts) is kept until the backend data arrives; then
+  // scenarioReset rebuilds the state from the authoritative data (02 §3.3).
   const iss = useIssScenarioQuery();
   const cislunar = useCislunarScenarioQuery();
+  const resetDone = useRef(false);
 
   useEffect(() => {
-    console.log('[AppProvider] Scenario query status:', {
-      iss: { status: iss.status, error: iss.error },
-      cislunar: { status: cislunar.status, error: cislunar.error },
-    });
+    if (resetDone.current) return;
     if (iss.isSuccess && cislunar.isSuccess) {
-      console.log('[AppProvider] Both scenarios loaded, dispatching scenarioReset');
+      resetDone.current = true;
       setScenarios(iss.data, cislunar.data);
       dispatch(scenarioReset(Date.now()));
     }
-  }, [iss.isSuccess, cislunar.isSuccess, iss.data, cislunar.data, iss.status, cislunar.status, iss.error, cislunar.error, dispatch]);
+  }, [iss.isSuccess, cislunar.isSuccess, iss.data, cislunar.data, dispatch]);
 
   // Ticker (02 §3.4)
   useEffect(() => {
@@ -47,7 +46,7 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id);
   }, [dispatch]);
 
-  // Ready when the state has real crew data.
+  // Ready when the state has real crew data (fresh load or restored snapshot).
   const ready = state.missions.iss.crew.length > 0;
   const rawError = iss.error ?? cislunar.error;
   const loadError = (iss.isError || cislunar.isError)

@@ -11,7 +11,7 @@ const loadJson = (p: string) => JSON.parse(readFileSync(join(DATA_DIR, p), 'utf-
 const sources = loadJson('sources.json') as Source[];
 import { MISSION_PREFIX } from '../domain/ids';
 import { overlaps, toMs, defaultAgendaRange, flightDay, missionTimeMs } from '../domain/time';
-import { parseRoute, toHash } from '../app/routes';
+import { parsePath, routePath } from '../app/routes';
 import type { Route } from './types';
 import { deserialize, serialize } from './persistence';
 import { en } from '../i18n/en';
@@ -87,10 +87,10 @@ describe('U-ROUTE-01', () => {
       { view: 'ground', missionId: 'iss', page: 'agenda' }, { view: 'ground', missionId: 'cislunar', page: 'link' },
       { view: 'ground', missionId: 'iss', page: 'crew' }, { view: 'ground', missionId: 'cislunar', page: 'log' }, { view: 'settings' },
     ];
-    for (const r of routes) expect(parseRoute(toHash(r))).toEqual(r);
-    expect(parseRoute('')).toEqual({ view: 'onboard', page: 'today' });
-    expect(parseRoute('#/')).toEqual({ view: 'onboard', page: 'today' });
-    for (const bad of ['#/nope', '#/ground/mars/agenda', '#/ground/iss/xyz', '#/onboard/modules', '#/settings/x']) expect(parseRoute(bad), bad).toBeNull();
+    for (const r of routes) expect(parsePath(routePath(r))).toEqual(r);
+    expect(parsePath('/')).toEqual({ view: 'onboard', page: 'today' });
+    expect(parsePath('')).toEqual({ view: 'onboard', page: 'today' });
+    for (const bad of ['/nope', '/ground/mars/agenda', '/ground/iss/xyz', '/onboard/modules', '/settings/x']) expect(parsePath(bad), bad).toEqual({ view: 'notfound' });
   });
 });
 

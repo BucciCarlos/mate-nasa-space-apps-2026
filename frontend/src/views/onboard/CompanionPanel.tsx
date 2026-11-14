@@ -8,7 +8,8 @@ import { useLocale, useT } from '../../i18n/I18nProvider';
 import { renderReply } from '../../i18n/companionText';
 import { matchIntent } from '../../domain/companion/intents';
 import { suggestedIntents, ALL_CHIPS, NOTICE_CHIPS } from '../../domain/companion/suggestions';
-import { navigate } from '../../app/routes';
+import { useNavigate } from 'react-router-dom';
+import { routePath } from '../../app/routes';
 import { NoticeCard } from './NoticeCard';
 import { SourceCard } from '../shared/SourceCard';
 import { UserTextView } from '../shared/UserTextView';
@@ -21,6 +22,7 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
   const open = state.ui.companionOpen;
   const [text, setText] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const executedRef = useRef<Set<string>>(new Set());
   const latestNotice = notices.length > 0 ? notices[notices.length - 1] : null;
@@ -45,12 +47,12 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
       let opened: string | null = null;
       for (const a of reply.actions) {
         switch (a.type) {
-          case 'navigate': navigate(a.route); opened = a.route.view === 'onboard' ? t.shell.nav[a.route.page] : t.shell.perspective.ground; break;
+          case 'navigate': navigate(routePath(a.route)); opened = a.route.view === 'onboard' ? t.shell.nav[a.route.page] : t.shell.perspective.ground; break;
           case 'select_range': uiRangeSet(a.range); break;
           case 'highlight': uiHighlightSet(a.target); break;
           case 'clear_highlight': uiHighlightSet(null); break;
           case 'open_source': uiSourceOpen(a.sourceId); break;
-          case 'open_observation_form': uiObservationPrefill(a.prefill); navigate({ view: 'onboard', page: 'observations' }); opened = t.shell.nav.observations; break;
+          case 'open_observation_form': uiObservationPrefill(a.prefill); navigate('/onboard/observations'); opened = t.shell.nav.observations; break;
         }
       }
       companionActionsExecuted(ONBOARD_MISSION_ID, turn.id);

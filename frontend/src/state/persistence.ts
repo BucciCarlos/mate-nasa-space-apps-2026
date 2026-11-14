@@ -8,12 +8,17 @@ export function serialize(state: AppState): string {
   return JSON.stringify(state);
 }
 
-/** Returns the snapshot or null when it is missing, corrupt or of another schema version. */
+/**
+ * Returns the snapshot or null when it is missing, corrupt, of another
+ * schema version, or was captured before the scenarios had loaded
+ * (an empty-state snapshot would resurrect a broken session on reload).
+ */
 export function deserialize(raw: string | null): AppState | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as Partial<AppState>;
     if (!parsed || parsed.schemaVersion !== 1 || !parsed.missions?.iss || !parsed.missions?.cislunar) return null;
+    if (parsed.missions.iss.crew.length === 0 || parsed.missions.cislunar.crew.length === 0) return null;
     return parsed as AppState;
   } catch {
     return null;

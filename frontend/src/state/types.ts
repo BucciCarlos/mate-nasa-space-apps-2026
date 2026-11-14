@@ -95,6 +95,7 @@ export type GroundPage = 'agenda' | 'link' | 'crew' | 'log';
 export type Route =
   | { view: 'onboard'; page: OnboardPage }
   | { view: 'ground'; missionId: MissionId; page: GroundPage }
+  | { view: 'fd30'; page: 'today' | 'sleep' }
   | { view: 'settings' }
   | { view: 'notfound' };
 

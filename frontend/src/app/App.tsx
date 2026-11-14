@@ -1,61 +1,43 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider, useApp } from '../state/AppProvider';
 import { scenarioReset } from '../state/mateSlice';
 import { I18nProvider, useT } from '../i18n/I18nProvider';
-import { useRoute } from './useRoute';
+import { parsePath } from './routes';
 import { Shell } from './Shell';
 import { ErrorBoundary } from './ErrorBoundary';
-import { navigate } from './routes';
-import { GroundAgenda } from '../views/ground/GroundAgenda';
-import { GroundLink } from '../views/ground/GroundLink';
-import { GroundCrew } from '../views/ground/GroundCrew';
-import { GroundLog } from '../views/ground/GroundLog';
-import { OnboardToday } from '../views/onboard/OnboardToday';
-import { OnboardAgenda } from '../views/onboard/OnboardAgenda';
-import { OnboardObservations } from '../views/onboard/OnboardObservations';
 import { CompanionPanel } from '../views/onboard/CompanionPanel';
-import { Settings } from '../views/Settings';
 
-function Body() {
+export function NotFound() {
+  const t = useT();
+  return (
+    <div className="notfound">
+      <h1 id="view-h" tabIndex={-1}>{t.common.notFoundTitle}</h1>
+      <p>{t.common.notFoundBody}</p>
+      <Link className="btn btn-primary" to="/onboard/today">{t.common.home}</Link>
+    </div>
+  );
+}
+
+function Body({ children }: { children?: React.ReactNode }) {
   const { state, ready, loadError } = useApp();
   const t = useT();
-  const route = useRoute();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const route = parsePath(location.pathname);
   const [live, setLive] = useState('');
   const announce = useCallback((text: string) => { setLive(''); window.setTimeout(() => setLive(text), 30); }, []);
 
   const restart = () => {
     if (window.confirm(t.common.restartConfirm)) {
       scenarioReset(Date.now());
-      navigate({ view: 'onboard', page: 'today' });
+      navigate('/onboard/today');
     }
   };
 
   useEffect(() => {
     if (route.view === 'settings' || route.view === 'notfound') document.getElementById('view-h')?.focus();
   }, [route]);
-
-  let content: React.ReactNode;
-  switch (route.view) {
-    case 'ground': {
-      const props = { missionId: route.missionId, role: state.groundRole };
-      content = route.page === 'agenda' ? <GroundAgenda {...props} /> : route.page === 'link' ? <GroundLink {...props} /> : route.page === 'crew' ? <GroundCrew {...props} /> : <GroundLog {...props} />;
-      break;
-    }
-    case 'onboard':
-      content = route.page === 'today' ? <OnboardToday /> : route.page === 'agenda' ? <OnboardAgenda /> : <OnboardObservations />;
-      break;
-    case 'settings':
-      content = <Settings onRestart={restart} />;
-      break;
-    default:
-      content = (
-        <div className="notfound">
-          <h1 id="view-h" tabIndex={-1}>{t.common.notFoundTitle}</h1>
-          <p>{t.common.notFoundBody}</p>
-          <a className="btn btn-primary" href="#/onboard/today">{t.common.home}</a>
-        </div>
-      );
-  }
 
   return (
     <I18nProvider locale={state.locale}>
@@ -73,8 +55,8 @@ function Body() {
       {ready && (
       <Shell route={route} onRestart={restart}>
         <div className={`layout${route.view === 'onboard' ? ' has-companion' : ''}`}>
-          <ErrorBoundary t={t} onRestart={() => { scenarioReset(Date.now()); navigate({ view: 'onboard', page: 'today' }); }}>
-            <main id="main" className="main">{content}</main>
+          <ErrorBoundary t={t} onRestart={() => { scenarioReset(Date.now()); navigate('/onboard/today'); }}>
+            <main id="main" className="main">{children ?? <Outlet />}</main>
           </ErrorBoundary>
           {route.view === 'onboard' && <CompanionPanel announce={announce} />}
         </div>
@@ -85,19 +67,12 @@ function Body() {
   );
 }
 
-function LocalizedBody() {
-  const { state } = useApp();
-  return (
-    <I18nProvider locale={state.locale}>
-      <Body />
-    </I18nProvider>
-  );
-}
-
-export function App() {
+// Body (inside AppProvider) wraps its content in I18nProvider with the
+// store's locale, so the i18n context re-renders when localeSet fires.
+export function App({ children }: { children?: React.ReactNode }) {
   return (
     <AppProvider>
-      <LocalizedBody />
+      <Body>{children}</Body>
     </AppProvider>
   );
 }

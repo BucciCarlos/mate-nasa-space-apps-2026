@@ -5,7 +5,8 @@ import { MISSION_IDS } from '../state/types';
 import { useApp } from '../state/AppProvider';
 import { localeSet, groundRoleSet, uiLastRoute } from '../state/mateSlice';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { navigate, toHash } from './routes';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { routePath, sameRoute } from './routes';
 import { useNow } from '../state/useNow';
 import { flightDay, missionTimeMs } from '../domain/time';
 import { fmtTime } from '../i18n/format';
@@ -19,17 +20,23 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
   const locale = useLocale();
   const now = useNow(10_000);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const isGround = route.view === 'ground';
   const missionId: MissionId = isGround ? route.missionId : 'iss';
   const mission = state.missions[missionId];
   const mNow = missionTimeMs(mission.clockStart, state.sessionStartMs, now);
   const surface = isGround ? 'ground' : 'onboard';
 
+  // Persist the last route per perspective. Guarded by sameRoute so the effect
+  // only fires on a real navigation (the Route object is recreated each render).
   useEffect(() => {
-    if (route.view === 'ground' || route.view === 'onboard') dispatch(uiLastRoute(route));
-  }, [route, dispatch]);
+    if (route.view === 'ground' || route.view === 'onboard') {
+      const last = state.ui.lastRoute[route.view];
+      if (!last || !sameRoute(last, route)) dispatch(uiLastRoute(route));
+    }
+  }, [route, state.ui.lastRoute, dispatch]);
 
-  const goPerspective = (view: 'ground' | 'onboard') => navigate(view === 'ground' ? state.ui.lastRoute.ground : state.ui.lastRoute.onboard);
+  const goPerspective = (view: 'ground' | 'onboard') => navigate(routePath(view === 'ground' ? state.ui.lastRoute.ground : state.ui.lastRoute.onboard));
 
   return (
     <div className="shell" data-surface={surface}>
@@ -39,12 +46,13 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
         <nav aria-label={t.common.perspectiveLabel} className="seg">
           <button type="button" className={`seg-btn${!isGround && route.view !== 'settings' ? ' is-on' : ''}`} aria-pressed={!isGround && route.view !== 'settings'} onClick={() => goPerspective('onboard')}>{t.shell.perspective.onboard}</button>
           <button type="button" className={`seg-btn${isGround ? ' is-on' : ''}`} aria-pressed={isGround} onClick={() => goPerspective('ground')}>{t.shell.perspective.ground}</button>
+          <Link to="/demo/fd30" className="btn btn-ghost btn-sm">{t.fd30.entry}</Link>
         </nav>
         {isGround && (
           <>
             <label className="ctl">
               <span className="ctl-label">{t.shell.mission.label}</span>
-              <select value={route.missionId} onChange={(e) => navigate({ view: 'ground', missionId: e.target.value as MissionId, page: route.page })}>
+              <select value={route.missionId} onChange={(e) => navigate(`/ground/${e.target.value}/${route.page}`)}>
                 {MISSION_IDS.map((id) => <option key={id} value={id}>{t.shell.mission[id]}</option>)}
               </select>
             </label>
@@ -72,7 +80,7 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
           <button type="button" className="btn btn-ghost" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>☰ <span className="sr-only">{t.common.menu}</span></button>
           {menuOpen && (
             <div className="menu-pop" role="menu">
-              <a role="menuitem" href={toHash({ view: 'settings' })} onClick={() => setMenuOpen(false)}>{t.common.settings}</a>
+              <Link role="menuitem" to="/settings" onClick={() => setMenuOpen(false)}>{t.common.settings}</Link>
               <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); onRestart(); }}>{t.common.restartScenario}</button>
             </div>
           )}
@@ -81,8 +89,8 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
       {(route.view === 'onboard' || route.view === 'ground') && (
         <nav className="subnav" aria-label={t.a11y.missionNav}>
           {route.view === 'onboard'
-            ? ONBOARD_PAGES.map((p) => <a key={p} href={toHash({ view: 'onboard', page: p })} aria-current={route.page === p ? 'page' : undefined}>{t.shell.nav[p]}</a>)
-            : GROUND_PAGES.map((p) => <a key={p} href={toHash({ view: 'ground', missionId: route.missionId, page: p })} aria-current={route.page === p ? 'page' : undefined}>{t.shell.nav[p]}</a>)}
+            ? ONBOARD_PAGES.map((p) => <NavLink key={p} to={`/onboard/${p}`} aria-current="page">{t.shell.nav[p]}</NavLink>)
+            : GROUND_PAGES.map((p) => <NavLink key={p} to={`/ground/${route.missionId}/${p}`} aria-current="page">{t.shell.nav[p]}</NavLink>)}
         </nav>
       )}
       {children}
