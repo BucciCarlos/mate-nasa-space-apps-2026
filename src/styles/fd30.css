@@ -268,3 +268,64 @@
   .fd-floating .sprout { width: 60px; height: 70px; }
   .fd-floating .fd-character small { display: none; }
 }
+
+/* Exercise uses the same personal layout and floating anchor as Today/Sleep. */
+.fd-exercise-card { border-bottom: 1px solid var(--rule); padding: 24px 0; }
+.fd-exercise-card h2 { font: 400 28px Georgia, serif; margin: 10px 0; }
+.fd-exercise-card p, .fd-exercise-card strong { font-size: 12px; color: var(--quiet); }
+.fd-exercise-session { margin: 24px 0; padding: 22px; border: 1px solid var(--rule); border-radius: 6px; overflow-wrap: anywhere; }
+.fd-exercise-session p { color: var(--quiet); font-size: 13px; line-height: 1.65; }
+.fd-exercise-session h3 { font-size: 16px; font-weight: 550; }
+.fd-session-times { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px; font-size: 12px; }
+.fd-session-times dt { color: var(--quiet); }
+.fd-session-times dd { margin: 0; }
+.fd-session-duration { border-top: 1px solid var(--rule); margin-top: 20px; padding-top: 14px; }
+.fd-session-duration > strong { font-size: 42px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.fd-session-duration small { font-size: 18px; }
+.fd-session-highlight { outline: 2px solid var(--rust); outline-offset: 3px; background: #eee0cd55; }
+.fd-floating-notice .fd-link { display: flex; margin-top: 10px; }
+.fd-summary-action { border: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; }
+.fd-chat-tools > .fd-link { margin-right: 12px; }
+@media (max-width: 600px) {
+  .fd-nav { gap: 14px; flex-wrap: wrap; }
+  .fd-session-times { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .fd-session-times dd { margin-bottom: 8px; }
+  .fd-exercise-session { padding: 16px; }
+  .fd-rest-plan .fd-large-time { font-size: 28px; }
+}
+
+/* Laboratory keeps blood primary and the hypothetical urine branch secondary. */
+.fd-lab-card { border-bottom: 1px solid var(--rule); padding: 24px 0; }
+.fd-lab-card h2 { font: 400 28px Georgia, serif; margin: 10px 0; }
+.fd-lab-card p, .fd-lab-card strong { font-size: 12px; color: var(--quiet); line-height: 1.65; }
+.fd-lab-sample { padding: 24px; margin: 24px 0; border: 1px solid var(--rule); border-radius: 6px; overflow-wrap: anywhere; }
+.fd-lab-sample p, .fd-lab-secondary > p { font-size: 13px; line-height: 1.65; color: var(--quiet); }
+.fd-lab-sample small { font-size: 10px; color: var(--quiet); }
+.fd-lab-future { border-left: 3px solid #a36846; padding: 12px 16px; background: #eee0cd66; margin: 20px 0; }
+.fd-lab-future strong, .fd-lab-storage strong { font-size: 13px; font-weight: 600; }
+.fd-lab-future p, .fd-lab-storage p { margin-bottom: 0; }
+.fd-lab-timeline { list-style: none; padding: 0 0 0 20px; margin: 28px 0; }
+.fd-lab-timeline li { border-left: 2px solid var(--rule); position: relative; padding: 0 0 24px 22px; }
+.fd-lab-timeline li::before { content: ''; width: 9px; height: 9px; border: 2px solid #85947f; border-radius: 50%; background: #f7f5ec; position: absolute; left: -6px; top: 5px; }
+.fd-lab-timeline li[data-received="true"]::before { background: var(--ink); border-color: var(--ink); }
+.fd-lab-timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.fd-lab-timeline h3 { font-size: 16px; font-weight: 550; margin: 0; }
+.fd-lab-timeline p { margin: 8px 0; }
+.fd-lab-storage { border-top: 1px solid var(--rule); padding: 18px 0; }
+.fd-lab-storage small { display: block; margin-top: 10px; }
+.fd-lab-result { border-top: 1px solid var(--rule); padding: 20px 0; }
+.fd-lab-result h3 { font-size: 18px; font-weight: 550; }
+.fd-lab-result .fd-lab-future-label { font-size: 11px; }
+.fd-lab-values { font: 400 28px Georgia, serif; display: block; margin-top: 24px; }
+.fd-lab-review, .fd-lab-incomplete { border-left: 2px solid #a36846; padding-left: 12px; }
+.fd-lab-secondary { border-top: 1px solid var(--rule); padding: 24px 0; }
+.fd-lab-secondary > summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+.fd-lab-stored { font-size: 22px !important; font-family: Georgia, serif; }
+.fd-lab-scope { font-size: 11px; color: var(--quiet); border-left: 2px solid #a36846; padding-left: 12px; line-height: 1.7; }
+@media (max-width: 600px) {
+  .fd-lab-sample { padding: 16px; }
+  .fd-lab-timeline { padding-left: 6px; }
+  .fd-lab-timeline li { padding-left: 18px; }
+  .fd-header .fd-nav { width: 100%; justify-content: space-between; margin-left: 0; gap: 8px; }
+  .fd-header .fd-nav a { font-size: 12px; }
+}

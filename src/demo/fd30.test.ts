@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CREW, FD30_KEY, HISTORY, OWNER, REST, START, WAKE, WAKE_EVENT, freshPreview, previewReduce, previewTime, restorePreview } from './fd30';
+import { CREW, FD30_KEY, HISTORY, OWNER, REST, START, WAKE, WAKE_EVENT, EXERCISE_EVENTS, EXERCISE_HISTORY, EXERCISE_SESSION, DAY_EVENTS, elapsedMinutes, exerciseSessions, ingestExercise, latestPersonalEvent, latestNews, nextPreviewEvent, previewReply, freshPreview, previewReduce, previewTime, restorePreview } from './fd30';
 import { fitPosition, fromPreference, intersects, toPreference } from './position';
 import { createInitialState } from '../state/initialState';
 import { STORAGE_KEY } from '../state/persistence';
@@ -30,7 +30,7 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
     const advanced = previewReduce(s, { type: 'next', now: 61_000 });
     expect(previewTime(advanced, 61_000)).toBe(WAKE);
     expect(previewTime(advanced, 71_000)).toBe(WAKE + 10_000);
-    expect(previewReduce(advanced, { type: 'next', now: 71_000 })).toBe(advanced);
+    expect(nextPreviewEvent(advanced)?.kind).toBe('lab.sample_taken');
     expect(previewReduce(advanced, { type: 'seen', owner: OWNER }).profiles[OWNER].seen).toBe(true);
   });
   it('retains conversation, draft and receipt over reload, with language of original input', () => {
@@ -52,13 +52,13 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
     expect(m1.missions.iss.clockStart).toBe('2027-03-09T14:00:00Z');
   });
   it('uses the canonical personal route, retaining all published M1 route meanings', () => {
-    for (const page of ['sleep', 'today'] as const) {
+    for (const page of ['sleep', 'today', 'exercise', 'laboratory'] as const) {
       const route = { view: 'fd30', page } as const;
       expect(parseRoute(toHash(route))).toEqual(route);
     }
     expect(toHash({ view: 'fd30', page: 'sleep' })).toBe('#/onboard/personal/sleep');
     expect(parseRoute('#/onboard/today')).toEqual({ view: 'onboard', page: 'today' });
-    expect(parseRoute('#/onboard/personal/exercise')).toBeNull();
+    expect(toHash({ view: 'fd30', page: 'exercise' })).toBe('#/onboard/personal/exercise');
   });
 });
 
@@ -88,7 +88,7 @@ describe('Floating companions — private preferences and safe positions', () =>
     const legacy = { version: 1, sessionStartMs: 1000, offsetMs: 300000, wakeReceived: true,
       profiles: { [OWNER]: { seen: true, draft: 'unfinished', turns: [{ text: 'resumen', lang: 'es', reply: 'sleep' }] } } };
     const s = restorePreview(JSON.stringify(legacy), 2000);
-    expect(s.version).toBe(2);
+    expect(s.version).toBe(4);
     expect(s.sessionStartMs).toBe(1000);
     expect(s.offsetMs).toBe(300000);
     expect(s.wakeReceived).toBe(true);
@@ -117,5 +117,100 @@ describe('Floating companions — private preferences and safe positions', () =>
     const bad = { ...s, profiles: { ...s.profiles, [OWNER]: { ...s.profiles[OWNER], position: { x: 2, y: 0 } } } };
     expect(restorePreview(JSON.stringify(bad), 2000)).toEqual(freshPreview(2000));
     expect(restorePreview(JSON.stringify({ ...s, activeCrewId: 'unknown' }), 2000)).toEqual(freshPreview(2000));
+  });
+});
+
+
+describe('IMP03 exercise — owner-scoped workflow, journal and migration', () => {
+  it('preloads only Lucía, readable without events, never as novelty or a measurement', () => {
+    const state = freshPreview(1000);
+    expect(exerciseSessions(state, OWNER)).toHaveLength(1);
+    expect(exerciseSessions(state, 'iss:crew-mo')).toEqual([]);
+    expect(exerciseSessions(state, 'iss:crew-ti')).toEqual([]);
+    expect(state.processedIds).toEqual(expect.arrayContaining(EXERCISE_HISTORY.map(e => e.id)));
+    expect(latestNews(state, OWNER)).toBeNull();
+    expect(EXERCISE_HISTORY.every(e => e.measurement === null && e.sourceId === 'demo-history')).toBe(true);
+  });
+  it('automatically starts/finishes at source times with the same clock, including inactive owners and catch-up', () => {
+    let state = previewReduce(freshPreview(1000), { type: 'select', crewId: 'iss:crew-mo' });
+    const startAt = Date.parse(EXERCISE_EVENTS[0].occurredAt) - START + 1000;
+    const finishAt = Date.parse(EXERCISE_EVENTS[1].occurredAt) - START + 1000;
+    state = previewReduce(state, { type: 'tick', now: startAt - 1 });
+    expect(state.exercise.find(s => s.id === EXERCISE_SESSION)).toBeUndefined();
+    state = previewReduce(state, { type: 'tick', now: startAt });
+    let session = exerciseSessions(state, OWNER).find(s => s.id === EXERCISE_SESSION)!;
+    expect(session.start).toEqual(EXERCISE_EVENTS[0]);
+    expect(elapsedMinutes(session)).toBeNull();
+    expect(latestNews(state, 'iss:crew-mo')).toBeNull();
+    state = previewReduce(state, { type: 'tick', now: finishAt });
+    session = exerciseSessions(state, OWNER).find(s => s.id === EXERCISE_SESSION)!;
+    expect(session.finish).toEqual(EXERCISE_EVENTS[1]);
+    expect(elapsedMinutes(session)).toBe(60);
+    expect(state.offsetMs).toBe(0);
+    const catchUp = previewReduce(freshPreview(1000), { type: 'tick', now: finishAt });
+    expect(catchUp.exercise).toEqual(state.exercise);
+    expect(previewReduce(state, { type: 'tick', now: finishAt + 10000 })).toBe(state);
+    expect(restorePreview(JSON.stringify(state), finishAt + 10000)).toEqual(state);
+  });
+  it('next processes the shared day in source order, then resumes 1x without wrapping or duplication', () => {
+    let state = freshPreview(1000);
+    for (const event of DAY_EVENTS) {
+      state = previewReduce(state, { type: 'next', now: 2000 });
+      expect(previewTime(state, 2000)).toBe(Date.parse(event.occurredAt));
+      expect(state.processedIds.filter(id => id === event.id)).toHaveLength(1);
+    }
+    expect(nextPreviewEvent(state)).toBeUndefined();
+    expect(previewTime(state, 3000)).toBe(Date.parse(DAY_EVENTS.at(-1)!.occurredAt) + 1000);
+    expect(previewReduce(state, { type: 'next', now: 3000 })).toBe(state);
+  });
+  it('summary action acknowledges exactly its event, highlights its session and rejects stale owner/session references', () => {
+    let state = previewReduce(freshPreview(1000), { type: 'tick', now: Date.parse(EXERCISE_EVENTS[1].occurredAt) - START + 1000 });
+    expect(latestNews(state, OWNER)?.id).toBe(EXERCISE_EVENTS[1].id);
+    state = previewReduce(state, { type: 'exercise/view', owner: OWNER, sessionId: EXERCISE_SESSION, eventId: EXERCISE_EVENTS[1].id });
+    expect(state.profiles[OWNER].highlightedSessionId).toBe(EXERCISE_SESSION);
+    expect(state.profiles[OWNER].exerciseSeenIds).toEqual([EXERCISE_EVENTS[1].id]);
+    expect(latestPersonalEvent(state, OWNER)?.id).toBe(EXERCISE_EVENTS[1].id);
+    expect(latestPersonalEvent(state, 'iss:crew-mo')).toBeNull();
+    expect(state.profiles[OWNER].seen).toBe(false);
+    expect(previewReply(state, OWNER, 'my sleep summary')).toBe('sleep');
+    expect(previewReply(state, OWNER, 'Ver mi resumen')).toBe('exercise');
+    expect(previewReply(state, 'iss:crew-mo', 'Ver mi resumen')).toBe('sleep');
+    expect(previewReduce(state, { type: 'exercise/view', owner: OWNER, sessionId: EXERCISE_SESSION, eventId: EXERCISE_EVENTS[1].id })).toBe(state);
+    expect(previewReduce(state, { type: 'exercise/view', owner: OWNER, sessionId: 'other', eventId: EXERCISE_EVENTS[1].id })).toBe(state);
+    state = previewReduce(state, { type: 'select', crewId: 'iss:crew-ti' });
+    expect(previewReduce(state, { type: 'exercise/view', owner: OWNER, sessionId: EXERCISE_SESSION, eventId: EXERCISE_EVENTS[1].id })).toBe(state);
+  });
+  it('migrates v2 without losing owner positions, drafts, turns, receipts, active owner or mission time', () => {
+    const initial = freshPreview(1000);
+    const legacy = { version: 2, sessionStartMs: 1000, offsetMs: 500000, wakeReceived: true, activeCrewId: 'iss:crew-ti',
+      profiles: Object.fromEntries(CREW.map((c, i) => [c.id, { seen: true, draft: `private-${i}`, turns: [{ text: `turn-${i}`, lang: 'es', reply: 'sleep' }], position: { x: i / 4, y: .4 } }])) };
+    const restored = restorePreview(JSON.stringify(legacy), 10000);
+    expect(restored.version).toBe(4);
+    expect(restored.activeCrewId).toBe(legacy.activeCrewId);
+    expect(restored.sessionStartMs).toBe(legacy.sessionStartMs);
+    expect(restored.offsetMs).toBe(legacy.offsetMs);
+    for (const c of CREW) expect(restored.profiles[c.id]).toMatchObject(legacy.profiles[c.id]);
+    expect(restored.wakeReceived).toBe(true);
+    expect(restored.exercise).toEqual(initial.exercise);
+    expect(restored.processedIds).toContain(WAKE_EVENT.id);
+    expect(restorePreview(JSON.stringify(restored), 11000)).toEqual(restored);
+  });
+  it('rejects duplicate, wrong mission/source, unconfirmed and backwards events without leaking content', () => {
+    const state = freshPreview(1000), due = Date.parse(EXERCISE_EVENTS[1].occurredAt);
+    const started = ingestExercise(state, [EXERCISE_EVENTS[0]], due);
+    expect(ingestExercise(started, [EXERCISE_EVENTS[0]], due)).toBe(started);
+    for (const patch of [{ missionId: 'cislunar' }, { sourceId: 'unknown' }, { association: { status: 'unconfirmed' as const } }, { association: { status: 'confirmed' as const, crewId: 'unknown' } }]) {
+      const rejected = ingestExercise(state, [{ ...EXERCISE_EVENTS[0], ...patch }], due);
+      expect(rejected.exercise).toEqual(state.exercise);
+      expect(rejected.diagnostics).toHaveLength(1);
+      expect(latestNews(rejected, OWNER)).toBeNull();
+      expect(Object.keys(rejected.diagnostics[0]).sort()).toEqual(['eventId', 'sourceId', 'status']);
+      expect(ingestExercise(rejected, [{ ...EXERCISE_EVENTS[0], ...patch }], due)).toBe(rejected);
+    }
+    const incomplete = ingestExercise(state, [EXERCISE_EVENTS[1]], due);
+    expect(elapsedMinutes(incomplete.exercise.find(s => s.id === EXERCISE_SESSION)!)).toBeNull();
+    const backwards = ingestExercise(incomplete, [EXERCISE_EVENTS[0]], due);
+    expect(backwards.exercise).toEqual(incomplete.exercise);
+    expect(backwards.diagnostics[0].status).toBe('rejected');
   });
 });

@@ -9,13 +9,13 @@ import { useT } from '../i18n/I18nProvider';
 
 type Character = { id: CrewId; character: string; shape: 'sprout' | 'beacon' | 'sail' };
 interface Props {
-  crew: Character; preference: Position | null; pose: Pose; news: boolean; chatOpen: boolean;
-  onPosition: (position: Position | null) => void; onChat: () => void; onSleep: () => void;
+  crew: Character; preference: Position | null; pose: Pose; news: boolean; hasSummary: boolean; newsText: string; chatOpen: boolean;
+  onPosition: (position: Position | null) => void; onChat: () => void; onSleep: () => void; onExercise: () => void; onLaboratory: () => void; onSummary: () => void;
   characterRef: React.RefObject<HTMLButtonElement>;
 }
 const asBox = (r: DOMRect): Box => ({ x: r.x, y: r.y, width: r.width, height: r.height });
 
-export function FloatingCompanion({ crew, preference, pose, news, chatOpen, onPosition, onChat, onSleep, characterRef }: Props) {
+export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, onPosition, onChat, onSleep, onExercise, onLaboratory, onSummary, characterRef }: Props) {
   const t = useT().fd30;
   const frame = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
@@ -86,8 +86,11 @@ export function FloatingCompanion({ crew, preference, pose, news, chatOpen, onPo
           <p>{t.moveInstructions}</p>
         </> : <>
           <span className="fd-presence-status">{actualPose === 'interaction' ? t.interaction : news ? t.news : t.idle}</span>
-          <p aria-live="polite" aria-atomic="true">{actualPose === 'interaction' ? t.interactionText : news ? t.newsText : t.idleText}</p>
-          <a className="fd-link" href="#/onboard/personal/sleep" onClick={e => { e.preventDefault(); onSleep(); }}>{news ? t.summary : t.openSleep}<span aria-hidden="true">→</span></a>
+          <p aria-live="polite" aria-atomic="true">{actualPose === 'interaction' ? t.interactionText : news ? newsText : t.idleText}</p>
+          {hasSummary && <button className="fd-link fd-summary-action" type="button" onClick={onSummary}>{t.summary}<span aria-hidden="true">→</span></button>}
+          <a className="fd-link" href="#/onboard/personal/laboratory" onClick={e => { e.preventDefault(); onLaboratory(); }}>{t.openLaboratory}<span aria-hidden="true">→</span></a>
+          <a className="fd-link" href="#/onboard/personal/exercise" onClick={e => { e.preventDefault(); onExercise(); }}>{t.openExercise}<span aria-hidden="true">→</span></a>
+          <a className="fd-link" href="#/onboard/personal/sleep" onClick={e => { e.preventDefault(); onSleep(); }}>{t.openSleep}<span aria-hidden="true">→</span></a>
           {focused && <p className="fd-keyboard-hint">{t.keyboardHint}</p>}
         </>}
       </div>
