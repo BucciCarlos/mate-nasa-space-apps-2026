@@ -1,5 +1,19 @@
 node_modules/
 dist/
+backend/app/static/
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfvars
+terraform/.terraform.lock.hcl
+deploy/
 data-raw/
 .vite/
 *.log
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+frontend/.env.local
