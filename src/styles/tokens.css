@@ -1,0 +1,51 @@
+/* Design tokens (03 §4). Two surfaces: [data-surface="ground"] (dark) and [data-surface="onboard"] (light). */
+:root {
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --r-1: 4px; --r-2: 8px; --r-3: 14px;
+  --fs-0: 13px; --fs-1: 15px; --fs-2: 17px; --fs-3: 20px; --fs-4: 26px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --amber: #d98b1e;
+  --amber-bg: rgba(217, 139, 30, 0.14);
+  --green: #1f8a5b;
+  --red: #c7423f;
+  --focus: #ffb347;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+[data-surface="ground"] {
+  --bg: #0f1620;
+  --bg-2: #161f2c;
+  --bg-3: #1f2a3a;
+  --fg: #e6edf5;
+  --fg-2: #a9b7c8;
+  --line: #2b3a4e;
+  --accent: #35c4e6;
+  --accent-fg: #06202a;
+  --base-fs: var(--fs-1);
+  --amber: #ffb347;
+  --amber-bg: rgba(255, 179, 71, 0.16);
+  --green: #4fd59a;
+  --red: #ff7b78;
+  --focus: #ffd27a;
+}
+
+[data-surface="onboard"] {
+  --bg: #f6f3ee;
+  --bg-2: #ffffff;
+  --bg-3: #ede8e0;
+  --fg: #1f2429;
+  --fg-2: #5b636d;
+  --line: #d9d2c7;
+  --accent: #117a79;
+  --accent-fg: #ffffff;
+  --base-fs: var(--fs-2);
+  --focus: #b8560b;
+}
+
+.color-teal { --companion: #117a79; }
+.color-blue { --companion: #2b63c7; }
+.color-violet { --companion: #6a4fc9; }
+.color-amber { --companion: #b8700b; }
+.color-rose { --companion: #c2426d; }
+.color-green { --companion: #2f8a3a; }

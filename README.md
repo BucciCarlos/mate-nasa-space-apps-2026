@@ -27,26 +27,30 @@ M.A.T.E. is a prototype for demonstration. **It is not a medical device.** It do
 
 M.A.T.E. never invents physiological values, histories, thresholds or predictions. When it has no evidence, it says so.
 
-### Run it locally (planned stack: React, TypeScript, Vite, plain CSS)
+### Run it locally (React 18, TypeScript, Vite 8, plain CSS)
 
-Requirements: Node.js 20 or later. These commands will work once the application code lands (milestone M1):
+Requirements: Node.js 22.12 or later (verified with Node 22.23 and npm 10). Commands verified on 2026-11-14:
 
 ```bash
 npm install
-npm run dev          # development server
-npm test             # unit tests
-npm run build        # production build in dist/
-npm run preview      # serve dist/ locally; works without internet
+npm run dev          # development server (Vite), prints a local URL
+npm test             # unit tests (Vitest)
+npm run typecheck    # tsc --noEmit
+npm run check:i18n   # fails on user-visible literal text in components
+npm run build        # type-check + production build in dist/
+npm run preview      # serves dist/ at http://localhost:4173
 ```
 
-After `npm install`, the app needs no network: all data ships with it.
+After `npm install`, the app makes no network requests: every page, style and data file is served by the local server, so it works without internet. `dist/index.html` must be served (for example with `npm run preview`), not opened as a file.
+
+Milestone M1 (the integration journey below) is implemented. M2–M4 (evidence views, module catalog, body map, three-phase journey) are not built yet.
 
 ### Guided journey (milestone M1)
 
 1. Open the app. You start **Onboard**, as Lucía Ferraro (fictional) on the ISS.
 2. Switch to **Ground** › ISS › Agenda as *Mission operator*. Select "Payload hardware swap" and advance it by 90 minutes. The preview shows how the planned rest window changes.
 3. Send the update and watch it travel the simulated link: *In transit* → *Delivered*.
-4. Go back **Onboard**. The companion tells you that Ground updated your schedule. Ask "Show me": it opens your agenda and highlights the change.
+4. Go back **Onboard**. The companion tells you that Ground updated your schedule. Choose "Show me what changed" (or type it): it opens your agenda, selects the period and highlights the blocks that moved, before and after.
 5. Ask "How will this affect me?". The companion explains that it has no comparable sleep records and therefore makes no inference.
 6. Ask "Why does this matter?". It cites NASA's page on the risk from inadequate sleep and irregular schedules.
 7. Log an observation. It is private by default; you can choose to share a summary.
@@ -122,26 +126,30 @@ M.A.T.E. es un prototipo de demostración. **No es un dispositivo médico.** No 
 
 M.A.T.E. nunca inventa valores fisiológicos, historiales, umbrales ni predicciones. Cuando no tiene evidencia, lo dice.
 
-### Ejecutarlo localmente (stack previsto: React, TypeScript, Vite, CSS normal)
+### Ejecutarlo localmente (React 18, TypeScript, Vite 8, CSS normal)
 
-Requisitos: Node.js 20 o superior. Estos comandos funcionarán cuando llegue el código de la aplicación (hito M1):
+Requisitos: Node.js 22.12 o superior (verificado con Node 22.23 y npm 10). Comandos verificados el 14/11/2026:
 
 ```bash
 npm install
-npm run dev          # servidor de desarrollo
-npm test             # pruebas unitarias
-npm run build        # build de producción en dist/
-npm run preview      # sirve dist/ localmente; funciona sin internet
+npm run dev          # servidor de desarrollo (Vite), imprime una URL local
+npm test             # pruebas unitarias (Vitest)
+npm run typecheck    # tsc --noEmit
+npm run check:i18n   # falla si hay texto literal visible en los componentes
+npm run build        # verificación de tipos + build de producción en dist/
+npm run preview      # sirve dist/ en http://localhost:4173
 ```
 
-Después de `npm install`, la app no necesita red: todos los datos viajan con ella.
+Después de `npm install`, la app no hace ninguna petición de red: todas las páginas, estilos y datos los sirve el servidor local, así que funciona sin internet. `dist/index.html` debe servirse (por ejemplo con `npm run preview`), no abrirse como archivo.
+
+El hito M1 (el recorrido guiado de abajo) está implementado. M2–M4 (vistas de evidencia, catálogo de módulos, mapa corporal, viaje en tres fases) todavía no están construidos.
 
 ### Recorrido guiado (hito M1)
 
 1. Abrí la app. Empezás **A Bordo**, como Lucía Ferraro (ficticia) en la EEI.
 2. Pasá a **Tierra** › EEI › Agenda como *Operador de misión*. Seleccioná «Cambio de hardware de carga útil» y adelantalo 90 minutos. La vista previa muestra cómo cambia la ventana de descanso planificada.
 3. Enviá la actualización y seguí su viaje por el enlace simulado: *En tránsito* → *Entregado*.
-4. Volvé **A Bordo**. El compañero te avisa que Tierra actualizó tu agenda. Pedile «Mostrame»: abre tu agenda y resalta el cambio.
+4. Volvé **A Bordo**. El compañero te avisa que Tierra actualizó tu agenda. Elegí «Mostrame qué cambió» (o escribilo): abre tu agenda, selecciona el período y resalta los bloques que se movieron, antes y después.
 5. Preguntale «¿Cómo me va a afectar?». El compañero explica que no tiene registros de sueño comparables y por eso no infiere nada.
 6. Preguntale «¿Por qué importa?». Cita la página de NASA sobre el riesgo por sueño inadecuado y horarios irregulares.
 7. Registrá una observación. Es privada por defecto; podés elegir compartir un resumen.
