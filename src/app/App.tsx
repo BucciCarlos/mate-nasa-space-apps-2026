@@ -14,6 +14,7 @@ import { OnboardAgenda } from '../views/onboard/OnboardAgenda';
 import { OnboardObservations } from '../views/onboard/OnboardObservations';
 import { CompanionPanel } from '../views/onboard/CompanionPanel';
 import { Settings } from '../views/Settings';
+import { Fd30Preview } from '../demo/Fd30Preview';
 
 function Body() {
   const { state, dispatch } = useApp();
@@ -32,6 +33,8 @@ function Body() {
   useEffect(() => {
     if (route.view === 'settings' || route.view === 'notfound') document.getElementById('view-h')?.focus();
   }, [route]);
+
+  if (route.view === 'fd30') return <Fd30Preview page={route.page} />;
 
   let content: React.ReactNode;
   switch (route.view) {

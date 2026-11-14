@@ -1,6 +1,8 @@
 import type { Messages } from './en';
+import { fd30Es } from './fd30';
 
 export const es: Messages = {
+  fd30: fd30Es,
   common: {
     appName: 'M.A.T.E.',
     appTagline: 'Entorno Terapéutico y Médico para Astronautas',

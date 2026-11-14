@@ -7,6 +7,8 @@ const MISSIONS: MissionId[] = ['iss', 'cislunar'];
 export function parseRoute(hash: string): Route | null {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '').replace(/\/+$/, '');
   const parts = path.split('/').filter(Boolean);
+  if (path === 'demo/fd30') return { view: 'fd30', page: 'today' };
+  if (path === 'onboard/personal/sleep') return { view: 'fd30', page: 'sleep' };
   if (parts.length === 0) return { view: 'onboard', page: 'today' };
   if (parts[0] === 'onboard') {
     const page = (parts[1] ?? 'today') as OnboardPage;
@@ -23,6 +25,7 @@ export function parseRoute(hash: string): Route | null {
 
 export function toHash(route: Route): string {
   switch (route.view) {
+    case 'fd30': return route.page === 'sleep' ? '#/onboard/personal/sleep' : '#/demo/fd30';
     case 'onboard': return `#/onboard/${route.page}`;
     case 'ground': return `#/ground/${route.missionId}/${route.page}`;
     case 'settings': return '#/settings';

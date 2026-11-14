@@ -93,6 +93,7 @@ export const INTENT_PRIORITY: IntentId[] = [
 export type OnboardPage = 'today' | 'agenda' | 'observations';
 export type GroundPage = 'agenda' | 'link' | 'crew' | 'log';
 export type Route =
+  | { view: 'fd30'; page: 'today' | 'sleep' }
   | { view: 'onboard'; page: OnboardPage }
   | { view: 'ground'; missionId: MissionId; page: GroundPage }
   | { view: 'settings' }

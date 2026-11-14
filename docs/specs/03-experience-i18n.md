@@ -1,6 +1,6 @@
 # 03 — Experience and bilingual design
 
-Status: draft for team review · 2026-11-14
+Status: draft for team review · 2026-11-14 · MATE-SPEC02: M1.1 extension in §8. M1 screens below remain the regression baseline; §8 replaces the character/chat arrangement for the next delivery.
 
 ## 1. Shell (M1 MUST)
 
@@ -13,7 +13,7 @@ The header is shared by both surfaces. From left to right:
 5. The **link indicator** for the current mission.
 6. The mission clock: `FD n · hh:mm UTC`.
 7. The **language switch**: EN | ES.
-8. A menu with Settings and Restart scenario.
+8. A menu with Settings and Restart scenario. In M1.1, View as and Next event appear only in a separately labelled Demo mode area (§8); no destination switch is added Onboard.
 
 The perspective switch exists because the prototype runs both ends of the system in one tab. Switching perspective keeps the state and each side's last view (02 §3.2).
 
@@ -58,7 +58,7 @@ The perspective switch exists because the prototype runs both ends of the system
 | Link down | banner + icon + text |
 | No evidence | icon + "No evidence" label |
 
-- **Companion avatar:** an abstract CSS/SVG orb with the initial of the companion's name. No human likeness, no generated imagery. Default name: **Mate**.
+- **Companion identity (M1.1):** original characters with distinct silhouettes and per-profile identities, defined in §8.2. This replaces the M1 orb-with-initial direction. Chat is one tool of the character, not its entire presence.
 - **Forbidden:** NASA insignia ("meatball"), logotype ("worm") or seal; mission patches; agency or national flags; images or likeness of real astronauts; anything implying NASA endorsement. Space Apps rules require a visible watermark on any image or video generated with AI ("SI") tools, and none is planned.
 - **Motion:** transitions of 200 ms or less; respect `prefers-reduced-motion`.
 
@@ -208,3 +208,135 @@ The catalogs must contain these strings, with exactly this meaning; small wordin
 | `provenance.simulated` | Simulated | Simulado |
 | `provenance.nasaResource` | NASA resource | Recurso NASA |
 | `common.writtenIn` | Written in {language} | Escrito en {language} |
+
+## 8. M1.1 — A visual Onboard day
+
+Contracts: [02 §12](02-architecture-contracts.md#12-m11--profiles-and-automatic-onboard-day-normative-extension). Fixture: [04 §11](04-data-traceability.md#11-m11--day-fixture-and-event-provenance). Acceptance: [05 §10](05-acceptance-build-order.md#10-m11--onboard-day-acceptance-and-build-order).
+
+### 8.1 Screen hierarchy and actions
+
+Today is the main FD30 day view: current profile + common mission clock, a dominant latest-event summary, its planned-versus-recorded distinction, and a chronological rail connecting wake, training and samples/results. Own voluntary observations appear in a separate contextual section; an empty section says No observations, not a fabricated note. Each event has a source/association disclosure and Simulated badge. Result available and No usable values may appear together. Display the three provenance lanes and preloaded-history disclosure of 04 §11.2; the blood analyzer rail/result says Future onboard analysis — simulated / Análisis futuro a bordo — simulado. Urine is secondary, not presented as an inflight Standard Measures requirement. No clinical green check appears just because analysis finished.
+
+Written chat starts **closed** on initial load/reload and after a profile switch. **Authorized IMP02 amendment to SPEC03:** the original character floats above the view; lower-right is the initial position only. Drag with mouse/finger to another visible position outside essential controls. It retains viewport position through scroll and Today/Sleep navigation. Each profile remembers its own normalized preference; viewport/chat/keyboard constraints may temporarily project the effective position without overwriting that preference (02 §12.5.1). Essential navigation, jury controls, form/actions and chat controls remain reachable even when content scrolls under the character. This replaces the mandatory reserved lower-right gutter/footer, while preserving the current visual hierarchy.
+
+A tap/click opens written chat, while dragging and releasing never opens it. The final approved IMP02 cut removes the visible Position / Posición button and its menu, without another floating control. Tab focuses the character; M enables arrows (8 px), Shift+arrows (32 px), Enter to confirm and Escape to cancel. Home resets this companion only. Translated instructions appear on focus and are exposed as an accessible description; movement, confirm/cancel and reset never open chat. Enter/Space outside movement mode still opens chat. Notice/action bubbles switch sides and stay clamped inside the usable viewport near all edges; no clipped text or controls. View as in Demo mode switches Lucía/Sprout, Tomás/Beacon and Mei/Sail without restarting FD30, carrying over private records or reusing conversations. The previously selected profile's unsent text is preserved privately; the next profile starts with chat/movement controls closed.
+
+The chat's placement is independent of the character: desktop lateral column reallocating main content, mobile bottom region with its own scroll. Main content stays reachable, the character stays visible, and temporary adjustment around chat/keyboard does not overwrite its saved preference. Close chat and Escape restore focus to the character and retain that owner's conversation/draft. Events signal news where the character was left, without autonomous movement, chat opening, navigation or focus theft. Reduced motion changes pose/text immediately.
+
+Separate sibling controls beside the character provide View my summary and module actions, plus Show me what changed when applicable. These controls never require opening chat; do not nest them inside the character button. They execute the actions in 02 §12.5–12.6. An ordinary event changes the character's posture/expression, unread marker and short text (for example Training completed / Entrenamiento finalizado), without opening chat, stealing focus or navigating. Capsule notices use the same rule when the optional extension is enabled. The brief notice contains no capsule body or other profile's private content.
+
+Demo controls are visually separate from astronaut tasks, titled Demo mode — not authentication / Modo muestra — no es autenticación. View as shows the three fictional ISS names and role titles. Next event shows the target mission UTC time; Restart scenario confirms its scope. There are no I woke up, Start training, Sample taken or Enter result controls. Event history can be read after arrival; it is not a manual wizard. Outside Demo mode the clock and automatic event processing continue, with jury controls absent.
+
+### 8.2 Original character direction (SVG/CSS, no assets in this spec task)
+
+Use original, compact, non-human characters with silhouettes readable in monochrome at about 64 px; no agency marks or real-person likenesses. The reference to ChatGPT pets is the **interaction of a persistent character with a user-opened chat** only: do not copy character designs, sprites, names, poses or app assets. Prefer a small layered inline SVG/CSS implementation; no animation library, remote image service or generated sprite sheet is required.
+
+M1.1 silhouette specification, stable per profile (original design choices, not clinical personas): Lucía → Sprout, an upright seed-shaped body with two asymmetrical leaf fins; Tomás → Beacon, a squat trapezoid body with a forked crest; Mei → Sail, an elongated curved body with a large offset sail fin. These proper names stay untranslated. Each is identifiable without its name or color; none is an orb with an initial. Their personalities must not imply specialist advice or emotional assessment. Name/accent customization can remain M3; default distinct identities are M1.1 MUST.
+
+| State | Static cue, always present | Optional motion |
+|---|---|---|
+| Idle / En reposo | Resting pose, Idle / En reposo text | Small gentle movement, never needed for meaning |
+| News / Novedad | Distinct attentive pose/expression + unread-count marker and a short event-specific text (fallback New update / Nueva novedad) | One brief attention gesture; no continuous flashing/bouncing |
+| Interaction / Interacción | Turned/pointing pose + Viewing summary / Mostrando resumen while an explicit action executes | Brief pose transition, then idle or news if unread events remain |
+
+With reduced motion, replace movement by immediate pose/text changes; never suppress the unread cue or the character. No source review state is encoded as a worried/happy health verdict. Markers have accessible labels scoped to the active profile; inactive profiles do not announce private arrivals. Seen/read state is per event and profile. Closing chat leaves presence and unread state intact. Keyboard and touch activate the same actions; hover is never required.
+
+### 8.3 Wireframe A — Today, news present, chat closed
+
+```text
+[ A Bordo / Onboard ] [Lucía · EEI/ISS] [FD30 · UTC] [EN/ES]
+[ Hoy/Today | Sueño/Sleep | Ejercicio/Exercise | Laboratorio/Laboratory ]
+[ Demo: Ver como/View as | Siguiente evento/Next event ]
++--------------------------------------------------------------+
+| Hoy / Today — dominant event summary                         |
+| SIMULADO / SIMULATED: Entrenamiento finalizado / Completed    |
+| Sin métricas / No metrics available · Origen / Source         |
+| [Ver resumen / View summary]                                 |
+| Jornada / Day · cards: Sueño | Ejercicio | Laboratorio        |
+| Agenda simulada | Reporte simulado | Evidencia de otra misión |
+| [Check-in opcional / Optional check-in → Observaciones]       |
+|                                       +--------------------+ |
+| Floating initial position, movable    | [Sprout silhouette] | |
+|                                       | Training completed | |
+|                                       | Chat closed/cerrado| |
+|                                       | [View my summary]  | |
+|                                       | Keyboard: M / Home | |
++---------------------------------------+--------------------+-+
+Desktop open: [reflowed Today/detail | lateral chat + Close/Cerrar]
+Mobile open:  [scrollable Today/detail]
+              [bottom chat panel + Close/Cerrar; character independent]
+```
+
+Desktop ≥1024 px: keep the current summary hierarchy and visual design; the character initially appears lower-right and may float anywhere usable. There is no mandatory presence gutter. Chat still opens in its own lateral column when main content fits, otherwise in the bottom region. Mobile: full silhouette and a legible edge-adapting short notice/action bubble float above the scrollable view, with essential controls given paint/hit-test priority; chat reserves its own bottom region. Keep character, notices and focus-only keyboard instructions within visual viewport/safe margins at 390 px and narrower widths. EN/ES wrap without horizontal overflow. All personal views share the same owner-scoped position, and navigation never opens chat. No-observation and optional check-in scope is unchanged. The first IMP02 slice implements Today/Sleep only; the rest of this wireframe remains later scope.
+
+### 8.4 Wireframe B — Commander, Crew
+
+```text
+[ A Bordo / Onboard ] [Tomás · Commander/Comandante] [FD30 · UTC]
+[ Hoy/Today | Mi agenda/My agenda | Tripulación/Crew ]
++--------------------------------------------------------------+
+| Tripulación / Crew — operational planning dominates           |
+| Profile/Perfil | received agenda | planned rest window        |
+| Lucía          | tasks           | planned only                |
+| Tomás          | tasks           | planned only                |
+| Mei            | tasks           | planned only                |
+| Solapamientos / Overlaps: activity + interval                  |
+| Solicitudes compartidas / Shared operational requests         |
+| sender → Tomás · exact voluntarily shared message             |
+|                                       +--------------------+ |
+| No teammate-private data here         | [Beacon silhouette]| |
+|                                       | Idle / En reposo   | |
+|                                       | Chat closed/cerrado| |
+|                                       | [My summary]       | |
++---------------------------------------+--------------------+-+
+```
+
+Desktop uses aligned team lanes and a separate voluntary-request list, with the same floating per-profile character and independent chat layout as Today. Mobile stacks operational cards and requests; an explicitly opened bottom chat does not cover controls. Both languages retain the hierarchy. Beacon's summary/chat always belongs to **Tomás**, never the teammate whose lane is selected. No expand-control leads into a teammate's measured sleep, metrics, samples, check-in, capsule, notes or chat. Requests show only their authorized immutable message and sender/recipient. Request preview retains Message / Mensaje, named Recipient / Destinatario and Share with Commander / Compartir con Comandante, separate from medical sharing. Neither the check-in nor the optional capsule broadens Commander or Ground visibility.
+
+### 8.5 Reference strings for the day (EN / ES)
+
+| EN | ES |
+|---|---|
+| Demo mode — not authentication | Modo muestra — no es autenticación |
+| View as | Ver como |
+| Next event | Siguiente evento |
+| End of scripted day | Fin de la jornada guionada |
+| View my summary | Ver mi resumen |
+| Show me what changed | Mostrame qué cambió |
+| Good morning, {name}. An episode-ended event arrived. | Buen día, {name}. Llegó un evento de fin de episodio. |
+| Planned rest window | Ventana de descanso planificada |
+| Recorded sleep · No record | Sueño registrado · Sin registro |
+| Planned / In progress / Completed | Previsto / En curso / Finalizado |
+| No metrics available | Sin métricas disponibles |
+| Collection planned / Sample taken / Analyzing / Result available | Toma prevista / Muestra tomada / Análisis en curso / Resultado disponible |
+| No usable values / No comparable record | Sin valores utilizables / Sin registro comparable |
+| Source review status not reported | El origen no informó un estado de revisión |
+| Marked for review by source | Marcado para revisión por el origen |
+| Association unconfirmed — not assigned to a profile | Asociación sin confirmar — sin atribuir a un perfil |
+| No observations | Sin observaciones |
+| Open chat / Close chat | Abrir chat / Cerrar chat |
+| Optional check-in | Check-in opcional |
+| Would you like to leave a comment about your day or a leisure preference? | ¿Querés dejar un comentario sobre tu día o una preferencia de ocio? |
+| Save privately / Skip | Guardar en privado / Omitir |
+| Private check-in — not shared | Check-in privado — no se comparte |
+| Family capsule available / Open capsule | Cápsula familiar disponible / Abrir cápsula |
+| Fictional local capsule | Cápsula ficticia local |
+| Capability not verified | Capacidad sin verificar |
+| Crew / Shared operational requests | Tripulación / Solicitudes operativas compartidas |
+| Only the named Commander receives this message; it is not sent to Ground. Recall is not available. | Solo el Comandante indicado recibe este mensaje; no se envía a Tierra. No hay opción de retirarlo después. |
+
+All ordinary content, status, empty/error text, accessible names, source disclosures and confirmation dialogs follow the typed EN/ES catalogs. Proper names and source identifiers retain the existing exceptions. No specialist opinion is implied by these provisional neutral strings.
+
+### 8.6 Guidance for the visual implementation stage
+
+Recommend **frontend-design** as a design guide when visual implementation is authorized; do not install or run it in this spec task, and do not make an unavailable skill a runtime dependency. The character directions above remain reviewable sketches in words, not approved assets. Use [NASA-STD-3001 Vol. 2 §10, Crew Interfaces](https://www.nasa.gov/reference/10-0-crew-interfaces-vol-2/) as a reference for consistent controls, direct presentation of status and understandable automation, with the revision checked at implementation. Apply this to clear Demo mode, source/time/association labels and explicit user authority over navigation/sharing. This is a reference for crew interfaces, not a claim that the prototype is certified or fully compliant, nor an authorization to expand Ground/Commander access to personal data.
+
+### 8.7 Personal navigation with chat closed (M1.1 MUST)
+
+Provide persistent Onboard entries Sleep / Sueño, Exercise / Ejercicio and Laboratory / Laboratorio. On mobile these remain keyboard/touch accessible in the navigation menu, without opening chat. Today always has a corresponding card for each module, including when it has no records; Mate's action list offers the same three entries independently of unread news. All three entry points open the same active-profile personal detail defined in 02 §12.6. Show the profile identity, available history from the beginning of FD30, provenance and explicit missing-data states. Do not redirect to scientific Evidence or require Next event to unlock a module. Device events refresh the detail and Today card automatically. Acceptance: 05 §10.4.
+
+### 8.8 Wellbeing and optional capsule presentation
+
+Today and Observations offer Optional check-in, clearly subordinate to the day summary. It opens the existing Observations view in the private qualitative path of 02 §12.7: day comment or leisure preference, no required score or response. Save privately, Cancel and Skip are reachable without advancing the day; simply leaving the form is allowed. A saved entry says Private check-in — not shared / Check-in privado — no se comparte. Do not show guilt prompts, adherence percentages, inferred mood, medical/Commander sharing controls or automatic leisure booking. The ordinary M1 medical-summary form remains a different path with its existing consent preview.
+
+Only if the optional family extension is enabled, a brief capsule notice appears beside the recipient's character after the main journey, still with chat closed. It shows Fictional local capsule and Open capsule, not the message body. Explicit Open capsule opens an owner-scoped local text panel labelled with fictional sender, recipient and provenance; Close returns focus to its opener. It neither opens chat nor auto-plays media, and never appears in Commander Crew or Ground. Keep this separate from automatic medical monitoring and from the core acceptance; see 05 §10.6.

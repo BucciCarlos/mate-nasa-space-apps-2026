@@ -38,6 +38,7 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
         <nav aria-label={t.common.perspectiveLabel} className="seg">
           <button type="button" className={`seg-btn${!isGround && route.view !== 'settings' ? ' is-on' : ''}`} aria-pressed={!isGround && route.view !== 'settings'} onClick={() => goPerspective('onboard')}>{t.shell.perspective.onboard}</button>
           <button type="button" className={`seg-btn${isGround ? ' is-on' : ''}`} aria-pressed={isGround} onClick={() => goPerspective('ground')}>{t.shell.perspective.ground}</button>
+          <a href="#/demo/fd30" className="btn btn-ghost btn-sm">{t.fd30.entry}</a>
         </nav>
         {isGround && (
           <>

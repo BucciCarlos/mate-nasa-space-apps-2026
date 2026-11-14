@@ -32,6 +32,7 @@ Las specs se escriben una sola vez, en inglés (versión canónica). El producto
 | Milestone | English | Español |
 |---|---|---|
 | M1 | Integration journey: an ISS schedule change travels Ground → crew → Ground, in both languages. It is the first integration milestone, not the limit of the app. | Recorrido de integración: un cambio de agenda de la EEI viaja Tierra → tripulación → Tierra, en ambos idiomas. Es el primer hito de integración, no el límite de la app. |
+| M1.1 | **Next delivery: FD30 Onboard day.** Per-profile characters with chat initially closed, automatic simulated events, private optional check-in and limited Commander Crew; optional local fictional capsule after the main journey. M1 remains a regression. | **Próxima entrega: jornada FD30 a bordo.** Personajes por perfil con chat inicialmente cerrado, eventos automáticos simulados, check-in privado de uso voluntario y Tripulación limitada del Comandante; cápsula ficticia local opcional después del recorrido principal. M1 se conserva como regresión. |
 | M2 | Evidence layer: real, traceable NASA and partner content. | Capa de evidencia: contenido real y trazable de NASA y agencias asociadas. |
 | M3 | Breadth and continuity: module catalog, body map, three-phase journey, companion customization, in-app guide. | Amplitud y continuidad: catálogo de módulos, mapa corporal, viaje en tres fases, personalización del compañero, guía en la app. |
 | M4 | Enhancements (SHOULD). | Mejoras (SHOULD). |
@@ -43,5 +44,5 @@ El material original de M.A.T.E. se publica bajo la Apache License 2.0 ([LICENSE
 
 ## Reading order / Orden de lectura
 
-- Implementers / Implementación: 01 → 02 → 05 (M1) → 03 → 04 (§1, §2, §8 for M1).
+- Implementers / Implementación: 01 §6.1 → 02 §12 → 03 §8 → 04 §11 → 05 §10 for M1.1 / para M1.1; retain M1 contracts and regression / conservar contratos y regresión M1.
 - Reviewers / Revisión: 01 → 04 → 05.

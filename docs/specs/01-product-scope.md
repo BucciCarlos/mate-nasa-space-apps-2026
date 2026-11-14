@@ -18,7 +18,7 @@ The prototype is a static web application and a decision-support demonstration. 
 |---|---|
 | P1 | **One companion across phases.** The same companion (name, appearance, memory of the person's own records) accompanies pre-flight, in-flight and post-flight. |
 | P2 | **Context before interpretation.** M.A.T.E. explains what changed in the crew member's context (agenda, link, environment). It never infers a health outcome it has no evidence for, and says so explicitly. |
-| P3 | **No invented science.** No fabricated physiological values, personal histories, thresholds, probabilities, risk scores or predictions. People, agendas, plans, link behaviour and conversation may be simulated and are always labelled as simulated. |
+| P3 | **No invented science.** No fabricated physiological values, clinical histories presented as measured evidence, thresholds, probabilities, risk scores or predictions. Explicitly simulated workflow history has the limits in 04 §11. People, agendas, plans, link behaviour and conversation may be simulated and are always labelled as simulated. |
 | P4 | **Provenance at the point of use.** Every data-bearing element shows where it comes from (03 §5, 04 §2). |
 | P5 | **Private by default.** Private notes and companion conversations never leave Onboard. Ground only receives summaries the crew member explicitly chooses to share. |
 | P6 | **No readiness verdicts.** Never "fit/unfit", "apto/no apto" or equivalents. No flow depends on a cognitive test. |
@@ -30,12 +30,12 @@ The prototype is a static web application and a decision-support demonstration. 
 
 | Surface | Role | Sees | Can do |
 |---|---|---|---|
-| Onboard | Astronaut: one fictional ISS crew member | Own agenda and notices, link status as known on board, own observations and conversation, evidence and concept modules | Ask the companion, log observations, choose to share a summary |
+| Onboard | Astronaut: one fictional ISS crew member in M1; any of the three via Demo mode in M1.1 | Own agenda and notices, link status as known on board, own observations and conversation, evidence and concept modules | Ask the companion, log observations, choose to share a summary |
 | Ground | Mission operator | Agendas of both missions, link and message status, mission log, *that* a crew summary arrived (not its content), evidence and concept modules | Advance tasks and send updates, set the simulated link up or down |
 | Ground | Medical professional | Agendas (read-only), link status, content of shared summaries, mission log, evidence and concept modules | Read shared summaries |
 
 Role switching on Ground is a **demonstration filter, not security**, and the UI says so (03 §1).
-FUTURE: crew medical officer, behavioral health, researcher and commander roles; real authentication.
+M1.1 adds the Commander as a crew member with their own companion and a limited Crew view (02 §12.4), not a third Ground role. FUTURE: crew medical officer, behavioral health, researcher roles and real authentication.
 
 ## 4. Mission profiles
 
@@ -46,7 +46,7 @@ FUTURE: crew medical officer, behavioral health, researcher and commander roles;
 | Mars | FUTURE | — | — |
 
 - **Isolation:** a change, message, notice or log entry belongs to exactly one mission and never appears in another (contract: 02 §4).
-- **Onboard has no destination selector.** It is bound to the ISS crew member defined in the scenario (04 §8).
+- **Onboard has no destination selector.** It remains bound to the ISS. M1 fixes the scenario user; M1.1 adds View as, in Demo mode only, for profiles within that mission (02 §12). Cislunar remains Ground-only.
 - Fictional mission names must not use real NASA mission identifiers (e.g. "Artemis", "Gateway", expedition numbers).
 
 ## 5. Module catalog
@@ -65,11 +65,13 @@ Tiers:
 | CORE-AGENDA | Agenda: Ground editor, Onboard agenda, planned-rest-window computation | The context change at the heart of M1 | M1 MUST |
 | CORE-LINK | Simulated Ground–space link: queued, in transit, delivered, link down | Honest pending and stale states | M1 MUST |
 | CORE-ENGINE | Event engine ("coordinator"): deterministic rules with rule traces ("Why am I seeing this?") | Explainability without generative AI | M1 MUST |
-| CORE-COMPANION | Companion: guided intents, free text, simulated voice, UI actions | The conversational experience | M1 MUST (M1 intents); M3 MUST (module intents) |
+| CORE-COMPANION | Companion: guided intents, free text, simulated voice, UI actions; persistent original characters per profile in M1.1 | The conversational experience | M1 MUST (M1 intents); M1.1 MUST (characters and day actions); M3 MUST (module intents) |
 | CORE-OBS | Observations and consented sharing | Self-report, privacy, the crew member's decision | M1 MUST |
-| CORE-ROLES | Role filters (M1 MUST); audit view of who received what (M4 SHOULD) | Professional console realism | M1 / M4 |
+| CORE-ROLES | Role filters (M1 MUST); limited onboard Commander view (M1.1 MUST); audit view of who received what (M4 SHOULD) | Professional console realism | M1 / M1.1 / M4 |
 | CORE-PROV | Provenance badges (M1 MUST); Sources page (M2 MUST) | Validity and NASA traceability | M1 / M2 |
 | CORE-I18N | English and Spanish everywhere | Non-negotiable requirement | M1 MUST |
+| CORE-PROFILES | Owner-scoped Onboard profiles and limited Commander Crew | Identity continuity and voluntary operational sharing | M1.1 MUST |
+| CORE-DAY | Automatic scripted local equipment events and common demo clock | One connected FD30 day with visible provenance and preloaded workflow history | M1.1 MUST |
 | CORE-CATALOG | Module catalog and body map navigation | Breadth of the platform; the challenge's clickable human figure | M3 MUST |
 | CORE-JOURNEY | Pre-flight / in-flight / post-flight journey with the same companion | The continuity that defines M.A.T.E. | M3 MUST |
 | CORE-GUIDE | In-app guided-journey panel with step completion | The public app explains itself without a presenter | M3 MUST |
@@ -120,6 +122,20 @@ Every one of the 17 risks listed in the challenge resource *Risks of Human Space
 9. If the link is down, everything waits visibly and is delivered in order when the link returns.
 
 Normative contracts: 02. Acceptance: 05 §2.
+
+### 6.1 Next delivery: M1.1 — Onboard day (MUST)
+
+A connected visual FD30 day on a fictional ISS mission, with provenance-labelled simulated history and blood as the main lab path: sleep-episode end → equipment-driven training → blood and urine sample workflow → result availability. The companion starts with written chat closed and an initial lower-right floating position across Today/Sleep/Exercise/Laboratory; the authorized IMP02 amendment makes it movable with a preference per profile, while essential controls stay reachable (02 §12.5.1). Activating the character opens the independent responsive chat; dragging does not, and closing it preserves that profile's conversation. Automatic events update the correct profile without manual starts or transcription. No usable measurement means an explicit missing-data state, not invented physiology. Contracts: 02 §12; scenario/provenance: 04 §11; experience and wireframes: 03 §8; acceptance: 05 §10.
+
+Demo mode provides View as for the three ISS profiles and next-event/reset controls for the jury. Shared mission time, delivered plans and events survive profile changes; private state stays scoped to its owner. The Commander is Tomás Ibarra, also a normal crew profile; Crew adds only team operational plans and voluntarily addressed requests. Medical sharing with Ground retains the M1 contract.
+
+Product vision: the mother AI receives body-sensor, exercise-equipment, analyzer and spacecraft signals, associates them with confirmed identities, crosses them with planned activity, and updates profiles. An agenda states intention, never proof of completion. The prototype represents this coordinator with deterministic simulated events, not a running AI model. Cameras are optional future context, never required and never a basis for emotional inference. No clinical or psychological conclusions are specified while specialist input is pending.
+
+M1.1 includes an optional-to-complete, qualitative private check-in through Observations: a day comment or leisure preference, with no score, inferred cause, sharing or plan change. A fictional local family capsule is an optional extension only after the main journey (02 §12.8); omitting it does not prevent closing M1.1. No real media transport is included.
+
+The three team draft reports have been received; authorship, discipline attribution and specialist endorsement remain pending where not established. Their inventories and clinical proposals do not become verified measurements, integrations or approved medical policy.
+
+M1.1 does not require the M2 evidence datasets, full module catalog, body map, three-phase journey, live ingestion or a deployed service. These retain their later milestones; the integral vision remains intact.
 
 ## 7. Out of scope for the prototype (FUTURE)
 

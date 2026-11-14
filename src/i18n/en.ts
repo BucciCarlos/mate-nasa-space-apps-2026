@@ -1,6 +1,8 @@
+import { fd30En } from './fd30';
 // English catalog: source of truth. `es.ts` must mirror every key (checked by tsc through `Messages`).
 
 export const en = {
+  fd30: fd30En,
   common: {
     appName: 'M.A.T.E.',
     appTagline: 'Medical & Astronaut Therapeutic Environment',

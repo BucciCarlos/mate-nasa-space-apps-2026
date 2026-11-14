@@ -45,6 +45,20 @@ After `npm install`, the app makes no network requests: every page, style and da
 
 Milestone M1 (the integration journey below) is implemented. M2–M4 (evidence views, module catalog, body map, three-phase journey) are not built yet.
 
+### FD30 visual cut (IMP02, local preview)
+
+Run `npm run dev -- --host 127.0.0.1 --port 5173` and open **http://127.0.0.1:5173/#/demo/fd30**. This separate fictional ISS fixture starts at 05:55 UTC on FD30, as Lucía Ferraro, with Sprout visible and chat closed. M1 remains at `#/onboard/today` and `#/ground/iss/agenda`, with its own state and medical channel; the preview also has a link back to it.
+
+1. Before advancing, open **Sleep** from navigation, Today or Sprout's separate action. All use `#/onboard/personal/sleep`; FD29 simulated history is already readable. Return to Today.
+2. In **Demo mode**, choose **Next event**. The 06:00 simulated episode-ended report updates Today and Sleep; Sprout greets you without opening chat or navigating. **View my summary** opens the same Sleep detail.
+3. The planned window is 21:30–06:00 (8 h 30 min **planned**). Recorded sleep says **No record** throughout: no duration or quality measurement is supplied. Source disclosures distinguish the plan, a fictional device report and external research context.
+4. Activate Sprout to open chat; close with its labelled button or Escape. Conversation and draft survive closure, navigation, EN/ES and reload in this tab; reload starts with chat closed. **Restart preview** confirms and resets only this fixture. Its one event also arrives at 1× mission time without the skip control.
+
+5. Drag Sprout with mouse or touch; releasing a drag does not open chat. Tap to open chat in its independent side/bottom panel. Focus the character with Tab and press **M** to enable arrows (8 px), Shift+arrows (32 px), Enter to save and Escape to cancel. **Home** resets only that companion. There is no permanent Position button or floating position menu; keyboard hints appear on focus.
+6. Use **View as** in Demo mode to switch Lucía/Sprout, Tomás/Beacon and Mei/Sail. Each keeps its position, conversation and draft. FD30 keeps running; the wake report belongs only to Lucía. Resize temporarily adapts the visible position without replacing the saved preference. The earlier single-profile preview snapshot is migrated; M1 storage is untouched.
+
+This cut has Today and Sleep only, three isolated crew profiles, original inline SVG/CSS, and scripted chat replies about Sleep. Exercise, Laboratory, Commander, check-in and family capsules are not implemented here. It is a visual review slice, not completion of the full M1.1 specifications. No deployment is included.
+
 ### Guided journey (milestone M1)
 
 1. Open the app. You start **Onboard**, as Lucía Ferraro (fictional) on the ISS.
@@ -143,6 +157,20 @@ npm run preview      # sirve dist/ en http://localhost:4173
 Después de `npm install`, la app no hace ninguna petición de red: todas las páginas, estilos y datos los sirve el servidor local, así que funciona sin internet. `dist/index.html` debe servirse (por ejemplo con `npm run preview`), no abrirse como archivo.
 
 El hito M1 (el recorrido guiado de abajo) está implementado. M2–M4 (vistas de evidencia, catálogo de módulos, mapa corporal, viaje en tres fases) todavía no están construidos.
+
+### Corte visual FD30 (IMP02, vista local)
+
+Ejecutá `npm run dev -- --host 127.0.0.1 --port 5173` y abrí **http://127.0.0.1:5173/#/demo/fd30**. Este escenario ficticio separado de la EEI empieza a las 05:55 UTC de FD30, como Lucía Ferraro, con Sprout visible y el chat cerrado. M1 conserva sus rutas `#/onboard/today` y `#/ground/iss/agenda`, su estado y su canal médico; el corte también incluye un enlace para volver.
+
+1. Antes de avanzar, abrí **Sueño** desde navegación, Hoy o la acción separada de Sprout. Todos llegan a `#/onboard/personal/sleep`; el historial simulado de FD29 ya se puede consultar. Volvé a Hoy.
+2. En **Modo muestra**, elegí **Siguiente evento**. El reporte simulado de fin de episodio de las 06:00 actualiza Hoy y Sueño; Sprout saluda sin abrir el chat ni navegar. **Ver mi resumen** abre el mismo detalle de Sueño.
+3. La ventana prevista es 21:30–06:00 (8 h 30 min **planificadas**). Sueño registrado dice **Sin registro** antes y después: no se recibió medición de duración o calidad. La procedencia distingue agenda, reporte ficticio y contexto externo de investigación.
+4. Activá Sprout para abrir el chat; cerralo con su botón etiquetado o Escape. Conversación y borrador se conservan al cerrar, navegar, cambiar EN/ES y recargar esta pestaña; la recarga arranca con el chat cerrado. **Reiniciar corte** pide confirmación y reinicia solo este escenario. Su único evento también llega con el reloj a velocidad 1×, sin usar el control de salto.
+
+5. Arrastrá a Sprout con mouse o dedo; soltar un arrastre no abre el chat. Tocarlo abre el panel lateral/inferior independiente. Enfocá el personaje con Tab y pulsá **M** para activar flechas (8 px), Shift+flechas (32 px), Enter para guardar y Escape para cancelar. **Home** restablece solo a ese compañero. No hay botón permanente de Posición ni menú flotante de posición; las instrucciones de teclado aparecen al enfocar.
+6. Usá **Ver como** en Modo muestra para alternar Lucía/Sprout, Tomás/Beacon y Mei/Sail. Cada uno conserva posición, conversación y borrador. FD30 sigue corriendo; el reporte de despertar solo corresponde a Lucía. Cambiar el ancho adapta la posición visible sin reemplazar la preferencia guardada. Se migra el corte previo de un perfil; el almacenamiento de M1 no se modifica.
+
+Este corte incluye solo Hoy y Sueño, tres perfiles separados, SVG/CSS original y respuestas guionadas sobre Sueño. No implementa Ejercicio, Laboratorio, Comandante, check-in ni cápsula familiar. Es una parte para revisión visual, no la implementación completa de M1.1. No incluye despliegue.
 
 ### Recorrido guiado (hito M1)
 
