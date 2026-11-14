@@ -3,10 +3,9 @@ import type { ReactNode } from 'react';
 import { useDispatch as useRd, useSelector, Provider } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { store, type RootState, type AppDispatch } from './store';
-import { clockTick } from './mateSlice';
+import { clockTick, scenarioReset } from './mateSlice';
 import { useIssScenarioQuery, useCislunarScenarioQuery } from './api';
 import { setScenarios } from './initialState';
-import { loadSnapshot, sessionStorageOrNull } from './persistence';
 import type { AppState } from './types';
 
 export const useAppDispatch: () => AppDispatch = () => useRd() as AppDispatch;
@@ -25,17 +24,22 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
   const state = useAppSelector((s) => s.mate) as AppState;
   const dispatch = useAppDispatch();
 
-  // Bootstrap: hydrate from backend unless we restored a sessionStorage snapshot
-  const hasSnapshot = useMemo(() => loadSnapshot(sessionStorageOrNull()) !== null, []);
-  const iss = useIssScenarioQuery(undefined, { skip: hasSnapshot });
-  const cislunar = useCislunarScenarioQuery(undefined, { skip: hasSnapshot });
+  // Fetch scenarios from the backend on every mount. No sessionStorage —
+  // state lives only in Redux.
+  const iss = useIssScenarioQuery();
+  const cislunar = useCislunarScenarioQuery();
 
   useEffect(() => {
-    if (hasSnapshot) return;
+    console.log('[AppProvider] Scenario query status:', {
+      iss: { status: iss.status, error: iss.error },
+      cislunar: { status: cislunar.status, error: cislunar.error },
+    });
     if (iss.isSuccess && cislunar.isSuccess) {
+      console.log('[AppProvider] Both scenarios loaded, dispatching scenarioReset');
       setScenarios(iss.data, cislunar.data);
+      dispatch(scenarioReset(Date.now()));
     }
-  }, [hasSnapshot, iss.isSuccess, cislunar.isSuccess, iss.data, cislunar.data]);
+  }, [iss.isSuccess, cislunar.isSuccess, iss.data, cislunar.data, iss.status, cislunar.status, iss.error, cislunar.error, dispatch]);
 
   // Ticker (02 §3.4)
   useEffect(() => {
@@ -43,9 +47,11 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id);
   }, [dispatch]);
 
-  const ready = hasSnapshot || (iss.isSuccess && cislunar.isSuccess);
-  const loadError = !hasSnapshot && (iss.isError || cislunar.isError)
-    ? (iss.error ?? cislunar.error) instanceof Error ? String(iss.error ?? cislunar.error) : 'API unreachable'
+  // Ready when the state has real crew data.
+  const ready = state.missions.iss.crew.length > 0;
+  const rawError = iss.error ?? cislunar.error;
+  const loadError = (iss.isError || cislunar.isError)
+    ? (rawError instanceof Error ? rawError.message : typeof rawError === 'string' ? rawError : JSON.stringify(rawError) ?? 'API unreachable')
     : null;
 
   const value = useMemo<AppContextValue>(

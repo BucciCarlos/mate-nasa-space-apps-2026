@@ -4,7 +4,7 @@ Single source of truth for the scenario/source data that the frontend
 previously shipped inside the bundle (frontend/src/data/*.json).
 
 Run:
-    uvicorn app.main:app --reload --port 8000
+    uvicorn app.main:app --reload --port 8002
 """
 from __future__ import annotations
 

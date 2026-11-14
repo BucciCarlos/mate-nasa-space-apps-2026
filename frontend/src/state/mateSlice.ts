@@ -7,7 +7,7 @@ import type {
   ObservationTopic, PlanUpdateMessage, Route, ScheduleChange, SharedSummary, UserText, Viewer,
 } from './types';
 import { MISSION_IDS } from './types';
-import { createInitialState } from './initialState';
+import { createInitialState, createEmptyState } from './initialState';
 import { advanceTask, diffForCrew } from '../domain/agenda';
 import { belongsTo, makeId } from '../domain/ids';
 import { respond } from '../domain/companion/respond';
@@ -107,7 +107,10 @@ function tickMission(m: MissionState, nowMs: number): MissionState {
 
 export const mateSlice = createSlice({
   name: 'mate',
-  initialState: undefined as unknown as AppState,
+  // The slice's initial state is an empty AppState. If a sessionStorage
+  // snapshot exists, store.ts's preloadedState overrides this. If not,
+  // AppProvider dispatches scenarioReset() once the API data arrives.
+  initialState: createEmptyState(Date.now()),
   reducers: {
     localeSet: (state, action: PayloadAction<Locale>) => {
       if (state.locale !== action.payload) state.locale = action.payload;
@@ -248,29 +251,29 @@ export const mateSlice = createSlice({
 });
 
 // Multi-arg thunks: call sites read like `planChangeSent('iss', taskId, 30, Date.now())`.
-export const localeSet = (locale: Locale) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.localeSet(locale));
-export const groundRoleSet = (role: AppState['groundRole']) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.groundRoleSet(role));
+export const localeSet = (locale: Locale): any => (dispatch: any) => dispatch(mateSlice.actions.localeSet(locale));
+export const groundRoleSet = (role: AppState['groundRole']): any => (dispatch: any) => dispatch(mateSlice.actions.groundRoleSet(role));
 export const planChangeSent = (missionId: MissionId, taskId: string, advanceMinutes: AdvanceMinutes, nowMs: number) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.planChangeSent({ missionId, taskId, advanceMinutes, nowMs }));
+  (dispatch: any) => dispatch(mateSlice.actions.planChangeSent({ missionId, taskId, advanceMinutes, nowMs }));
 export const linkStatusSet = (missionId: MissionId, status: 'up' | 'down', nowMs: number) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.linkStatusSet({ missionId, status, nowMs }));
-export const clockTick = (nowMs: number) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.clockTick(nowMs));
+  (dispatch: any) => dispatch(mateSlice.actions.linkStatusSet({ missionId, status, nowMs }));
+export const clockTick = (nowMs: number): any => (dispatch: any) => dispatch(mateSlice.actions.clockTick(nowMs));
 export const noticeSeen = (missionId: MissionId, noticeId: string) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.noticeSeen({ missionId, noticeId }));
+  (dispatch: any) => dispatch(mateSlice.actions.noticeSeen({ missionId, noticeId }));
 export const companionAsked = (missionId: MissionId, input: CompanionInput, nowMs: number) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.companionAsked({ missionId, input, nowMs }));
+  (dispatch: any) => dispatch(mateSlice.actions.companionAsked({ missionId, input, nowMs }));
 export const companionActionsExecuted = (missionId: MissionId, turnId: string) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.companionActionsExecuted({ missionId, turnId }));
+  (dispatch: any) => dispatch(mateSlice.actions.companionActionsExecuted({ missionId, turnId }));
 export const observationSaved = (p: { missionId: MissionId; crewId: string; topics: ObservationTopic[]; privateNote: UserText | null; relatedChangeId: string | null; share: { comment: UserText | null } | null; nowMs: number }) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.observationSaved(p));
-export const uiRangeSet = (range: Interval | null) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiRangeSet(range));
-export const uiHighlightSet = (target: HighlightTarget | null) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiHighlightSet(target));
-export const uiCompanionToggle = (open?: boolean) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiCompanionToggle(open));
-export const uiSourceOpen = (sourceId: string | null) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiSourceOpen(sourceId));
-export const uiObservationPrefill = (prefill: ObservationPrefill | null) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiObservationPrefill(prefill));
-export const uiLastRoute = (route: Route) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.uiLastRoute(route));
+  (dispatch: any) => dispatch(mateSlice.actions.observationSaved(p));
+export const uiRangeSet = (range: Interval | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiRangeSet(range));
+export const uiHighlightSet = (target: HighlightTarget | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiHighlightSet(target));
+export const uiCompanionToggle = (open?: boolean): any => (dispatch: any) => dispatch(mateSlice.actions.uiCompanionToggle(open));
+export const uiSourceOpen = (sourceId: string | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiSourceOpen(sourceId));
+export const uiObservationPrefill = (prefill: ObservationPrefill | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiObservationPrefill(prefill));
+export const uiLastRoute = (route: Route): any => (dispatch: any) => dispatch(mateSlice.actions.uiLastRoute(route));
 export const companionCustomized = (name: string, color: CompanionColor) =>
-  (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.companionCustomized({ name, color }));
-export const scenarioReset = (nowMs: number) => (dispatch: (a: unknown) => void) => dispatch(mateSlice.actions.scenarioReset(nowMs));
+  (dispatch: any) => dispatch(mateSlice.actions.companionCustomized({ name, color }));
+export const scenarioReset = (nowMs: number): any => (dispatch: any) => dispatch(mateSlice.actions.scenarioReset(nowMs));
 
 export default mateSlice.reducer;

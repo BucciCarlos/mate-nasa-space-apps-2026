@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { ScenarioFile, Source } from './types';
 
 const API_BASE: string =
-  (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8000';
+  (import.meta.env.VITE_API_BASE as string | undefined) ?? 'http://localhost:8002';
 
 /**
  * RTK Query endpoint for the M.A.T.E. backend.
