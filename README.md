@@ -194,6 +194,9 @@ El material original de M.A.T.E. del equipo Sora (código, documentación y recu
 
 Los datos y materiales de terceros conservan sus propias condiciones, créditos y requisitos de cita, y Apache-2.0 no los relicencia. Esto incluye contenido de NASA y de la Agencia Espacial Canadiense, datos de NASA OSDR y CDAWeb, NASA-STD-3001 y las publicaciones citadas. Ver [Datos y trazabilidad §9](docs/specs/04-data-traceability.md). Por ahora este repositorio contiene solo documentación, sin archivos de datos.
 
+### Colaboradores
+- Gustavo Paz
+
 ### Equipo
 
 Equipo Sora · NASA Space Apps Challenge 2026.
