@@ -1,0 +1,18 @@
+import type { ModuleId, Text } from './catalogTypes';
+const t = (en: string, es: string): Text => ({ en, es });
+/** Present consultation scope; no medical-report proposals are treated as implemented features. */
+export const CATALOG_SUMMARIES: Record<ModuleId, Text> = {
+  'MOD-CARDIO': t('Read cardiovascular context and data requirements. Dedicated cardiovascular records are not available.', 'Consultá el contexto cardiovascular y los datos necesarios. No hay registros cardiovasculares específicos disponibles.'),
+  'MOD-MSK': t('Explore exercise sessions in your Onboard profile. This card also explains the pending muscle and bone monitoring.', 'Consultá las sesiones de ejercicio de tu perfil en A bordo. La ficha también explica qué falta para el seguimiento muscular y óseo.'),
+  'MOD-NUTR': t('Read the scope of nutrition and hydration monitoring. Meal plans do not record intake or hydration.', 'Consultá el alcance del seguimiento de nutrición e hidratación. Las comidas planificadas no registran ingesta ni hidratación.'),
+  'MOD-IMMUNE': t('Consult your sample workflow Onboard and public Inspiration4 laboratory evidence from another crew. Personal immune measurements are not available.', 'Consultá el proceso de tus muestras en A bordo y evidencia pública de laboratorio de Inspiration4, de otra tripulación. No hay mediciones inmunológicas personales.'),
+  'MOD-SANS': t('Read the vision and eye-exam context and requirements. No eye examinations or images are available.', 'Consultá el contexto y los requisitos de visión y exámenes oculares. No hay exámenes ni imágenes disponibles.'),
+  'MOD-SENSORI': t('Read about balance and orientation around gravity changes. No personal sensorimotor tests are recorded.', 'Consultá el contexto de equilibrio y orientación en cambios de gravedad. No hay pruebas sensoriomotoras personales registradas.'),
+  'MOD-COG': t('Read the scope of a future voluntary attention check. There are no cognitive tests, scores or performance records.', 'Consultá el alcance de un futuro chequeo voluntario de atención. No hay pruebas cognitivas, puntajes ni registros de desempeño.'),
+  'MOD-CREW': t('Consult planned crew schedules and overlaps within FD30. Shared time does not confirm joint activity or measured rest.', 'Consultá horarios y coincidencias del plan de tripulación dentro de FD30. El mismo horario no confirma actividad compartida ni descanso medido.'),
+  'MOD-EVA': t('Read the scope of spacewalk preparation and pressure transitions. FD30 has no spacewalk plan or suit readings.', 'Consultá el alcance de la preparación de caminatas y cambios de presión. FD30 no tiene un plan de caminata ni lecturas de traje.'),
+  'MOD-MICRO': t('Read habitat hygiene and environmental sampling context. No microbial sampling results are available.', 'Consultá el contexto de higiene del hábitat y muestreo ambiental. No hay resultados de muestras microbianas disponibles.'),
+  'MOD-LOADS': t('Read the launch and landing load context and data requirements. No vehicle load records are available.', 'Consultá el contexto de cargas de lanzamiento y aterrizaje y los datos necesarios. No hay registros de cargas del vehículo disponibles.'),
+  'MOD-AUTONOMY': t('Read how local FD30 consultation differs from future autonomous planning and delayed-link support.', 'Consultá cómo la consulta local de FD30 se relaciona con la futura planificación autónoma y el soporte con enlace demorado.'),
+  'MOD-MED': t('Read the scope and requirements of autonomous medical support. Examination guidance, imaging and treatments are not available.', 'Consultá el alcance y los requisitos del apoyo médico autónomo. No hay guías de examen, imágenes ni tratamientos disponibles.'),
+};

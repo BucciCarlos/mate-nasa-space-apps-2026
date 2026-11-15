@@ -2,24 +2,24 @@
 .exercise-history section, .exercise-history header { min-width: 0; }
 .exercise-demo { color: var(--text-muted); font-size: .85rem; }
 .exercise-range { display: flex; gap: .6rem; flex-wrap: wrap; }
-.exercise-range button, .exercise-days button { padding: .75rem; border: 1px solid #698083; border-radius: .6rem; background: transparent; color: inherit; cursor: pointer; min-height: 44px; }
-.exercise-range button[aria-pressed="true"], .exercise-days button[aria-pressed="true"] { border-color: #e2ba71; box-shadow: inset 0 0 0 1px #e2ba71; }
+.exercise-range button, .exercise-days button { padding: .75rem; border: 1px solid var(--rule-strong); border-radius: .6rem; background: transparent; color: inherit; cursor: pointer; min-height: 44px; }
+.exercise-range button[aria-pressed="true"], .exercise-days button[aria-pressed="true"] { border-color: var(--mod-exercise); box-shadow: inset 0 0 0 1px var(--mod-exercise); }
 .exercise-chart-scroll, .exercise-table > div { overflow-x: auto; max-width: 100%; }
 .exercise-chart-scroll svg { width: 100%; display: block; }
 .exercise-chart-scroll text { fill: currentColor; font-size: 12px; }
-.exercise-grid { stroke: #71817f; opacity: .25; }
-.exercise-point { fill: #e2ba71; }
-.exercise-point-live { fill: #93d0cc; stroke: currentColor; stroke-width: 2px; }
+.exercise-grid { stroke: var(--rule-strong); opacity: .25; }
+.exercise-point { fill: var(--mod-exercise); }
+.exercise-point-live { fill: var(--brand); stroke: currentColor; stroke-width: 2px; }
 .exercise-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: .5rem; }
 .exercise-days button { display: grid; gap: .4rem; text-align: left; }
 .exercise-days span { font-size: .8rem; }
-.exercise-day-detail, .exercise-comparison { padding: 1.2rem; border: 1px solid #526568; border-radius: .8rem; }
+.exercise-day-detail, .exercise-comparison { padding: 1.2rem; border: 1px solid var(--rule-strong); border-radius: .8rem; }
 .exercise-history dl { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: .6rem 1rem; }
 .exercise-history dd { margin: 0; overflow-wrap: anywhere; }
 .exercise-history details { margin-top: 1rem; }
 .exercise-history summary { cursor: pointer; min-height: 44px; padding: .5rem 0; }
 .exercise-history li, .exercise-reservation { overflow-wrap: anywhere; }
-.exercise-reservation { margin-top: 1rem; border-top: 1px solid #526568; }
+.exercise-reservation { margin-top: 1rem; border-top: 1px solid var(--rule-strong); }
 .exercise-table table { border-collapse: collapse; width: 100%; min-width: 660px; }
-.exercise-table th, .exercise-table td { padding: .7rem; text-align: left; border-bottom: 1px solid #526568; }
+.exercise-table th, .exercise-table td { padding: .7rem; text-align: left; border-bottom: 1px solid var(--rule-strong); }
 @media (max-width: 600px) { .exercise-history dl { grid-template-columns: 1fr; gap: .3rem; } .exercise-history dd { margin-bottom: .6rem; } }

@@ -11,6 +11,8 @@ import { SleepSummary } from '../../views/history/sleep/SleepSummary';
 import { SleepProvenance } from '../../views/history/sleep/SleepProvenance';
 import { SLEEP_TEXT } from '../../views/history/sleep/sleepText';
 import { scriptedAnswer } from '../fd30Chat';
+import { SLEEP_SCORE_TEXT } from '../../views/history/sleep/sleepScoreText';
+import { sleepScoreDetail } from './sleepScore';
 import { SLEEP_RECORDS, fdDate, medianMinutes, sleepDuration, sleepHistory, sleepSegments } from './sleep';
 import type { SleepViewer } from './sleep';
 
@@ -100,7 +102,9 @@ describe('HIST01 canonical fictional sleep records', () => {
       const s = own(c.id, '06:00'), h = sleepHistory(s, viewer(c.id), at('06:00'), 'last7')!;
       const summary = render(createElement(SleepSummary, { state: s, owner: c.id, time: at('06:00') }));
       expect(summary).toContain(SLEEP_TEXT[locale].latest(`FD${h.latest!.fd}`, sleepDuration(h.latest!.durationMinutes)));
-      expect(scriptedAnswer(s, c.id, at('06:00'), 'sleep', locale).body).toBe(SLEEP_TEXT[locale].chat(`FD${h.latest!.fd}`, sleepDuration(h.latest!.durationMinutes), h.records.length));
+      // SLEEP-VOICE03: Mate shows the night, duration and score from the same record and calculation as the detail; no score when unavailable.
+      const night = `FD${h.latest!.fd}`, length = sleepDuration(h.latest!.durationMinutes), calc = sleepScoreDetail(s, viewer(c.id), at('06:00'), h.latest!.fd)!, st = SLEEP_SCORE_TEXT[locale];
+      expect(scriptedAnswer(s, c.id, at('06:00'), 'sleep', locale).body).toBe(`${calc.score ? st.chatScore(night, length, calc.score.display) : st.chatNoScore(night, length, st.chatReason[calc.reason!])}\n${st.chatCount(h.records.length)}`);
       const detail = render(createElement(SleepDetail, { state: s, owner: c.id, time: at('06:00') }));
       expect(detail).toContain(`data-sleep-owner="${c.id}"`);
       expect(detail).toContain('data-sleep-range="last7"');

@@ -5,6 +5,7 @@ import { exerciseSessionView } from './exerciseSession';
 import { useLocale, useT } from '../i18n/I18nProvider';
 import { EXERCISE_VERSION } from './fd30';
 import { ExerciseHistory } from '../views/history/exercise/ExerciseHistory';
+import type { ExerciseTarget } from '../views/history/exercise/ExerciseHistory';
 import type { CrewId, PreviewState } from './fd30';
 import '../styles/fd30-exercise.css';
 
@@ -45,7 +46,7 @@ function SessionPanel({ view, highlighted }: { view: ReturnType<typeof exerciseS
   </section>;
 }
 
-export function ExerciseDetail({ state, owner, time, asTable, onToggle, highlight }: { state: PreviewState; owner: CrewId; time: number; asTable: boolean; onToggle: () => void; highlight: boolean }) {
+export function ExerciseDetail({ state, owner, time, asTable, onToggle, highlight, target = null }: { state: PreviewState; owner: CrewId; time: number; asTable: boolean; onToggle: () => void; highlight: boolean; target?: ExerciseTarget | null }) {
   const t = useT().fd30;
   const locale = useLocale();
   const plan = plannedExercise(owner);
@@ -56,6 +57,6 @@ export function ExerciseDetail({ state, owner, time, asTable, onToggle, highligh
     {view.phase === 'planned' ? <>{reservation}<p className="fd-session-explanation">{view.session?.finish ? t.exerciseIncomplete : t.exerciseWaiting}</p></> : view.phase === 'live' ? <SessionPanel view={view} highlighted={highlight && state.profiles[owner].highlightedSessionId === view.session!.id} /> : null}
     <ExerciseChart owner={owner} time={time} points={view.points} asTable={asTable} onToggle={onToggle} />
     {view.phase !== 'planned' && <details className="fd-session-reservation"><summary>{t.exercisePlanned}</summary>{reservation}</details>}
-    <ExerciseHistory state={state} owner={owner} time={time} highlight={highlight} />
+    <ExerciseHistory state={state} owner={owner} time={time} highlight={highlight} target={target} />
   </div>;
 }

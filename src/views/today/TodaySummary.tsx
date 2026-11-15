@@ -16,6 +16,8 @@ import { SLEEP_TEXT } from '../history/sleep/sleepText';
 import { EXERCISE_TEXT } from '../history/exercise/exerciseText';
 import { toHash } from '../../app/routes';
 import { TODAY_TEXT as TODAY } from './todayText';
+import { restingPulse, sessionPulse, spo2, wellbeingIndex, wellbeingParts } from '../../demo/wellbeing';
+import { WellbeingFigure, HeartCircles } from './WellbeingFigure';
 import { meanOfReadings, sessionPowerDifference, sleepDelta } from './todayMetrics';
 import './today.css';
 
@@ -108,10 +110,20 @@ export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExerc
   const checkin = ownCheckins(ops, owner, time).at(-1) ?? null;
 
   const clock = fmtClock(time);
+  // MATE-WELL01: index from the current night and today's completed session; pulse is simulated (resting) or the live session value.
+  const wbParts = wellbeingParts(state, owner, time);
+  const wbIndex = wellbeingIndex(wbParts);
+  const wbSession = sessionPulse(state, owner, time);
+  const wbNow = wbSession ?? restingPulse(owner, time);
+  const wbSpo2 = spo2(owner, time);
   return <div className="td" data-today-owner={owner}>
     <header className="td-head">
       <p className="fd-eyebrow">{t.header}</p>
-      <h1 id="fd-view-h" tabIndex={-1}>{crew.name}</h1>
+      <div className="td-name">
+        <h1 id="fd-view-h" tabIndex={-1}>{crew.name}</h1>
+        <WellbeingFigure index={wbIndex} sleepFd={wbParts.sleepFd} />
+        <HeartCircles now={wbNow} spo2={wbSpo2} />
+      </div>
       <p className="td-meta"><span>{ft.mission}</span><span aria-hidden="true">·</span><time dateTime={new Date(time).toISOString()}>{clock} <small>{t.clock}</small></time></p>
     </header>
 

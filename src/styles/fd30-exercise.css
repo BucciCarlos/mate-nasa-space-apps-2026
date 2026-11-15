@@ -1,22 +1,22 @@
 /* IMP06: personal Exercise only; no shared navigation or CAT01 styles. */
 .fd-exercise-detail .fd-page-intro { margin-bottom: 22px; }
-.fd-session-dashboard { padding: 26px; border: 1px solid #bdcabe; background: #edf1e8; border-radius: 6px 30px 6px 6px; }
+.fd-session-dashboard { padding: 26px; border: 1px solid var(--rule-strong); background: var(--surface); border-radius: 6px 30px 6px 6px; }
 .fd-session-dashboard h2 { font-size: 18px; }
 .fd-session-disclosure, .fd-session-explanation { color: var(--quiet); font-size: 12px; line-height: 1.6; }
 .fd-session-disclosure { margin: 10px 0 24px; }
 .fd-session-primary, .fd-session-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .fd-session-metric-label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; font-size: 13px; }
-.fd-session-origin { font-size: 10px; border-bottom: 1px dashed #66786c; color: #3a534c; }
+.fd-session-origin { font-size: 10px; border-bottom: 1px dashed var(--rule-strong); color: var(--muted); }
 .fd-session-reading strong, .fd-session-received strong { display: block; margin: 10px 0 0; font-size: clamp(48px, 6vw, 82px); font-weight: 500; letter-spacing: -.055em; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .fd-session-reading small, .fd-session-received small { font-size: 13px; color: var(--quiet); letter-spacing: 0; margin-left: 8px; }
 .fd-session-reading strong.fd-session-missing { font-size: 23px; line-height: 1.4; letter-spacing: -.02em; }
 .fd-session-explanation { margin: 18px 0; }
-.fd-session-secondary { padding: 18px 0 24px; border-top: 1px solid #c9d4c5; }
+.fd-session-secondary { padding: 18px 0 24px; border-top: 1px solid var(--rule); }
 .fd-session-secondary .fd-session-reading strong { font-size: 34px; }
 .fd-session-secondary .fd-session-reading strong.fd-session-missing { font-size: 19px; }
 .fd-session-received > span { font-size: 13px; }
 .fd-session-received > p { font-size: 12px; color: var(--quiet); }
-.fd-session-dashboard .fd-report-details { border-color: #c9d4c5; }
+.fd-session-dashboard .fd-report-details { border-color: var(--rule); }
 .fd-session-reservation { padding-top: 18px; }
 .fd-session-reservation > summary { cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
 .fd-exercise-detail .fd-telemetry th:first-child { width: 22%; }

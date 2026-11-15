@@ -1,0 +1,110 @@
+[
+  {
+    "audio": "mate-sleep-lucia-question-en-sv02.mp3",
+    "voice": "en_US-ljspeech-medium",
+    "text": "How did I sleep last night?",
+    "duration_seconds": 1.933061,
+    "integrated_lufs": -16.26,
+    "true_peak_dbtp": -3.48,
+    "sha256": "b8d54ffd4a18f75de96631c1085e1c89da5848cf3aca97c0f3a3b69253ee1983"
+  },
+  {
+    "audio": "mate-sleep-lucia-answer-en-sv02.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "Your latest recorded night is FD29: six hours thirty-five minutes. Its demonstration score is seventy-one points. It is not a measurement.",
+    "duration_seconds": 8.777143,
+    "integrated_lufs": -16.37,
+    "true_peak_dbtp": -1.26,
+    "sha256": "b90d47103913febf8ae3147669d170d80a3b30d8fb604bfc08e8f7d4a61850f1"
+  },
+  {
+    "audio": "mate-sleep-tomas-question-en-sv02.mp3",
+    "voice": "en_US-bryce-medium",
+    "text": "How did I sleep last night?",
+    "duration_seconds": 2.35102,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -2.32,
+    "sha256": "58b1c692ab601bdbaa33ac75e81391dcc1d551c0afc9b1697ddb92a357f98451"
+  },
+  {
+    "audio": "mate-sleep-tomas-answer-en-sv02.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "Your latest recorded night is FD29: seven hours ten minutes. Its demonstration score is eighty-two points. It is not a measurement.",
+    "duration_seconds": 8.019592,
+    "integrated_lufs": -16.45,
+    "true_peak_dbtp": -1.26,
+    "sha256": "4b51f87af37be1927437d67ca3a631203bc813fe993317527992aa0865da88b5"
+  },
+  {
+    "audio": "mate-sleep-mei-question-en-sv02.mp3",
+    "voice": "en_US-ljspeech-medium",
+    "text": "How did I sleep last night?",
+    "duration_seconds": 1.906939,
+    "integrated_lufs": -16.26,
+    "true_peak_dbtp": -2.08,
+    "sha256": "6a5c2d113e9803a085f4c08aa882bf2f8c323845458edc79ccc6135a7943e992"
+  },
+  {
+    "audio": "mate-sleep-mei-answer-en-sv02.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "Your latest recorded night is FD29: seven hours twenty-five minutes. Its demonstration score is ninety-three points. It is not a measurement.",
+    "duration_seconds": 8.646531,
+    "integrated_lufs": -16.35,
+    "true_peak_dbtp": -1.26,
+    "sha256": "2cd0f10ae1560f6d204b5354bcc2785f3f9ebf1a1d25ac2b2abc354e6334c1de"
+  },
+  {
+    "audio": "mate-exercise-lucia-question-en-ev01.mp3",
+    "voice": "en_US-ljspeech-medium",
+    "text": "How did my flight day thirty exercise session go?",
+    "duration_seconds": 3.343673,
+    "integrated_lufs": -16.32,
+    "true_peak_dbtp": -1.26,
+    "sha256": "fa8641260b57406a8a9acaf5a2f32396007c4ec4024da61ae6612c49a0e29cd4"
+  },
+  {
+    "audio": "mate-exercise-lucia-answer-en-ev01.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "Your flight day thirty ergometer session is recorded as completed, lasting sixty minutes. This is a simulated session record.",
+    "duration_seconds": 7.941224,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -1.26,
+    "sha256": "7f6742da0ee875c70dbb1041a3e31f68598e56844860ed3159bd7980cf098b7f"
+  },
+  {
+    "audio": "mate-exercise-tomas-question-en-ev01.mp3",
+    "voice": "en_US-bryce-medium",
+    "text": "How does my recent training power compare with my own earlier sessions?",
+    "duration_seconds": 5.172245,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -2.78,
+    "sha256": "93684dbedec2963a517d2aa106436717faa72408d3670d7a30385101dd0eb33c"
+  },
+  {
+    "audio": "mate-exercise-tomas-answer-en-ev01.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "For your comparable ergometer sessions, the median of your latest four is one hundred eighty-one watts. Your earlier nine-session reference median is two hundred watts. That is nineteen watts lower, or nine point five percent. This is a comparison of simulated power records, not a change in physical fitness.",
+    "duration_seconds": 18.076735,
+    "integrated_lufs": -16.37,
+    "true_peak_dbtp": -1.26,
+    "sha256": "33d57a6fbd22888b8a4f445f3b8c0528fd3eefd90682578447ac2bc61d13bcbb"
+  },
+  {
+    "audio": "mate-exercise-mei-question-en-ev01.mp3",
+    "voice": "en_US-ljspeech-medium",
+    "text": "Can you show me my last recorded exercise session?",
+    "duration_seconds": 3.552653,
+    "integrated_lufs": -16.26,
+    "true_peak_dbtp": -3.73,
+    "sha256": "49517cf7c6dd18c90c8864a40c1bff7a741eb382839a3dd4f19682f1d01230c1"
+  },
+  {
+    "audio": "mate-exercise-mei-answer-en-ev01.mp3",
+    "voice": "en_US-norman-medium",
+    "text": "Your latest recorded session is from flight day twenty-nine. It lasted sixty minutes on the ergometer, with mean power of one hundred thirty-seven watts. This is a fictional history record, not your flight day thirty reservation.",
+    "duration_seconds": 12.408163,
+    "integrated_lufs": -16.43,
+    "true_peak_dbtp": -1.24,
+    "sha256": "00c788e8d0844b5421877670ca8c07f5e6d139ffde0f6612db66d0d40e924651"
+  }
+]

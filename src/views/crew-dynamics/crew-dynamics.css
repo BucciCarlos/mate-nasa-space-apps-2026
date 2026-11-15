@@ -1,15 +1,15 @@
-.crew-dynamics { max-width: 76rem; margin: 0 auto; padding: clamp(1rem, 3vw, 2rem); font-family: system-ui, sans-serif; line-height: 1.5; color: var(--text, #eaf1f5); background: var(--surface, #12202b); border-radius: 1rem; }
+.crew-dynamics { max-width: 76rem; margin: 0 auto; padding: clamp(1rem, 3vw, 2rem); font-family: system-ui, sans-serif; line-height: 1.5; color: var(--text); background: var(--surface); border-radius: 1rem; }
 .crew-dynamics h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.3rem); }
-.crew-dynamics-note { border-inline-start: .25rem solid #92cbb8; padding: .75rem 1rem; background: #ffffff09; }
+.crew-dynamics-note { border-inline-start: .25rem solid var(--brand); padding: .75rem 1rem; background: var(--tint); }
 .crew-dynamics-controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
-.crew-dynamics button { font: inherit; color: inherit; background: transparent; border: 1px solid #93b4bd; border-radius: .5rem; padding: .6rem 1rem; min-height: 44px; cursor: pointer; }
-.crew-dynamics button[aria-pressed='true'] { color: #10251e; background: #b4e2ce; border-color: #b4e2ce; }
-.crew-dynamics :focus-visible { outline: 3px solid #f5c978; outline-offset: 3px; }
-.crew-dynamics-scroll { overflow-x: auto; margin-block: 1rem; border: 1px solid #5c7582; border-radius: .5rem; }
+.crew-dynamics button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--rule-strong); border-radius: .5rem; padding: .6rem 1rem; min-height: 44px; cursor: pointer; }
+.crew-dynamics button[aria-pressed='true'] { color: var(--on-action); background: var(--action); border-color: var(--action); }
+.crew-dynamics :focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.crew-dynamics-scroll { overflow-x: auto; margin-block: 1rem; border: 1px solid var(--rule-strong); border-radius: .5rem; }
 .crew-dynamics table { width: 100%; border-collapse: collapse; text-align: start; font-variant-numeric: tabular-nums; }
 .crew-dynamics caption { text-align: start; padding: 1rem; font-weight: 700; }
-.crew-dynamics th, .crew-dynamics td { padding: .75rem; border-block-start: 1px solid #5c7582; vertical-align: top; min-width: 9rem; }
-.crew-dynamics thead { background: #ffffff09; }
+.crew-dynamics th, .crew-dynamics td { padding: .75rem; border-block-start: 1px solid var(--rule-strong); vertical-align: top; min-width: 9rem; }
+.crew-dynamics thead { background: var(--tint); }
 .crew-dynamics-time { white-space: nowrap; }
 .crew-dynamics-days summary { min-height: 44px; cursor: pointer; }
 .crew-dynamics-days ul { display: flex; flex-wrap: wrap; gap: .5rem 2rem; padding-inline-start: 1.5rem; }

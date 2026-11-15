@@ -1,5 +1,9 @@
 export const SLEEP_SCORE_TEXT = {
   en: {
+    chatScore: (fd: string, duration: string, points: number) => `Your latest recorded night is ${fd}: ${duration} h:min. Demonstration score: ${points} points. It is not a measurement.`,
+    chatNoScore: (fd: string, duration: string, reason: string) => `Your latest recorded night is ${fd}: ${duration} h:min. Score unavailable: ${reason}.`,
+    chatCount: (n: number) => `There are ${n} nights with records in the last 7 days.`,
+    chatReason: { noRecord: 'no record was received at this cursor', missingBed: 'recorded time in bed is missing', invalidBed: 'scenario data is invalid or incompatible' },
     title: 'Demonstration sleep score', points: 'points · rounded half up',
     noRecord: 'Score unavailable · no record received at this cursor.', missingBed: 'Score unavailable · recorded time in bed is missing.', invalidBed: 'Score unavailable · invalid or incompatible scenario data.',
     duration: 'Duration component (up to 70 points)', efficiency: 'Efficiency component (up to 30 points, scaled by duration)',
@@ -12,6 +16,10 @@ export const SLEEP_SCORE_TEXT = {
     provenance: 'Original M.A.T.E. formula and fictional scenario episodes (mate-sleep-score.1 / fd30-bed.1). Not a NASA or Samsung formula, not a clinical assessment. No connected sensor, sleep phases or agenda-derived measurements. Awakenings have zero weight.',
   },
   es: {
+    chatScore: (fd: string, duration: string, points: number) => `Tu último registro es ${fd}: ${duration} h:min. Puntaje de demostración: ${points} puntos. No es una medición.`,
+    chatNoScore: (fd: string, duration: string, reason: string) => `Tu último registro es ${fd}: ${duration} h:min. Puntaje no disponible: ${reason}.`,
+    chatCount: (n: number) => `Hay ${n} noches con registro en los últimos 7 días.`,
+    chatReason: { noRecord: 'no se recibió un registro a esta hora del cursor', missingBed: 'falta el tiempo en cama registrado', invalidBed: 'los datos de escenario son inválidos o incompatibles' },
     title: 'Puntaje de sueño de demostración', points: 'puntos · redondeo con mitad hacia arriba',
     noRecord: 'Puntaje no disponible · sin registro recibido a esta hora del cursor.', missingBed: 'Puntaje no disponible · falta tiempo en cama registrado.', invalidBed: 'Puntaje no disponible · datos de escenario inválidos o incompatibles.',
     duration: 'Componente de duración (hasta 70 puntos)', efficiency: 'Componente de eficiencia (hasta 30 puntos, escalado por duración)',

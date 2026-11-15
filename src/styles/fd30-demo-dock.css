@@ -1,11 +1,11 @@
 /* UX02: Demo mode is a floating, non-modal panel opened by a round button on the left edge. Imported last so it wins the cascade. */
 .fd30 { grid-template-rows: auto minmax(0, 1fr); }
-.fd30 .fd-demo-fab { position: fixed; z-index: 70; width: 48px; height: 48px; padding: 0; display: grid; place-items: center; color: #fffdf8; background: var(--ink); border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 3px 14px #243d3e40; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
-.fd30 .fd-demo-fab[aria-expanded="true"] { background: #395857; }
+.fd30 .fd-demo-fab { position: fixed; z-index: 70; width: 48px; height: 48px; padding: 0; display: grid; place-items: center; color: var(--on-action); background: var(--action); border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 3px 14px color-mix(in srgb, var(--shadow-color) 25%, transparent); touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.fd30 .fd-demo-fab[aria-expanded="true"] { background: var(--action-hover); }
 .fd30 .fd-demo-fab[data-dragging="true"] { cursor: grabbing; }
 .fd30 .fd-demo-fab:focus-visible { outline-offset: 3px; }
 
-.fd30 .fd-demo.fd-demo-panel { position: fixed; z-index: 80; right: 8px; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; width: auto; box-sizing: border-box; padding: 6px 12px 8px; overflow-y: auto; overscroll-behavior: contain; background: #ece9df; border: 1px solid #c5cabe; border-radius: 12px; box-shadow: 0 8px 28px #243d3e38; font-size: 12px; }
+.fd30 .fd-demo.fd-demo-panel { position: fixed; z-index: 80; right: 8px; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; width: auto; box-sizing: border-box; padding: 6px 12px 8px; overflow-y: auto; overscroll-behavior: contain; background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 12px; box-shadow: 0 8px 28px color-mix(in srgb, var(--shadow-color) 22%, transparent); font-size: 12px; }
 .fd30 .fd-demo.fd-demo-panel[hidden] { display: none; }
 .fd30 .fd-demo.fd-demo-panel:focus { outline: none; }
 .fd30 .fd-demo.fd-demo-panel > div { display: flex; width: auto; flex: none; gap: 6px 12px; justify-content: flex-start; flex-direction: row; align-items: center; }

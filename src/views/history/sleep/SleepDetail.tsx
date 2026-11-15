@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { CrewId, PreviewState } from '../../../demo/fd30';
 import { CREW } from '../../../demo/fd30';
-import { fdDate, fdLabel, sleepDuration, sleepHistory, sleepSegments } from '../../../demo/history/sleep';
+import { FLIGHT_DAY_ONE, fdDate, fdLabel, sleepDuration, sleepHistory, sleepSegments } from '../../../demo/history/sleep';
 import type { SleepRange } from '../../../demo/history/sleep';
 import { planFor } from '../../../demo/fd30Plan';
 import { useLocale } from '../../../i18n/I18nProvider';
@@ -9,10 +9,15 @@ import { SLEEP_TEXT } from './sleepText';
 import './sleep.css';
 import { SleepScore } from './SleepScore';
 
-export function SleepDetail({ state, owner, time }: { state: PreviewState; owner: CrewId; time: number }) {
+/** `targetFd`: optional night to open selected (voice guided playback). View-only: it never moves the clock or writes a record. */
+export function SleepDetail({ state, owner, time, targetFd = null }: { state: PreviewState; owner: CrewId; time: number; targetFd?: number | null }) {
   const locale = useLocale(), t = SLEEP_TEXT[locale];
   // View-only preferences by profile. No clock/reducer/record copies or writes.
-  const [views, setViews] = useState<Partial<Record<CrewId, { range: SleepRange; fd: number | null }>>>({});
+  const [views, setViews] = useState<Partial<Record<CrewId, { range: SleepRange; fd: number | null }>>>(() => {
+    if (!targetFd) return {};
+    const currentFd = Math.floor((time - FLIGHT_DAY_ONE) / 86_400_000) + 1;
+    return { [owner]: { range: targetFd >= currentFd - 6 ? 'last7' : 'all', fd: targetFd } };
+  });
   const detail = useRef<HTMLElement>(null);
   const preference = views[owner] ?? { range: 'last7' as const, fd: null };
   const view = sleepHistory(state, { perspective: 'onboard', owner }, time, preference.range);

@@ -14,8 +14,8 @@ export type { ClipPair } from './labDialogue';
  */
 export function useDialogueVoice({ chatOpen, owner, onGround, page, cursor, onEnded }: {
   chatOpen: boolean; owner: string; onGround: boolean; page: string; cursor: number;
-  /** Called only after a fully successful, non-cancelled sequence whose clip pair names ONE sample to open. */
-  onEnded: (key: string, sampleId: string) => void;
+  /** Called only after a fully successful, non-cancelled sequence whose clip pair names ONE target to open (a lab sample or a sleep night). */
+  onEnded: (key: string, target: { sampleId?: string; sleepFd?: number; exercise?: NonNullable<ClipPair['opensExercise']> }) => void;
 }) {
   const player = useMemo(() => createDialoguePlayer({ createClip: htmlAudioClip }), []);
   const state: PlayerState = useSyncExternalStore(player.subscribe, () => player.state, () => player.state);
@@ -31,7 +31,7 @@ export function useDialogueVoice({ chatOpen, owner, onGround, page, cursor, onEn
     query.current = { key, at: queryAt };
     void player.play({ question: clips.question, answer: clips.answer, key }).then(result => {
       // Guided opening only for the sample named by the compatible dialogue, never a fixed or default destination.
-      if (result.status === 'ended' && clips.opensSampleId) ended.current(key, clips.opensSampleId);
+      if (result.status === 'ended' && (clips.opensSampleId || clips.opensSleepFd || clips.opensExercise)) ended.current(key, { sampleId: clips.opensSampleId, sleepFd: clips.opensSleepFd, exercise: clips.opensExercise });
     });
   };
   // `state` is the player's real state: the stage is never rewritten. The result highlight is decided by the clip pair.

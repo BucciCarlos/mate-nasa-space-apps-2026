@@ -1,0 +1,6 @@
+/* MATE-THEME01: the Claro / Oscuro switch in the FD30 header. Tokens only; both themes come from fd30-theme.css. */
+.fd30 .fd-settings { padding-bottom: 20px; }
+.fd30 .fd-settings-button { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--rule-strong); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.fd30 .fd-settings-button:hover { background: var(--tint); }
+.fd30 .fd-settings-button[aria-pressed="true"] { background: var(--tint-strong); }
+@media (max-width: 760px) { .fd30 .fd-settings { padding-bottom: 0; } }

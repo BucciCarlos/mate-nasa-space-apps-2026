@@ -12,6 +12,6 @@
 
 /* One visible perspective action and one secondary Evidence link, in Demo mode on both surfaces. */
 .fd30 .fd-demo-navigation { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
-.fd30 .fd-demo-navigation .fd-perspective-switch { color: #fffdf8; background: var(--ink); border: 1px solid var(--ink); border-radius: 5px; padding: 10px 14px; font-size: 13px; font-weight: 700; }
-.fd30 .fd-demo-navigation .fd-perspective-switch:hover { background: #395857; }
+.fd30 .fd-demo-navigation .fd-perspective-switch { color: var(--on-action); background: var(--action); border: 1px solid var(--action); border-radius: 5px; padding: 10px 14px; font-size: 13px; font-weight: 700; }
+.fd30 .fd-demo-navigation .fd-perspective-switch:hover { background: var(--action-hover); }
 .fd30 .fd-demo-navigation .fd-secondary-link { margin: 0; color: var(--quiet); font-size: 12px; }

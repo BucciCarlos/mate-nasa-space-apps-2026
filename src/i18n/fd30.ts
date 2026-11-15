@@ -71,7 +71,6 @@ export const fd30En = {
   labHistoryAdapter: "demo-history · collection workflow; no real collection device or analyzer verified.",
   labPlanBody: "Planned collection slot in mission UTC; planned time does not confirm attendance or a result.",
   labAvailability: "Workflow metadata available when received; clinical values unavailable because the fixture supplies none.",
-  labScope: "FD30 starts with preloaded history. Blood analysis is a future capability; external research remains separate from every crew profile.",
   labNextBloodTaken: "09:15 UTC · blood sample taken",
   labNextBloodAnalysis: "09:20 UTC · blood analysis started",
   labNextUrineTaken: "09:25 UTC · secondary urine sample taken",
@@ -120,7 +119,7 @@ export const fd30En = {
 
   entry: 'FD30 visual preview', viewAs: 'View as', moveCompanion: 'Move companion', keyboardHint: 'With the character focused: M to move, Home to reset its position.', moveInstructions: 'Arrows: move 8 px. Shift + arrows: 32 px. Enter: save. Escape: cancel. Home: reset position. Moving does not open chat.', onboard: 'Onboard', personal: 'Your personal space',
   identity: 'Lucía Ferraro', crew: 'ISS crew member', mission: 'ISS · FD30',
-  today: 'Today', sleep: 'Sleep', m1: 'M1 · Ground ↔ Onboard',
+  today: 'Home', sleep: 'Sleep', m1: 'M1 · Ground ↔ Onboard',
   demo: 'Demo mode', demoHint: 'Jury controls · not authentication',
   demoClose: 'Close Demo mode panel', demoDockHelp: 'Enter or Space opens or closes the panel. Alt plus Up or Down arrow moves this button; Shift makes the step larger. Escape closes the panel.',
   next: 'Next event', nextTime: '06:00 UTC · episode ended', end: 'No more scheduled events',
@@ -239,7 +238,6 @@ export const fd30Es: typeof fd30En = {
   labHistoryAdapter: "demo-history · proceso de toma; sin dispositivo real de toma ni analizador verificados.",
   labPlanBody: "Agenda planificada · turno de toma en UTC de misión; un horario previsto no confirma asistencia ni resultado.",
   labAvailability: "Metadatos de proceso disponibles al recibirse; valores clínicos no disponibles porque el escenario no los aporta.",
-  labScope: "FD30 comienza con historial precargado. El análisis de sangre es una capacidad futura; la investigación externa se mantiene separada de todos los perfiles.",
   labNextBloodTaken: "09:15 UTC · toma de sangre",
   labNextBloodAnalysis: "09:20 UTC · inicio de análisis de sangre",
   labNextUrineTaken: "09:25 UTC · toma secundaria de orina",
@@ -288,7 +286,7 @@ export const fd30Es: typeof fd30En = {
 
   entry: 'Corte visual FD30', viewAs: 'Ver como', moveCompanion: 'Mover compañero', keyboardHint: 'Con foco en el personaje: M para mover, Home para restablecer su posición.', moveInstructions: 'Flechas: mover 8 px. Shift + flechas: 32 px. Enter: guardar. Escape: cancelar. Home: restablecer posición. Mover no abre el chat.', onboard: 'A bordo', personal: 'Tu espacio personal',
   identity: 'Lucía Ferraro', crew: 'Tripulante de la EEI', mission: 'EEI · FD30',
-  today: 'Hoy', sleep: 'Sueño', m1: 'M1 · Tierra ↔ A bordo',
+  today: 'Inicio', sleep: 'Sueño', m1: 'M1 · Tierra ↔ A bordo',
   demo: 'Modo muestra', demoHint: 'Controles del jurado · no es autenticación',
   demoClose: 'Cerrar el panel de Modo muestra', demoDockHelp: 'Enter o Espacio abre o cierra el panel. Alt más flecha arriba o abajo mueve este botón; Mayús agranda el paso. Escape cierra el panel.',
   next: 'Siguiente evento', nextTime: '06:00 UTC · fin de episodio', end: 'No hay más eventos programados',

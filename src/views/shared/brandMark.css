@@ -1,9 +1,9 @@
-/* MATE-BRAND01/03: colors chosen for contrast on the FD30 paper (#f6f4ec). Petrol body, turquoise accent. */
+/* MATE-BRAND01/03 + THEME01: the SVG mark takes --brand-body / --brand-accent from fd30-theme.css, so it reads in both themes. */
 .brand-lockup { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
 .brand-mark { flex: none; display: block; width: 30px; height: 30px; }
-.brand-mark-body { fill: #1d4c55; }
+.brand-mark-body { fill: var(--brand-body); }
 .brand-mark-straw,
-.brand-mark-pulse { fill: none; stroke: #17807b; stroke-linecap: round; stroke-linejoin: round; }
+.brand-mark-pulse { fill: none; stroke: var(--brand-accent); stroke-linecap: round; stroke-linejoin: round; }
 .brand-mark-straw { stroke-width: 2; }
 .brand-mark-pulse { stroke-width: 1.8; }
 
@@ -18,5 +18,5 @@
 @media (max-width: 760px) { .fd-brand .brand-mark-name { font-size: 13px; } }
 
 /* Logo test (image). Height chosen to keep the letters legible; the bar grows accordingly. */
-.fd-brand .brand-logo { display: block; width: 56px; height: 56px; flex: none; align-self: center; }
+.fd-brand .brand-logo { display: block; width: 56px; height: 56px; flex: none; align-self: center; border-radius: 12%; }
 @media (max-width: 760px) { .fd-brand .brand-logo { width: 46px; height: 46px; } }

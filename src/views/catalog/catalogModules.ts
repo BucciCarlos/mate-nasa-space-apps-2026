@@ -30,8 +30,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       t('Confirmed person–record association and acquisition time', 'Asociación persona–registro confirmada y hora de adquisición'),
       t('Flight phase and protocol of each record', 'Fase de vuelo y protocolo de cada registro'),
     ],
-    notBuilt: t('No verified cardiovascular source is connected. The FD30 day has no heart-rate or blood-pressure data.',
-      'No hay una fuente cardiovascular verificada conectada. El día FD30 no tiene datos de frecuencia cardíaca ni de presión.'),
+    notBuilt: t('No verified cardiovascular source is connected. Synthetic Exercise pulse does not provide a cardiovascular assessment.',
+      'No hay una fuente cardiovascular verificada conectada. El pulso sintético de Ejercicio no ofrece una evaluación cardiovascular.'),
     capabilities: [SOURCE_PENDING],
   },
   {
@@ -56,8 +56,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       t('Bone measurements from a verified protocol and instrument', 'Mediciones óseas de un protocolo e instrumento verificados'),
       t('Person, session and flight-phase association', 'Asociación con persona, sesión y fase de vuelo'),
     ],
-    notBuilt: t('Only the simulated exercise workflow exists. No bone, strength or fitness data source is selected.',
-      'Solo existe el flujo simulado de ejercicio. No hay fuente seleccionada de datos óseos, de fuerza ni de aptitud.'),
+    notBuilt: t('Exercise has fictional session histories and synthetic telemetry. Bone and strength measurements remain unavailable.',
+      'Ejercicio tiene historiales ficticios de sesiones y telemetría sintética. Las mediciones óseas y de fuerza siguen sin estar disponibles.'),
     capabilities: [
       {
         id: 'fd30-exercise', status: 'available', verified: true,
@@ -188,7 +188,7 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
     capabilities: [SOURCE_PENDING],
   },
   {
-    id: 'MOD-COG', specTier: 'concept', surfaces: ['onboard'],
+    id: 'MOD-COG', specTier: 'concept', surfaces: ['onboard', 'ground'],
     title: t('Attention and cognitive performance', 'Atención y desempeño cognitivo'),
     solves: t('Would offer a future voluntary self-check that never yields a verdict and never gates a flow.',
       'Ofrecería en el futuro un autochequeo voluntario que nunca da un veredicto ni bloquea un flujo.'),
@@ -218,8 +218,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       t('Delivered agenda and crew roles', 'Agenda entregada y roles de la tripulación'),
       t('Only messages each person explicitly shares', 'Solo mensajes que cada persona comparte de forma explícita'),
     ],
-    notBuilt: t('The limited Commander view is specified but not built. No team metric is computed.',
-      'La vista limitada del Comandante está especificada pero no construida. No se calcula ninguna métrica de equipo.'),
+    notBuilt: t('Crew Dynamics consults the FD30 plan. No measured teamwork or cohesion metric is available.',
+      'Dinámica de tripulación consulta el plan FD30. No hay una métrica medida de trabajo en equipo ni de cohesión.'),
     capabilities: [{
       id: 'fd30-crew-dynamics', status: 'available', verified: true,
       label: t('Crew dynamics · mission plan', 'Dinámica de tripulación · plan de misión'),

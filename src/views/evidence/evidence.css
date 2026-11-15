@@ -70,4 +70,4 @@
 @media (max-width: 600px) { .evd-tab { padding: var(--sp-2); } .evd-groups strong { font-size: var(--fs-3); } }
 
 /* FD30 keeps its light paper surface in both perspectives; M1 Ground keeps its dark tokens. */
-.fd30 .evd { --bg: var(--paper); --bg-2: #fffdf8; --bg-3: #ece9df; --fg: var(--ink); --fg-2: var(--quiet); --line: var(--rule); --accent: #137d83; --focus: var(--rust); --amber: #8c5b16; --amber-bg: #f5ead2; }
+/* Colors for .evd come from fd30-theme.css (MATE-THEME01): the M1 token names are remapped inside .fd30. */

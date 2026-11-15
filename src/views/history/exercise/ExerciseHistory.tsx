@@ -2,15 +2,21 @@ import { useEffect, useRef, useState } from 'react';
 import type { CrewId, PreviewState } from '../../../demo/fd30';
 import { comparableReason, exerciseHistory } from '../../../demo/history/exercise';
 import type { ExerciseRange, ExerciseRecord } from '../../../demo/history/exercise';
-import { fdDate, fdLabel } from '../../../demo/history/sleep';
+import { FLIGHT_DAY_ONE, fdDate, fdLabel } from '../../../demo/history/sleep';
 import { EQUIPMENT } from '../../../demo/fd30Plan';
 import { useLocale } from '../../../i18n/I18nProvider';
 import { EXERCISE_TEXT } from './exerciseText';
 import './exercise.css';
 
-export function ExerciseHistory({ state, owner, time, highlight = false }: { state: PreviewState; owner: CrewId; time: number; highlight?: boolean }) {
+/** `target`: optional exact day/section to open (voice guided playback). View-only: never moves the clock or writes a record. */
+export interface ExerciseTarget { fd: number; focus: 'session' | 'comparison' }
+export function ExerciseHistory({ state, owner, time, highlight = false, target = null }: { state: PreviewState; owner: CrewId; time: number; highlight?: boolean; target?: ExerciseTarget | null }) {
   const locale = useLocale(), t = EXERCISE_TEXT[locale], detail = useRef<HTMLElement>(null);
-  const [views, setViews] = useState<Partial<Record<CrewId, { range: ExerciseRange; fd: number | null }>>>({});
+  const [views, setViews] = useState<Partial<Record<CrewId, { range: ExerciseRange; fd: number | null }>>>(() => {
+    if (!target) return {};
+    const currentFd = Math.floor((time - FLIGHT_DAY_ONE) / 86_400_000) + 1;
+    return { [owner]: { range: target.fd >= currentFd - 6 ? 'last7' : 'all', fd: target.fd } };
+  });
   const preference = views[owner] ?? { range: 'last7' as const, fd: null };
   const view = exerciseHistory(state, { perspective: 'onboard', owner }, time, preference.range);
   const completed = view?.records.some(r => r.fd === 30) ?? false;
@@ -21,6 +27,13 @@ export function ExerciseHistory({ state, owner, time, highlight = false }: { sta
     setViews(v => ({ ...v, [owner]: { range: v[owner]?.range ?? 'last7', fd: 30 } }));
     requestAnimationFrame(() => { detail.current?.focus(); detail.current?.scrollIntoView({ block: 'center' }); });
   }, [highlight, completed, highlightedId, owner, seenCount]);
+  useEffect(() => {
+    if (!target) return;
+    requestAnimationFrame(() => {
+      const heading = target.focus === 'comparison' ? document.getElementById('exercise-comparison-h') : detail.current;
+      heading?.focus(); heading?.scrollIntoView({ block: 'center' });
+    });
+  }, [target?.fd, target?.focus]);
   if (!view) return null;
   const selected = view.days.find(d => d.fd === preference.fd) ?? view.days.find(d => d.fd === view.latest?.fd) ?? view.days.at(-1)!;
   const number = (v: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(v);
@@ -48,7 +61,7 @@ export function ExerciseHistory({ state, owner, time, highlight = false }: { sta
         </svg>
       </div>
     </section>
-    <section className="exercise-comparison" aria-labelledby="exercise-comparison-h"><h3 id="exercise-comparison-h">{t.comparison}</h3><p>{t.calculation}</p>
+    <section className="exercise-comparison" aria-labelledby="exercise-comparison-h"><h3 id="exercise-comparison-h" tabIndex={-1}>{t.comparison}</h3><p>{t.calculation}</p>
       {!view.comparisons.length && <p>{t.insufficient}</p>}
       {view.comparisons.map(c => <div key={c.protocolId} data-exercise-comparison={c.protocolId}>
         <h4>{c.protocolId} · {t.through(fdLabel(c.rows.at(-1)!.fd))}</h4>

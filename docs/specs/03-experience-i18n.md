@@ -399,3 +399,29 @@ Exercise retains Lucía's live panel, current simulated pulse/power/cadence and 
 Detail shows aerobic type, fictional equipment, duration, available mean W/rpm, start/finish/reception UTC, protocol, power coverage and comparison eligibility/reason. No activity / Sin actividad, No record / Sin registro and Not applicable / No aplica remain distinct; future reservations and live sessions have their own labels. No steps, calories, pulse history, risk colours, clinical conclusions or causal language. Comparisons describe differences from the owner's reference, with cohort membership available in a disclosure. The full reference may predate the selected 7-day view and is labelled accordingly.
 
 One general fictional-record label accompanies the history. The live telemetry retains its separate simulated/not-measured disclosure. Sources and evidence documents adapter/version/class/privacy, limited historical plan coverage, calculation rules and protocol limitations without exposing private rows in either perspective. Today and Mate share latest session/day/duration and last7 count; prior Exercise replies after a rewound cursor hide and return without regeneration. No Catalog or D-9 changes.
+
+### 8.15 THEME01 — FD30 theme: palette Océano A1, Claro / Oscuro (EN/ES)
+
+Scope: the FD30 experience, Onboard and Ground. M1 (its CSS, tokens and Settings view) is not part of this surface and is not changed; any style shared with M1 is overridden only inside `.fd30[data-surface]`.
+
+**Tokens.** All FD30 colors live in `src/styles/fd30-theme.css`; no FD30 stylesheet carries a literal color (a test enforces it). Light is the base; dark applies under `html[data-fd30-theme="dark"]`. The M1 token names (`--bg-2`, `--fg`, `--line`, `--accent` ...) are remapped inside `.fd30` so shared components follow the theme without edits.
+
+| Role | Claro | Oscuro |
+|---|---|---|
+| Page background (frames the cards) | `#E5F1EE` | `#0E1A1D` |
+| Header, cards, panels (`--surface`) | `#FFFFFF` | `#172A2D` |
+| Text (`--ink`) | `#15343A` | `#E6F0EE` |
+| Secondary text (`--muted`) | `#4E6568` | `#A3BAB7` |
+| Links and actions (`--link`, `--action`) | `#126862` | `#3FC1B9` |
+| Brand accent (`--brand`), graphics and large marks only | `#17807B` | `#3FC1B9` |
+| Text on a filled action (`--on-action`) | `#FFFFFF` | `#0E1A1D` |
+
+The text color on a filled button is chosen for contrast with its fill, not fixed: white on `#126862` (6.6:1) and `#0E1A1D` on `#3FC1B9` (8.1:1). Each module keeps its own color for icons and charts (`--mod-sleep`, `--mod-exercise`, `--mod-lab`, `--mod-crew`, `--mod-wellbeing`) with a lighter dark-mode value; module colors are never the dominant fill of a card. The logo SVG has no background block and takes `--brand-body` and `--brand-accent`, so the silhouette and the pulse read in both themes.
+
+**Contrast (MUST).** Text tokens reach 4.5:1 against the page background, the card surface and both tints in each theme; borders of controls, focus ring, module colors and logo reach 3:1 against page and card. `src/theme/theme.test.ts` computes this from the real tokens. Small text, focus rings and charts are included.
+
+**Switch (MUST).** One button in the FD30 header toggles Claro ↔ Oscuro. There is no list of options and no "System" option, and the operating system's color scheme is never followed. Its accessible name is «Tema oscuro» / «Dark theme» with `aria-pressed` true in dark; its title names the action. The button is icon-only (sun / moon) and does not change the header height.
+
+**Initial theme and persistence (MUST).** Without a saved preference the theme is Claro, even when the system prefers dark. The choice is saved locally (`mate:fd30:theme:v1`, values `light` / `dark`). Every storage access is guarded: if reading fails, or the saved value is invalid (including a legacy `system`), the theme is Claro; if saving fails, the switch still works for the session. Changing the theme never resets the mission clock, the active profile, the route or the chat, and never moves a draft.
+
+**Acceptance.** (1) Fresh profile with the system in dark: Claro. (2) Toggle to Oscuro, reload: Oscuro. (3) Toggle with a chat open at 10:41: clock, profile, route, open chat, replies and draft unchanged. (4) Storage blocked: the toggle still changes the theme. (5) A legacy `system` value with the system in dark: Claro. (6) Onboard and Ground, 390 and 1440 px, EN and ES: no text below 4.5:1, no horizontal overflow, no color of the previous palette (chat, demo mode, charts, tables, focus rings).

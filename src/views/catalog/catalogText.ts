@@ -3,6 +3,9 @@ import type { Locale } from '../../state/types';
 
 const en = {
   title: 'Module catalog',
+  subtitle: 'Explore the mission’s monitoring areas',
+  groundOperator: 'Operational plans only. Personal records are not shared here.',
+  groundMedical: 'Public evidence and documentation. No private history or medical summary is provided here.',
   introOnboard: 'What each module would do for you, and what exists today.',
   introOperator: 'Operational use of each module. Mission operator view.',
   introMedical: 'Medical use of each module. Medical professional view.',
@@ -27,7 +30,7 @@ const en = {
   riskPageNote: 'Direct link to the risk page not registered yet; the link opens the NASA index.',
   dataNeeds: 'Data it would need',
   prototype: 'In the prototype',
-  notBuilt: 'Why it is not built',
+  notBuilt: 'Pending functionality',
   pendingVerification: 'Pending verification',
   open: 'Open',
   source: 'Source',
@@ -50,6 +53,9 @@ export type CatalogMessages = typeof en;
 
 const es: CatalogMessages = {
   title: 'Catálogo de módulos',
+  subtitle: 'Explorá las áreas de seguimiento de la misión',
+  groundOperator: 'Solo planes operativos. Aquí no se comparten registros personales.',
+  groundMedical: 'Evidencia pública y documentación. Aquí no se ofrecen historiales privados ni resúmenes médicos.',
   introOnboard: 'Qué haría cada módulo por vos y qué existe hoy.',
   introOperator: 'Utilidad operativa de cada módulo. Vista de operador de misión.',
   introMedical: 'Utilidad médica de cada módulo. Vista de profesional médico.',
@@ -74,7 +80,7 @@ const es: CatalogMessages = {
   riskPageNote: 'Todavía no está registrado el enlace directo a la página del riesgo; el enlace abre el índice de la NASA.',
   dataNeeds: 'Datos que necesitaría',
   prototype: 'En el prototipo',
-  notBuilt: 'Por qué no está construido',
+  notBuilt: 'Funcionalidad pendiente',
   pendingVerification: 'Pendiente de verificación',
   open: 'Abrir',
   source: 'Fuente',

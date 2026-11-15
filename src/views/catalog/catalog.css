@@ -34,11 +34,6 @@
 .mcat-details { margin-top: var(--sp-2); }
 .mcat-details summary { cursor: pointer; color: var(--accent); }
 .mcat-excluded { margin-top: var(--sp-3); }
-/* Available now first; the rest, folded by default under "Future capabilities". */
-.mcat-now { margin: var(--sp-4) 0; }
-.mcat-now h3 { margin: 0 0 var(--sp-1); }
-.mcat-now-list { list-style: none; margin: var(--sp-2) 0 0; padding: 0; display: grid; gap: var(--sp-2); }
-.mcat-now-list li { display: flex; flex-wrap: wrap; gap: 4px var(--sp-2); align-items: baseline; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); }
-.mcat-future { margin-top: var(--sp-4); }
-.mcat-future > summary { cursor: pointer; font-weight: 700; padding: var(--sp-2) 0; }
-.mcat-future > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.mcat-open { display: inline-block; padding-block: var(--sp-2); }
+.mcat-card-head h3 { overflow-wrap: anywhere; }

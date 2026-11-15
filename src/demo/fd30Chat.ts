@@ -1,7 +1,10 @@
 import { exerciseHistory } from './history/exercise';
+import { exerciseFactsAt } from './history/exerciseFacts';
 import { EXERCISE_TEXT } from '../views/history/exercise/exerciseText';
 import { sleepHistory, fdLabel, sleepDuration } from './history/sleep';
 import { SLEEP_TEXT } from '../views/history/sleep/sleepText';
+import { SLEEP_SCORE_TEXT } from '../views/history/sleep/sleepScoreText';
+import { sleepScoreDetail } from './history/sleepScore';
 import { scheduleInterval, scheduleContinuation } from './fd30Day';
 import { SCHEDULE_TEXT } from '../i18n/fd30Schedule';
 import type { CrewId, PreviewState, Turn } from './fd30';
@@ -40,7 +43,13 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
     const text = EXERCISE_TEXT[lang];
     const latest = history?.latest;
     const summary = latest ? text.latest(fdLabel(latest.fd), new Intl.NumberFormat(lang).format(latest.durationMinutes)) : text.noRecord;
-    return { at: time, detail: 'exercise', body: `${reservation}\n${status}\n${summary}\n${text.count(history?.records.length ?? 0, history?.days.length ?? 7)}` };
+    // EXERCISE-VOICE02: when the owner's records at this cursor match an approved dialogue case, the answer opens with that exact
+    // session description (the audio is its English summary). Tomás's comparison is against his own reference, not a judgement.
+    const facts = exerciseFactsAt(owner, time), nf = (v: number, digits = 0) => new Intl.NumberFormat(lang, { maximumFractionDigits: digits }).format(v), minus = (v: number) => v < 0 ? '−' : '';
+    const dialogue = !facts ? '' : facts.profile === 'lucia' ? text.voiceLucia(nf(facts.minutes))
+      : facts.profile === 'tomas' ? text.voiceTomas(nf(facts.recentW), nf(facts.referenceW), facts.referenceCount, `${minus(facts.differenceW)}${nf(Math.abs(facts.differenceW))}`, `${minus(facts.differencePercent)}${nf(Math.abs(facts.differencePercent), 1)}`)
+      : text.voiceMei(nf(facts.minutes), nf(facts.powerW));
+    return { at: time, detail: 'exercise', body: `${dialogue ? `${dialogue}\n` : ''}${reservation}\n${status}\n${summary}\n${text.count(history?.records.length ?? 0, history?.days.length ?? 7)}` };
   }
   if (intent === 'laboratory') {
     // Only this owner's own FD30 samples (from their plan), by canonical ID. A historical preload or another profile's
@@ -58,7 +67,12 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
   if (intent === 'sleep') {
     const history = sleepHistory(state, { perspective: 'onboard', owner }, time, 'last7');
     const latest = history?.latest, text = SLEEP_TEXT[lang];
-    return { at: time, detail: 'sleep', body: latest ? text.chat(fdLabel(latest.fd), sleepDuration(latest.durationMinutes), history!.records.length) : text.empty };
+    if (!latest) return { at: time, detail: 'sleep', body: text.empty };
+    // Same record and calculation as the Sleep detail (sleepScoreDetail). No score is ever borrowed from another night.
+    const st = SLEEP_SCORE_TEXT[lang], night = fdLabel(latest.fd), duration = sleepDuration(latest.durationMinutes);
+    const detail = sleepScoreDetail(state, { perspective: 'onboard', owner }, time, latest.fd);
+    const first = detail?.score ? st.chatScore(night, duration, detail.score.display) : st.chatNoScore(night, duration, st.chatReason[detail?.reason ?? 'noRecord']);
+    return { at: time, detail: 'sleep', body: `${first}\n${st.chatCount(history!.records.length)}` };
   }
   return { at: time, body: t.fallback };
 }

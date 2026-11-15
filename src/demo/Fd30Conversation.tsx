@@ -5,7 +5,7 @@ import { CHAT_QUESTIONS, FD30_CHAT_TEXT } from '../i18n/fd30Chat';
 import type { CrewId, ProfileState } from './fd30';
 import type { ClipPair } from './voice/useDialogueVoice';
 import type { PlayerState } from './voice/dialoguePlayer';
-import { labDialogueClips } from './voice/labDialogue';
+import { dialogueClips } from './voice/dialogueClips';
 import type { ChatDetail } from './fd30Chat';
 import '../styles/fd30-chat.css';
 
@@ -31,12 +31,12 @@ export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, o
       {profile.turns.filter(turn => (turn.reply !== 'exercise' && turn.reply !== 'laboratory') || !turn.answer || turn.answer.at <= time).map((turn, i) => {
         const text = FD30_CHAT_TEXT[turn.lang];
         const detail = turn.answer?.detail;
-        const clips = owner && voice && turn.answer ? labDialogueClips(owner, turn) : null;
+        const clips = owner && voice && turn.answer ? dialogueClips(owner, turn) : null;
         const voiceKey = `${owner}:${i}`;
         const mine = !!clips && voice!.state.key === voiceKey;
         const speaking = mine && voice!.state.status === 'playing';
         // Highlight the existing result access only while Mate's ANSWER really plays and that answer reports a result.
-        const mateSpeaking = speaking && voice!.state.stage === 'answer' && !!clips?.resultAvailable;
+        const mateSpeaking = speaking && voice!.state.stage === 'answer' && !!detail && clips?.highlight === detail;
         return <div className="fd-chat-pair" key={i} lang={turn.lang}>
           <p className="fd-chat-user"><small>{turn.input === 'simulated_voice' ? text.transcription : t.you}</small>{turn.text}</p>
           <div className="fd-chat-answer"><small>{character}</small>
@@ -47,7 +47,7 @@ export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, o
               <small>{c.voiceNote}</small>
               {mine && voice!.state.status === 'error' && <small role="status" className="fd-chat-audio-error">{c.voiceError}</small>}
             </div>}
-            {detail && <a className={`fd-link${mateSpeaking && detail === 'laboratory' ? ' fd-voice-focus' : ''}`} data-voice-focus={mateSpeaking && detail === 'laboratory' ? 'true' : undefined} href={toHash({ view: 'fd30', page: detail })} onClick={e => { e.preventDefault(); onOpen(detail); }}>{text.detail[detail]}</a>}
+            {detail && <a className={`fd-link${mateSpeaking ? ' fd-voice-focus' : ''}`} data-voice-focus={mateSpeaking ? 'true' : undefined} href={toHash({ view: 'fd30', page: detail })} onClick={e => { e.preventDefault(); onOpen(detail); }}>{text.detail[detail]}</a>}
           </div>
         </div>;
       })}

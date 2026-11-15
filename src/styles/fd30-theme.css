@@ -1,0 +1,127 @@
+/*
+ * MATE-THEME01 — FD30 theme tokens (palette Océano A1).
+ *
+ * Light is the default. Dark applies when <html data-fd30-theme="dark"> (set by src/theme/fd30Theme.ts, which resolves
+ * Claro / Oscuro / Sistema). Everything is scoped to `.fd30[data-surface]`, so nothing here reaches M1.
+ * The M1 token names (--bg-2, --fg, --line, --accent ...) are remapped INSIDE `.fd30` only; shared stylesheets keep working
+ * and follow the active theme without being edited.
+ *
+ * Contrast (WCAG 2.x) of the text tokens against every real surface was computed when the values were chosen:
+ *   light: ink 11.5–13.3:1, muted 5.0–6.2:1, link 5.3–6.6:1 on bg / surface / tints; filled action: white on #126862 6.6:1.
+ *   dark:  ink 8.9–15.3:1, muted 5.1–8.7:1, link 4.7–8.1:1; filled action: #0E1A1D on #3FC1B9 8.1:1.
+ * --brand (#17807B) is 4.1:1 on the light background: use it for graphics and large marks, never for small text.
+ */
+.fd30[data-surface] {
+  color-scheme: light;
+
+  /* Surfaces: the page background frames white cards and panels. */
+  --bg: #E5F1EE;
+  --surface: #FFFFFF;
+  --tint: #EEF6F4;
+  --tint-strong: #D8EAE5;
+  --tint-warm: #F6EDE3;
+
+  /* Text and actions. */
+  --ink: #15343A;
+  --muted: #4E6568;
+  --link: #126862;
+  --action: #126862;
+  --action-hover: #0E5550;
+  --on-action: #FFFFFF;
+  --brand: #17807B;
+
+  /* Lines and focus. */
+  --rule: #C5DAD5;
+  --rule-strong: #5E8A83;
+  --focus-ring: #0B4F4A;
+
+  /* Status. */
+  --warn: #8E4631;
+  --warn-solid: #8E4631;
+  --on-warn: #FFFFFF;
+  --amber: #8C5B16;
+  --amber-bg: #F5EAD2;
+  --ok: #1F7A52;
+  --danger: #A6312E;
+
+  /* Each module keeps its own color for icons and charts, never as a dominant fill. */
+  --mod-sleep: #345F65;
+  --mod-exercise: #A36846;
+  --mod-lab: #5F5373;
+  --mod-crew: #4F6F7C;
+  --mod-wellbeing: #1D4C55;
+
+  /* Logo mark (SVG): body and accent. */
+  --brand-body: #1D4C55;
+  --brand-accent: #17807B;
+
+  --shadow-color: #15343A;
+  --shadow-card: 0 1px 2px color-mix(in srgb, var(--shadow-color) 8%, transparent), 0 8px 22px color-mix(in srgb, var(--shadow-color) 8%, transparent);
+
+  /* Derived soft tones for bars and quiet accents (≥3:1 against the card surface in both themes). */
+  --mod-sleep-soft: color-mix(in srgb, var(--mod-sleep) 62%, var(--surface));
+  --mod-exercise-soft: color-mix(in srgb, var(--mod-exercise) 62%, var(--surface));
+  --mod-crew-soft: color-mix(in srgb, var(--mod-crew) 62%, var(--surface));
+
+  /* Legacy FD30 names kept as aliases so existing rules follow the theme. */
+  --paper: var(--bg);
+  --quiet: var(--muted);
+  --sage: var(--tint);
+  --rust: var(--warn);
+
+  /* M1 token names, remapped only inside FD30 (shared stylesheets follow the theme without edits). */
+  --bg-2: var(--surface);
+  --bg-3: var(--tint);
+  --fg: var(--ink);
+  --fg-2: var(--muted);
+  --line: var(--rule);
+  --accent: var(--link);
+  --accent-fg: var(--on-action);
+  --focus: var(--focus-ring);
+  --red: var(--danger);
+  --green: var(--ok);
+  --shadow: var(--shadow-card);
+  --text: var(--ink);
+  --text-muted: var(--muted);
+}
+
+html[data-fd30-theme="dark"] .fd30[data-surface] {
+  color-scheme: dark;
+
+  --bg: #0E1A1D;
+  --surface: #172A2D;
+  --tint: #1D3437;
+  --tint-strong: #25454A;
+  --tint-warm: #2D2620;
+
+  --ink: #E6F0EE;
+  --muted: #A3BAB7;
+  --link: #3FC1B9;
+  --action: #3FC1B9;
+  --action-hover: #66D3CC;
+  --on-action: #0E1A1D;
+  --brand: #3FC1B9;
+
+  --rule: #2C4447;
+  --rule-strong: #5F8C90;
+  --focus-ring: #7FE0D8;
+
+  --warn: #F0A98B;
+  --warn-solid: #F0A98B;
+  --on-warn: #0E1A1D;
+  --amber: #E2BA71;
+  --amber-bg: rgba(226, 186, 113, 0.16);
+  --ok: #4FD59A;
+  --danger: #FF8A87;
+
+  --mod-sleep: #86BCC6;
+  --mod-exercise: #E3A584;
+  --mod-lab: #B9ABD9;
+  --mod-crew: #9DB9C6;
+  --mod-wellbeing: #7FD3CC;
+
+  --brand-body: #CFE8E4;
+  --brand-accent: #3FC1B9;
+
+  --shadow-color: #000000;
+}

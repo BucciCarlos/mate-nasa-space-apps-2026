@@ -32,6 +32,7 @@ import '../styles/fd30-imp05.css';
 import '../styles/secondary-nav.css';
 import '../styles/fd30-demo-dock.css';
 import { BrandImage } from '../views/shared/BrandMark';
+import { ThemeToggle } from '../theme/ThemeSettings';
 
 function Arrow() {
   return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12H20M14 6L20 12L14 18" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg>;
@@ -118,7 +119,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [profile.turns.length, chatOpen]);
   useEffect(() => {
     const selected = showing && (page === 'laboratory' ? profile.highlightedSampleId : page === 'exercise' ? profile.highlightedSessionId : null);
-    const heading = document.getElementById(selected ? page === 'laboratory' ? labHeadingId(selected) : 'fd-exercise-session-h' : 'fd-view-h');
+    const heading = document.getElementById(page === 'catalog' ? 'mcat-h' : selected ? page === 'laboratory' ? labHeadingId(selected) : 'fd-exercise-session-h' : 'fd-view-h');
     heading?.focus();
     if (selected) heading?.scrollIntoView({ block: 'center' });
     else document.getElementById('fd-main')?.scrollTo(0, 0);
@@ -149,15 +150,33 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
     setShowing(true); setAnnouncement(t.labOpened);
     navigate({ view: 'fd30', page: 'laboratory' });
   };
-  // VOICE06: spoken lab dialogue. Guided playback opens the blood detail once, only after the answer ended successfully.
+  // VOICE06/SLEEP-VOICE03: spoken dialogues (Laboratory, Sleep). Guided playback opens ONE target once, only after the answer
+  // ended successfully; the dialogue names the target (a lab sample or a sleep night), never a fixed one, and the clock is untouched.
   const guidedVoiceOpened = useRef(new Set<string>());
-  const voice = useDialogueVoice({ chatOpen: chatOpen && !onGround, owner, onGround, page, cursor: missionTime, onEnded: (key, sampleId) => {
-    // The dialogue names the sample to open (never a fixed one); it must belong to the active profile and have its result.
+  const [sleepTarget, setSleepTarget] = useState<{ owner: CrewId; fd: number } | null>(null);
+  useEffect(() => { if (page !== 'sleep') setSleepTarget(null); }, [page]);
+  const [exerciseTarget, setExerciseTarget] = useState<{ owner: CrewId; fd: number; focus: 'session' | 'comparison' } | null>(null);
+  useEffect(() => { if (page !== 'exercise') setExerciseTarget(null); }, [page]);
+  const voice = useDialogueVoice({ chatOpen: chatOpen && !onGround, owner, onGround, page, cursor: missionTime, onEnded: (key, target) => {
     const current = stateRef.current;
-    const sample = current.laboratory.find(s => s.crewId === current.activeCrewId && s.id === sampleId);
-    if (current.playback !== 'guided' || guidedVoiceOpened.current.has(key) || !sample?.result) return;
-    guidedVoiceOpened.current.add(key);
-    openTodayLab(sample.id, sample.result.id);
+    if (current.playback !== 'guided' || guidedVoiceOpened.current.has(key)) return;
+    if (target.sampleId) {
+      const sample = current.laboratory.find(s => s.crewId === current.activeCrewId && s.id === target.sampleId);
+      if (!sample?.result) return;
+      guidedVoiceOpened.current.add(key);
+      openTodayLab(sample.id, sample.result.id);
+    } else if (target.exercise) {
+      // Exercise: Lucía's completed FD30 session reuses the existing exercise/view path; Tomás/Mei open their exact FD (and the comparison section for Tomás).
+      const ex = target.exercise, session = current.exercise.find(s => s.id === ex.sessionId && s.crewId === current.activeCrewId);
+      guidedVoiceOpened.current.add(key);
+      if (session?.finish) { dispatch({ type: 'exercise/view', owner: current.activeCrewId, sessionId: session.id, eventId: session.finish.id }); setShowing(true); }
+      setExerciseTarget({ owner: current.activeCrewId, fd: ex.fd, focus: ex.focus });
+      openPersonal('exercise');
+    } else if (target.sleepFd) {
+      guidedVoiceOpened.current.add(key);
+      setSleepTarget({ owner: current.activeCrewId, fd: target.sleepFd });
+      openPersonal('sleep');
+    }
   } });
   const openSleep = () => openPersonal('sleep');
   const openExercise = () => openPersonal('exercise');
@@ -220,6 +239,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
         <div className="fd-languages" role="group" aria-label={messages.common.language}>
           {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch({ type: 'locale/set', locale: lang })}>{lang.toUpperCase()}</button>)}
         </div>
+        <ThemeToggle />
       </header>
       <DemoDock label={t.demo} hint={t.demoHint} instructions={t.demoDockHelp} closeLabel={t.demoClose}>
         <div className="fd-demo-navigation">
@@ -236,19 +256,17 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
           <div className={`fd-page${page === 'agenda' ? ' fd-page-schedule' : ''}${onGround || page === 'crew' ? ' fd-page-operations' : ''}`}>
             <div className="fd-dayline"><span>{t.mission} <span aria-hidden="true">/</span> {t.date}</span><time title={t.clock}>{time} <small>{t.clock}</small></time></div>
             {!onGround && <OpsNavigation owner={owner} page={page} />}
-            {page === 'today' || page === 'laboratory' ? <p className="fd-lab-scope">{t.labScope}</p> : null}
             {page === 'crew-dynamics' || page === 'ground-crew-dynamics' ? <CrewDynamics state={state} viewer={onGround ? { perspective: 'ground', role: groundRole } : { perspective: 'onboard', owner }} />
               : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} />
               : page === 'ground-catalog' ? <div className="fd-ground-catalog"><ModuleCatalog perspective="ground" role={groundRole} /></div>
               : page === 'ground-evidence' ? <EvidenceSuite perspective="ground" />
               : opsPage ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate({ view: 'fd30', page: 'today' })} /> : page === 'today' ? <TodaySummary state={state} owner={owner} time={missionTime} ops={journal.state} onOpenSleep={openSleep} onOpenExercise={openExercise} onOpenLaboratory={openTodayLab} />
-              : page === 'agenda' ? <Fd30PersonalAgenda state={state} owner={owner} time={missionTime} /> : page === 'laboratory' ? <><LaboratoryDetail state={state} owner={owner} highlight={showing} time={missionTime} /><p className="fd-evidence-hint"><a href="#/onboard/personal/evidence">{t.labInspirationLink}</a></p></> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} /> : page === 'catalog' ? <>
-              <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal}</p><h1 id="fd-view-h" tabIndex={-1}>{t.catalog}</h1></div>
+              : page === 'agenda' ? <Fd30PersonalAgenda state={state} owner={owner} time={missionTime} /> : page === 'laboratory' ? <><LaboratoryDetail state={state} owner={owner} highlight={showing} time={missionTime} /><p className="fd-evidence-hint"><a href="#/onboard/personal/evidence">{t.labInspirationLink}</a></p></> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} target={exerciseTarget?.owner === owner ? { fd: exerciseTarget.fd, focus: exerciseTarget.focus } : null} /> : page === 'catalog' ? <>
               <ModuleCatalog perspective="onboard" />
             </> : page === 'evidence' ? <>
               <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.evidence}</h1></div>
               <EvidenceSuite perspective="onboard" />
-            </> : <SleepDetail state={state} owner={owner} time={missionTime} />}
+            </> : <SleepDetail state={state} owner={owner} time={missionTime} targetFd={sleepTarget?.owner === owner ? sleepTarget.fd : null} />}
             {!onGround && !opsPage && page !== 'crew-dynamics' && page !== 'catalog' && page !== 'agenda' && page !== 'sleep' && page !== 'evidence' && page !== 'ground-evidence' && <section className="fd-provenance" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h">{t.provenance}</h2><div><article><h3>{t.planLane}</h3><p>{page === 'laboratory' ? t.labPlanBody : page === 'exercise' ? t.exercisePlanLimit : t.planSource}</p></article><article><h3>{t.deviceLane}</h3><p>{page === 'laboratory' ? t.labAdapter : page === 'exercise' ? t.exerciseAdapter : t.deviceSource}</p></article><article><h3>{t.evidenceLane}</h3><p>{t.evidenceBody}</p></article></div><p className="fd-research"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer">{t.research}<span aria-hidden="true"> ↗</span></a><span>{t.researchBody}</span></p></section>}
             {!onGround && !!state.diagnostics.length && <details className="fd-report-details"><summary>{t.diagnostics}</summary>{state.diagnostics.map(d => <p key={d.eventId}>{d.eventId} · {d.sourceId} · {d.status === 'rejected' ? t.rejected : t.unassigned}</p>)}</details>}
             <footer className="fd-foot">{opsPage ? o.resetLimit : t.scope}{!onGround && <> <span aria-hidden="true">·</span> {crew.name}</>}</footer>

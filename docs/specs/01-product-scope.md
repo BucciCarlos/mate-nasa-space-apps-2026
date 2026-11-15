@@ -105,6 +105,14 @@ Every one of the 17 risks listed in the challenge resource *Risks of Human Space
 | MOD-AUTONOMY | Earth-independent operations | Covered by CORE-LINK and CORE-ENGINE + Concept card | Inadequate Systems Operations Support | The onboard core computes and explains changes without real-time Ground support | NASA HRP risk page | M1 (behaviour); M3 MUST (card) |
 | MOD-MED | Autonomous medical care: exam guidance, imaging, medications | Concept | — (context: *Ongoing HRP Research*, Tempus Pro) | Scope and data needs; explains why no imaging or treatment guidance is built | — | M3 MUST |
 
+### 5.2.1 MED02 — Medical contribution versus current implementation
+
+The team confirms that the medical report *MODULOS* (15 pages) is based on NASA sources. Receipt and that confirmed basis are acknowledged; an untraced row-level reference is not evidence of a non-NASA origin. The full per-module reconciliation, physical PDF page references, primary-source support by device/measurement versus range versus action, and physician questions are in 04 §12.
+
+The §5.2 tiers describe milestone scope, not proof that every capability is built or that every concept is still wholly empty. Current source inspection confirms private Sleep duration/score, Exercise workflow/history and synthetic telemetry, Laboratory journeys for all three profiles, the plan-only Crew Dynamics view, partial Immune links and separate public evidence. These remain intact. In particular, Tomás has his own blood workflow and Mei her own urine workflow; they are not empty placeholders or copies of Lucía. Compatible optional spoken Laboratory dialogues use those owners' query-time states; this report does not change their scripts, playback or permissions.
+
+The report contributes candidate instruments, variables and clinical-level actions to the existing modules; it does not approve new adapters, numeric clinical payloads, thresholds, automatic alarms, treatments or access rights. Its respiratory, metabolic, endocrine, renal/hematological and acoustic items are recorded as cross-domain candidates, not silently added as new catalogue modules. Broader real medical care remains pending specialist and product decisions. SLEEP03's 480-min reference, 70–95% band and duration-gated 70/30 formula remain original scenario design, never a NASA or Samsung formula. The physician-question register (04 §12.4) is the explicit next step for clinical proposals; neutral functionality is not blocked by those open questions.
+
 ### 5.3 Phase coverage
 
 | Phase | What M.A.T.E. does in the prototype | Data |
@@ -137,7 +145,7 @@ Product vision: the mother AI receives body-sensor, exercise-equipment, analyzer
 
 M1.1 includes an optional-to-complete, qualitative private check-in through Observations: a day comment or leisure preference, with no score, inferred cause, sharing or plan change. A fictional local family capsule is an optional extension only after the main journey (02 §12.8); omitting it does not prevent closing M1.1. No real media transport is included.
 
-The three team draft reports have been received; authorship, discipline attribution and specialist endorsement remain pending where not established. Their inventories and clinical proposals do not become verified measurements, integrations or approved medical policy.
+The three team draft reports have been received. MED02 records the team-confirmed NASA basis of the medical report; exact row-level references and approval of its clinical ranges/actions remain pending under 04 §12. Other authorship, discipline attribution and specialist endorsement remain pending where not established. Their inventories and clinical proposals do not become verified measurements, integrations or approved medical policy.
 
 M1.1 does not require the M2 evidence datasets, full module catalog, body map, three-phase journey, live ingestion or a deployed service. These retain their later milestones; the integral vision remains intact.
 

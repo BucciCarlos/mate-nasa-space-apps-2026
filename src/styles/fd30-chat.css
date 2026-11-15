@@ -1,6 +1,6 @@
 .fd-chat-suggestions, .fd-chat-voice { margin-block: 10px; }
 .fd-chat-suggestions { display: flex; flex-direction: column; gap: 6px; }
-.fd-chat-suggestions button, .fd-chat-voice button { display: block; width: 100%; padding: 7px 9px; text-align: left; font: inherit; color: var(--ink); background: #faf9f4; border: 1px solid var(--rule); border-radius: 5px; cursor: pointer; overflow-wrap: anywhere; }
+.fd-chat-suggestions button, .fd-chat-voice button { display: block; width: 100%; padding: 7px 9px; text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 5px; cursor: pointer; overflow-wrap: anywhere; }
 .fd-chat-voice summary { cursor: pointer; color: var(--quiet); }
 .fd-chat-voice button { margin-block: 6px; }
 .fd-chat-answer { padding: 10px; }
@@ -9,8 +9,8 @@
 
 /* VOICE06: optional audio control on a spoken answer and the highlighted access while Mate speaks. */
 .fd-chat-audio { display: grid; gap: 4px; justify-items: start; margin-top: 8px; }
-.fd-chat-audio button { min-height: 36px; padding: 6px 14px; border: 1px solid #bbc5b8; border-radius: 999px; background: #faf9f4; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; }
-.fd-chat-audio button[aria-pressed="true"] { background: var(--ink); color: #fffdf8; border-color: var(--ink); }
+.fd-chat-audio button { min-height: 36px; padding: 6px 14px; border: 1px solid var(--rule-strong); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; }
+.fd-chat-audio button[aria-pressed="true"] { background: var(--action); color: var(--on-action); border-color: var(--action); }
 .fd-chat-audio small { font-size: 11px; color: var(--quiet); }
-.fd-chat-audio-error { color: #6d4a37; }
-.fd-voice-focus { outline: 2px solid #a36846; outline-offset: 3px; border-radius: 4px; background: #f3e6dc; }
+.fd-chat-audio-error { color: var(--warn); }
+.fd-voice-focus { outline: 2px solid var(--mod-exercise); outline-offset: 3px; border-radius: 4px; background: var(--tint-warm); }

@@ -44,6 +44,12 @@ export interface ClipPair {
   resultAvailable?: boolean;
   /** Guided playback may open THIS sample's detail once after a successful end. Absent = open nothing automatically. */
   opensSampleId?: string;
+  /** Which existing detail access the conversation highlights while Mate's ANSWER really plays (lab: only with a result). */
+  highlight?: 'laboratory' | 'sleep' | 'exercise';
+  /** Guided playback may open Sleep with this exact night selected, once, without moving the clock. */
+  opensSleepFd?: number;
+  /** Guided playback may open Exercise on this exact session/section once, without moving the clock or the profile. */
+  opensExercise?: { sessionId?: string; fd: number; focus: 'session' | 'comparison' };
 }
 const LUCIA_PAIRS: Record<string, { id: string; file: string; resultAvailable: boolean; opensSampleId?: string }> = {
   'waiting|waiting': { id: 'waiting', file: LAB_WAITING_FILE, resultAvailable: false },
@@ -59,10 +65,10 @@ export function labDialogueClips(owner: CrewId, turn: Pick<Turn, 'reply' | 'answ
   if (owner === LAB_AUDIO_OWNER) {
     const pair = LUCIA_PAIRS[`${labStateAt(owner, at, 'blood')}|${labStateAt(owner, at, 'urine')}`];
     return pair ? { question: clip('question', LAB_QUESTION_FILE, 'crew'), answer: clip(pair.id, pair.file, 'mate'), resultAvailable: pair.resultAvailable,
-      ...(pair.opensSampleId ? { opensSampleId: pair.opensSampleId } : {}) } : null;
+      ...(pair.resultAvailable ? { highlight: 'laboratory' as const } : {}), ...(pair.opensSampleId ? { opensSampleId: pair.opensSampleId } : {}) } : null;
   }
   if (owner === 'iss:crew-ti' && sampleStateAt(owner, at, TI_BLOOD_SAMPLE) === 'result')
-    return { question: clip('tomas-question', TOMAS_QUESTION_FILE, 'crew'), answer: clip('tomas-answer', TOMAS_ANSWER_FILE, 'mate'), resultAvailable: true, opensSampleId: TI_BLOOD_SAMPLE };
+    return { question: clip('tomas-question', TOMAS_QUESTION_FILE, 'crew'), answer: clip('tomas-answer', TOMAS_ANSWER_FILE, 'mate'), resultAvailable: true, highlight: 'laboratory', opensSampleId: TI_BLOOD_SAMPLE };
   if (owner === 'iss:crew-mo' && sampleStateAt(owner, at, MO_URINE_SAMPLE) === 'analyzing')
     return { question: clip('mei-question', MEI_QUESTION_FILE, 'crew'), answer: clip('mei-answer', MEI_ANSWER_FILE, 'mate'), resultAvailable: false };
   return null;
