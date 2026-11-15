@@ -3,6 +3,8 @@
 **English** · [Español](#español)
 
 > **Status: draft.** M.A.T.E. is being built by Team Sora for the NASA Space Apps Challenge 2026, challenge *Create Health Monitoring Software for Astronauts on Space Missions*. There is no public build, deployed link or video yet; they will be added here when they exist.
+>
+> **FD30 demo** — the FD30 (sleep / exercise / laboratory) demo has been ported from `mate-imp02-fd30` into the FastAPI + Redux + React Router architecture, with a responsive and more legible layout. See `frontend/src/demo/`.
 
 ## Repository layout
 
