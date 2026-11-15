@@ -10,12 +10,12 @@ import { useT } from '../i18n/I18nProvider';
 type Character = { id: CrewId; character: string; shape: 'sprout' | 'beacon' | 'sail' };
 interface Props {
   crew: Character; preference: Position | null; pose: Pose; news: boolean; hasSummary: boolean; newsText: string; chatOpen: boolean;
-  onPosition: (position: Position | null) => void; onChat: () => void; onSleep: () => void; onExercise: () => void; onLaboratory: () => void; onSummary: () => void;
+  onPosition: (position: Position | null) => void; onChat: () => void; onSleep?: () => void; onExercise?: () => void; onLaboratory?: () => void; onSummary: () => void;
   characterRef: React.RefObject<HTMLButtonElement>;
 }
 const asBox = (r: DOMRect): Box => ({ x: r.x, y: r.y, width: r.width, height: r.height });
 
-export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, onPosition, onChat, onSleep, onExercise, onLaboratory, onSummary, characterRef }: Props) {
+export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, onPosition, onChat, onSummary, characterRef }: Props) {
   const t = useT().fd30;
   const frame = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   const initialBounds = { x: 8, y: 180, width: window.innerWidth - 16, height: Math.max(0, window.innerHeight - 188) };
   // Geometry lives in a ref and is read at render. A measurement overwrites it (latest wins) and bumps a counter to re-render.
   // A functional setState replaying an older DOM snapshot after a newer one made measure and render chase each other.
-  const geometryRef = useRef({ bounds: initialBounds, preferenceBounds: initialBounds, size: { width: 100, height: 160 }, notice: { width: 220, height: 120 }, obstacles: [] as Box[] });
+  const geometryRef = useRef({ bounds: initialBounds, preferenceBounds: initialBounds, size: { width: 100, height: 160 }, notice: { width: 220, height: 120 }, obstacles: [] as Box[], floats: [] as Box[] });
   const [, rerender] = useReducer((n: number) => n + 1, 0);
   const geometry = geometryRef.current;
   const gesture = useRef<{ id: number; start: Point; base: Point; moved: boolean } | null>(null);
@@ -45,7 +45,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     if (!root || !frame.current) return;
     const viewport = window.visualViewport;
     const x = (viewport?.offsetLeft ?? 0) + 8;
-    const y = Math.max((viewport?.offsetTop ?? 0) + 8, root.querySelector('.fd-demo')!.getBoundingClientRect().bottom + 8);
+    const y = Math.max((viewport?.offsetTop ?? 0) + 8, (root.querySelector('.fd-header')?.getBoundingClientRect().bottom ?? 0) + 8);
     let right = (viewport?.offsetLeft ?? 0) + (viewport?.width ?? innerWidth) - 8;
     let bottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight) - 8;
     const preferenceBounds = { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
@@ -58,9 +58,11 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     const bounds = { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
     const obstacles = [...root.querySelectorAll('.fd-main a, .fd-main button, .fd-main input, .fd-main select, .fd-main summary')]
       .map(e => asBox(e.getBoundingClientRect())).filter(r => r.width && r.height && r.y < bottom && r.y + r.height > y);
+    // The other floating control (Demo mode button and, while open, its panel) must stay reachable.
+    const floats = [...root.querySelectorAll('.fd-demo-fab, .fd-demo-panel:not([hidden])')].map(e => asBox(e.getBoundingClientRect())).filter(r => r.width && r.height);
     const rect = frame.current.getBoundingClientRect(), notice = bubble.current?.getBoundingClientRect();
     const old = geometryRef.current;
-    const next = { bounds, preferenceBounds, size: { width: rect.width, height: rect.height }, notice: notice ? { width: notice.width, height: notice.height } : old.notice, obstacles };
+    const next = { bounds, preferenceBounds, size: { width: rect.width, height: rect.height }, notice: notice ? { width: notice.width, height: notice.height } : old.notice, obstacles, floats };
     if (JSON.stringify(old) === JSON.stringify(next)) return;
     geometryRef.current = next;
     rerender();
@@ -71,10 +73,11 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     if (frame.current) observer.observe(frame.current);
     if (bubble.current) observer.observe(bubble.current);
     window.addEventListener('resize', measure);
+    window.addEventListener('fd-demo-dock', measure);
     window.addEventListener('scroll', measure, true);
     window.visualViewport?.addEventListener('resize', measure);
     window.visualViewport?.addEventListener('scroll', measure);
-    return () => { observer.disconnect(); window.removeEventListener('resize', measure); window.removeEventListener('scroll', measure, true); window.visualViewport?.removeEventListener('resize', measure); window.visualViewport?.removeEventListener('scroll', measure); };
+    return () => { observer.disconnect(); window.removeEventListener('resize', measure); window.removeEventListener('fd-demo-dock', measure); window.removeEventListener('scroll', measure, true); window.visualViewport?.removeEventListener('resize', measure); window.visualViewport?.removeEventListener('scroll', measure); };
   }, [measure, infoOpen, moving]);
   // Escape closes the card and returns focus to the info button. It yields to move mode (Escape cancels the move) and to
   // the chat when focus is inside it, so one Escape never closes two things.
@@ -82,7 +85,9 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     if (!infoOpen || moving) return;
     const escape = (e: KeyboardEvent) => {
       const target = e.target as Node | null;
-      if (e.key !== 'Escape' || e.defaultPrevented || (target !== document.body && !frame.current?.contains(target))) return;
+      if (e.key !== 'Escape' || e.defaultPrevented || (target !== document.body && !frame.current?.contains(target) && !(target as Element | null)?.closest?.('.fd-demo-fab'))) return;
+      // The open Demo panel is the top layer and takes this Escape first.
+      if (document.querySelector('.fd-demo-panel:not([hidden])')) return;
       e.preventDefault(); setInfoOpen(false); infoButton.current?.focus();
     };
     window.addEventListener('keydown', escape, true);
@@ -90,10 +95,10 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   }, [infoOpen, moving]);
   // Only viewport/chat constraints affect the resting anchor. Scroll changes bubble placement,
   // while main controls have paint/hit-test priority if they pass underneath the character.
-  const point = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size);
+  const point = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size, geometry.floats);
   const noticePoint = fitPosition({ x: point.x - geometry.notice.width - 12, y: point.y }, geometry.bounds, geometry.notice,
-    [...geometry.obstacles, { ...point, ...geometry.size }]);
-  const dropAt = (p: Point) => fitPosition(p, geometry.bounds, geometry.size, geometry.obstacles);
+    [...geometry.obstacles, ...geometry.floats, { ...point, ...geometry.size }]);
+  const dropAt = (p: Point) => fitPosition(p, geometry.bounds, geometry.size, [...geometry.obstacles, ...geometry.floats]);
   const commit = (p: Point) => onPosition(toPreference(dropAt(p), geometry.preferenceBounds, geometry.size));
   const release = (e: PointerEvent<HTMLButtonElement>, cancel: boolean) => {
     const g = gesture.current;
@@ -108,6 +113,8 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   };
   const actualPose = moving || dragPoint ? 'interaction' : pose;
   const cardOpen = infoOpen || moving;
+  // Actions appear only with a news item, and then at most the one contextual summary (sleep, exercise or lab sample).
+  const action = news && hasSummary;
   const act = (action: () => void) => () => { action(); setInfoOpen(false); };
   return (
     <div className={`fd-floating fd-pose-${actualPose}${moving ? ' fd-key-moving' : ''}`} ref={frame} style={{ left: point.x, top: point.y }} data-owner={crew.id}>
@@ -147,18 +154,14 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
         {news && !infoOpen && <span className="fd-info-badge" aria-hidden="true">!</span>}
       </button>
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{news ? `${t.news}. ${newsText}` : ''}</span>
-      {cardOpen && <div className="fd-floating-notice" ref={bubble} id="fd-companion-card" role="region" aria-label={t.companionInfo} style={{ left: noticePoint.x, top: noticePoint.y, maxHeight: geometry.bounds.height }}>
+      {cardOpen && <div className="fd-floating-notice" ref={bubble} id="fd-companion-card" role="region" aria-label={t.companionInfo} style={{ left: noticePoint.x, top: noticePoint.y, maxHeight: geometry.bounds.height, width: 'max-content', maxWidth: Math.min(220, geometry.bounds.width) }}>
         {moving ? <>
           <strong>{t.moveCompanion}</strong>
           <p>{t.moveInstructions}</p>
         </> : <>
           <span className="fd-presence-status">{actualPose === 'interaction' ? t.interaction : news ? t.news : t.idle}</span>
-          <p>{actualPose === 'interaction' ? t.interactionText : news ? newsText : t.idleText}</p>
-          {hasSummary && <button className="fd-link fd-summary-action" type="button" onClick={act(onSummary)}>{t.summary}<span aria-hidden="true">→</span></button>}
-          <a className="fd-link" href="#/onboard/personal/laboratory" onClick={e => { e.preventDefault(); act(onLaboratory)(); }}>{t.openLaboratory}<span aria-hidden="true">→</span></a>
-          <a className="fd-link" href="#/onboard/personal/exercise" onClick={e => { e.preventDefault(); act(onExercise)(); }}>{t.openExercise}<span aria-hidden="true">→</span></a>
-          <a className="fd-link" href="#/onboard/personal/sleep" onClick={e => { e.preventDefault(); act(onSleep)(); }}>{t.openSleep}<span aria-hidden="true">→</span></a>
-          <p className="fd-keyboard-hint">{t.keyboardHint}</p>
+          <p style={action ? undefined : { marginBottom: 0 }}>{actualPose === 'interaction' ? t.interactionText : news ? newsText : t.idleText}</p>
+          {action && <button className="fd-link fd-summary-action" type="button" onClick={act(onSummary)}>{t.summary}<span aria-hidden="true">→</span></button>}
         </>}
       </div>}
     </div>

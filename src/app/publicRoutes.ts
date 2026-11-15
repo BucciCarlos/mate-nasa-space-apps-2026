@@ -3,7 +3,7 @@ import { parseRoute, toHash } from './routes';
 
 export type Fd30Route = Extract<Route, { view: 'fd30' }>;
 export type Fd30Page = Fd30Route['page'];
-const onboardPages = ['today', 'sleep', 'exercise', 'laboratory', 'agenda', 'crew', 'wellbeing', 'requests', 'catalog', 'evidence'] as const;
+const onboardPages = ['today', 'sleep', 'exercise', 'laboratory', 'agenda', 'crew-dynamics', 'crew', 'wellbeing', 'requests', 'catalog', 'evidence'] as const;
 export type OnboardFd30Page = typeof onboardPages[number];
 // Retain the existing session key; it now also accepts reference sections.
 export const LAST_ONBOARD_KEY = 'mate:fd30:last-operational:v1';

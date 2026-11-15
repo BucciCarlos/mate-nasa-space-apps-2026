@@ -1,3 +1,4 @@
+import { LaboratoryHistory } from '../views/history/laboratory/LaboratoryHistory';
 import { useEffect, useRef } from 'react';
 import { useT } from '../i18n/I18nProvider';
 import { OWNER } from './fd30';
@@ -62,11 +63,16 @@ function Sample({ sample, sampleType, historical = false, highlighted = false }:
   </article>;
 }
 
-export function LaboratoryDetail({ state, owner, highlight = true }: { state: PreviewState; owner: CrewId; highlight?: boolean }) {
+export function LaboratoryDetail({ state, owner, highlight = true, time }: { state: PreviewState; owner: CrewId; highlight?: boolean; time?: number }) {
   const t = useT().fd30;
   const samples = labSamples(state, owner);
   const selected = highlight ? state.profiles[owner].highlightedSampleId : null;
   const history = samples.find(s => s.id === HISTORICAL_BLOOD_SAMPLE);
+  if (owner !== state.activeCrewId) return null;
+  if (time !== undefined) return <>
+    <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.labTitle}</h1></div>
+    <LaboratoryHistory state={state} owner={owner} time={time} renderSample={sample => <Sample sample={sample} sampleType={sample.sampleType} historical={sample.id === HISTORICAL_BLOOD_SAMPLE} highlighted={selected === sample.id} />} />
+  </>;
   return <>
     <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal} / {t.laboratory}</p><h1 id="fd-view-h" tabIndex={-1}>{t.labTitle}</h1><p>{t.labIntro}</p></div>
     {owner === OWNER ? <>

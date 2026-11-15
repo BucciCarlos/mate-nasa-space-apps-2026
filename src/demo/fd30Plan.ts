@@ -5,8 +5,8 @@ import type { CrewId } from './fd30';
 export const PLAN_VERSION = 'fd30-plan.2';
 export const PLAN_SOURCE = 'demo-plan';
 export const EQUIPMENT: Record<string, Bilingual> = {
-  'demo-ergometer': { en: 'Fictional ergometer', es: 'Ergómetro ficticio' },
-  'demo-treadmill': { en: 'Fictional treadmill', es: 'Cinta ficticia' },
+  'demo-ergometer': { en: 'Ergometer', es: 'Ergómetro' },
+  'demo-treadmill': { en: 'Treadmill', es: 'Cinta' },
 };
 export interface Fd30Block extends ScheduleBlock { equipmentId?: string; continuesAfterDay?: boolean }
 const slot = (id: string, crewId: CrewId, kind: ScheduleBlock['kind'], start: string, end: string, title: Bilingual, equipmentId?: string): Fd30Block => ({

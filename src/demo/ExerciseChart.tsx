@@ -3,6 +3,7 @@ import { useLocale, useT } from '../i18n/I18nProvider';
 import { TELEMETRY_END, TELEMETRY_START } from './exerciseTelemetry';
 import type { TelemetryPoint } from './exerciseTelemetry';
 import type { CrewId } from './fd30';
+import { TelemetryNote } from './TelemetryNote';
 import { OWNER } from './fd30';
 
 function paths(points: readonly TelemetryPoint[], key: 'workload_w' | 'cadence_rpm' | 'pulse_bpm', maximum: number) {
@@ -27,7 +28,7 @@ export function ExerciseChart({ owner, time, points, asTable, onToggle }: { owne
   const cursor = 48 + Math.max(0, Math.min(1, (time - TELEMETRY_START) / (TELEMETRY_END - TELEMETRY_START))) * 552;
   return <section className="fd-telemetry" aria-labelledby={`${id}-h`}>
     <h2 id={`${id}-h`}>{t.telemetryTitle}</h2>
-    <p className="fd-telemetry-label">{t.telemetrySynthetic}</p>
+    <p className="fd-telemetry-label">{t.telemetryHeading}<TelemetryNote /></p>
     {owner !== OWNER ? <p>{t.telemetryOther}</p> : <>
       <p data-telemetry-count={points.length}>{t.telemetryCount(points.length, usable)}</p>
       {!points.length && <p>{t.telemetryWaiting}</p>}
@@ -35,7 +36,7 @@ export function ExerciseChart({ owner, time, points, asTable, onToggle }: { owne
       <button type="button" onClick={onToggle} aria-expanded={asTable} aria-controls={`${id}-data`}>{asTable ? t.telemetryGraph : t.telemetryTable}</button>
       <div id={`${id}-data`}>
         {asTable ? <div className="fd-telemetry-table"><table>
-          <caption>{t.telemetrySynthetic}</caption>
+          <caption>{t.telemetryTitle}</caption>
           <thead><tr><th scope="col">{t.telemetryTime}</th><th scope="col">{t.sessionPulse} ({t.sessionPulseUnit})</th><th scope="col">{t.telemetryPower} {/* i18n-ignore — SI unit */}(W)</th><th scope="col">{t.telemetryCadence} {/* i18n-ignore — rotation unit */}(rpm)</th></tr></thead>
           <tbody>{points.map(p => <tr key={p.receivedAt}><th scope="row">{p.occurredAt.slice(11, 16)}</th>
             <td>{p.pulse_bpm === null ? t.telemetryMissing : format(p.pulse_bpm)}</td><td>{p.workload_w === null ? t.telemetryMissing : format(p.workload_w)}</td><td>{p.cadence_rpm === null ? t.telemetryMissing : format(p.cadence_rpm)}</td>
@@ -47,7 +48,7 @@ export function ExerciseChart({ owner, time, points, asTable, onToggle }: { owne
         ] as const).map(series => <figure key={series.key}>
           <figcaption>{series.label} ({series.unit})</figcaption>
           <svg viewBox="0 0 640 156" role="img" aria-labelledby={`${id}-${series.key}`} data-series={series.key}>
-            <title id={`${id}-${series.key}`}>{`${series.label} (${series.unit}) · ${t.telemetrySynthetic} · ${t.telemetryCount(points.length, usable)}`}</title>
+            <title id={`${id}-${series.key}`}>{`${series.label} (${series.unit}) · ${t.telemetryCount(points.length, usable)}`}</title>
             {[0, series.max / 2, series.max].map(v => <g key={v}><line x1="48" x2="600" y1={124 - v / series.max * 100} y2={124 - v / series.max * 100} className="fd-plot-grid" /><text x="40" y={128 - v / series.max * 100} textAnchor="end">{format(v)}</text></g>)}
             {time >= TELEMETRY_START + 22 * 60_000 && <rect x={48 + 22 / 60 * 552} y="24" width={(Math.min(25, (time - TELEMETRY_START) / 60_000 + 1) - 22) / 60 * 552} height="100" className="fd-plot-gap" />}
             {paths(points, series.key, series.max).map((d, i) => <path key={i} d={d} fill="none" className="fd-plot-line" data-telemetry-path />)}

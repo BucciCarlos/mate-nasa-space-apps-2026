@@ -52,7 +52,7 @@ describe('catalog registry', () => {
 
   it('marks as available only what exists, and no card claims evidence yet', () => {
     const available = CATALOG_MODULES.filter(m => moduleLevels(m).includes('available')).map(m => m.id);
-    expect(available).toEqual(['MOD-MSK']);
+    expect(available).toEqual(['MOD-MSK', 'MOD-IMMUNE', 'MOD-CREW']);
     expect(CATALOG_MODULES.some(m => moduleLevels(m).includes('evidence'))).toBe(false);
     for (const c of CATALOG_MODULES.flatMap(m => m.capabilities)) {
       if (c.status === 'available') { expect(c.verified).toBe(true); expect(Object.values(c.href ?? {}).length).toBeGreaterThan(0); }
@@ -138,7 +138,7 @@ describe('ModuleCatalog rendering', () => {
     // Personal exercise sessions are not opened from Ground.
     const ground = cardHtml(render({ perspective: 'ground', role: 'mission_operator' }, 'en'), 'MOD-MSK');
     expect(ground).not.toContain('#/onboard/personal/exercise');
-    for (const id of SPEC_IDS.filter(id => id !== 'MOD-MSK' && id !== 'MOD-AUTONOMY')) {
+    for (const id of SPEC_IDS.filter(id => !['MOD-MSK', 'MOD-AUTONOMY', 'MOD-IMMUNE', 'MOD-CREW'].includes(id))) {
       expect(cardHtml(render({ perspective: 'onboard' }, 'en'), id)).not.toContain('mcat-level-available');
     }
   });
@@ -205,5 +205,62 @@ describe('Available now and Future capabilities (MATE-UX01)', () => {
     const html = available(render({ perspective: 'onboard' }, 'en'));
     const listed = [...html.matchAll(/data-available="([^"]+)"/g)].map(m => m[1]).filter(k => k !== 'sources-evidence');
     expect(listed.every(k => ids.includes(k))).toBe(true);
+  });
+});
+
+describe('MOD-IMMUNE partial availability (MATE-CAT03)', () => {
+  const immune = () => CATALOG_MODULES.find(m => m.id === 'MOD-IMMUNE')!;
+  const card = (html: string) => cardHtml(html, 'MOD-IMMUNE');
+  const available = (html: string) => html.split('data-section="available-now"')[1]?.split('data-section="future-capabilities"')[0] ?? '';
+
+  it('is partially available: available parts plus future concepts', () => {
+    expect(moduleLevels(immune())).toEqual(['available', 'concept']);
+    expect(immune().capabilities.filter(c => c.status === 'available').map(c => c.id)).toEqual(['my-samples', 'i4-public-evidence']);
+    expect(immune().capabilities.find(c => c.id === 'immune-monitoring')?.status).toBe('concept');
+    expect(immune().capabilities.find(c => c.id === 'osd-575-cytokines')?.status).toBe('concept');
+  });
+
+  it('onboard: offers the active profile’s laboratory and public evidence, on both languages', () => {
+    for (const locale of ['en', 'es'] as const) {
+      const html = render({ perspective: 'onboard' }, locale);
+      const now = available(html);
+      expect(now).toContain('data-available="my-samples"');
+      expect(now).toContain('href="#/onboard/personal/laboratory"');
+      expect(now).toContain('data-available="i4-public-evidence"');
+      expect(now).toContain('href="#/onboard/personal/evidence"');
+      expect(card(html)).not.toContain('mcat-level-available');
+      expect(card(html)).toContain('data-moved="true"');
+      expect(card(html)).toContain('data-capability="immune-monitoring" data-status="concept"');
+    }
+  });
+
+  it('ground: both roles see only the public evidence link, never the personal laboratory', () => {
+    for (const locale of ['en', 'es'] as const) {
+      for (const role of ['mission_operator', 'medical_professional'] as const) {
+        const html = render({ perspective: 'ground', role }, locale);
+        const now = available(html);
+        expect(now).toContain('data-available="i4-public-evidence"');
+        expect(now).toContain('href="#/demo/fd30/ground/evidence"');
+        expect(now).not.toContain('data-available="my-samples"');
+        expect(now).not.toContain('#/onboard/personal/laboratory');
+        expect(card(html)).not.toContain('#/onboard/personal/');
+      }
+    }
+  });
+
+  it('keeps the immune available links identical for both Ground roles', () => {
+    const a = available(render({ perspective: 'ground', role: 'mission_operator' }, 'en'));
+    const b = available(render({ perspective: 'ground', role: 'medical_professional' }, 'en'));
+    expect(a).toBe(b);
+  });
+
+  it('does not present Inspiration4 as FD30 records or personal immune data', () => {
+    const i4 = immune().capabilities.find(c => c.id === 'i4-public-evidence')!;
+    expect(`${i4.note.en} ${i4.label.en}`).toMatch(/another crew/i);
+    expect(`${i4.note.en} ${i4.label.en}`).not.toMatch(/\bFD30 (record|data)s? of (this|your)|your (immune|cytokine)/i);
+    expect(`${i4.note.es} ${i4.label.es}`).toMatch(/otra tripulación/i);
+    const my = immune().capabilities.find(c => c.id === 'my-samples')!;
+    expect(`${my.label.en} ${my.note.en}`).not.toMatch(/immune panel|cytokine|normal|\brange\b/i);
+    expect(`${my.label.es} ${my.note.es}`).not.toMatch(/panel inmun|citoquina|normal|\brango\b/i);
   });
 });

@@ -1,3 +1,5 @@
+import { exerciseHistory } from './history/exercise';
+import { EXERCISE_TEXT } from '../views/history/exercise/exerciseText';
 import { sleepHistory, fdLabel, sleepDuration } from './history/sleep';
 import { SLEEP_TEXT } from '../views/history/sleep/sleepText';
 import { scheduleInterval, scheduleContinuation } from './fd30Day';
@@ -34,7 +36,11 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
     const session = state.exercise.find(s => s.crewId === owner && s.id === 'iss:session-lf-1');
     const status = due(session?.start) ? due(session?.finish) ? t.exerciseDone : t.exerciseLive : t.exerciseWaiting;
     const reservation = plan ? t.reservation(`${plan.start.slice(11, 16)}–${plan.end.slice(11, 16)}`, EQUIPMENT[plan.equipmentId!][lang]) : t.noPlan;
-    return { at: time, detail: 'exercise', body: `${reservation}\n${status}\n${t.noMetrics}` };
+    const history = exerciseHistory(state, { perspective: 'onboard', owner }, time, 'last7');
+    const text = EXERCISE_TEXT[lang];
+    const latest = history?.latest;
+    const summary = latest ? text.latest(fdLabel(latest.fd), new Intl.NumberFormat(lang).format(latest.durationMinutes)) : text.noRecord;
+    return { at: time, detail: 'exercise', body: `${reservation}\n${status}\n${summary}\n${text.count(history?.records.length ?? 0, history?.days.length ?? 7)}` };
   }
   if (intent === 'laboratory') {
     const samples = [BLOOD_SAMPLE, URINE_SAMPLE].map(id => state.laboratory.find(s => s.crewId === owner && s.id === id));

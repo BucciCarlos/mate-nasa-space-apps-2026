@@ -1,6 +1,7 @@
 // Optional browser regression; no runtime dependency or application fixture is changed.
 // See CONTRACT.md for the local Playwright/Chrome command.
 import assert from 'node:assert/strict';
+import { demo } from '../../demo/demoDock.helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ headless: true,
   ...(process.env.BROWSER_BIN ? { executablePath: process.env.BROWSER_BIN } : {}), args: ['--no-sandbox'] });
@@ -14,11 +15,11 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`${base}#/demo/fd30`);
     await page.getByRole('button', { name: locale.toUpperCase(), exact: true }).click();
-    await page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click();
-    await page.getByRole('slider').evaluate((el, value) => {
+    await demo(page, () => page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click());
+    await demo(page, () => page.getByRole('slider').evaluate((el, value) => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, value);
       el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
-    }, target);
+    }, target));
     await page.locator('.fd-nav a').filter({ hasText: locale === 'es' ? 'Ejercicio' : 'Exercise' }).click();
     await page.locator('.fd-exercise-detail').waitFor();
     await page.getByRole('button', { name: locale === 'es' ? 'Mostrar como tabla' : 'Show as table', exact: true }).click();
@@ -27,18 +28,18 @@ try {
     await page.locator('.fd-character').click(); await page.locator('#fd-ask').fill('private continuity draft');
     const saved = () => page.evaluate(key => JSON.parse(sessionStorage.getItem(key)), key);
     const before = await saved();
-    await page.locator('.fd-perspective-switch').click(); await page.locator('[data-surface="ground"]').waitFor();
-    assert.equal(await page.getByRole('slider').inputValue(), String(target));
+    await demo(page, () => page.locator('.fd-perspective-switch').click()); await page.locator('[data-surface="ground"]').waitFor();
+    assert.equal(await demo(page, () => page.getByRole('slider').inputValue()), String(target));
     assert.equal(await page.locator('.fd-chat,.fd-character,.fd-view-as,[role="status"]').count(), 0);
     await page.locator('.ops-role select').selectOption('medical_professional');
     await page.locator('[data-ops-card="iss:crew-mo"] button').click();
     assert.equal((await saved()).activeCrewId, before.activeCrewId);
     assert.equal(await page.locator('.ops-medical-empty').count(), 1);
-    await page.locator('.fd-demo .fd-secondary-link').click();
+    await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.locator('.evd[data-perspective="ground"] [data-chart="labs"]').waitFor();
-    await page.locator('.fd-perspective-switch').click();
+    await demo(page, () => page.locator('.fd-perspective-switch').click());
     await page.locator('#fd-ask').waitFor();
-    assert.equal(await page.getByRole('slider').inputValue(), String(target));
+    assert.equal(await demo(page, () => page.getByRole('slider').inputValue()), String(target));
     assert.equal(await page.locator('#fd-ask').inputValue(), 'private continuity draft');
     assert.equal(await page.locator('.fd-telemetry tbody tr').count(), 12);
     const after = await saved();
@@ -47,28 +48,28 @@ try {
     assert.equal(after.offsetMs, before.offsetMs); assert.equal(after.running, false);
     // A Ground detail for Lucía must also leave a non-Lucía Onboard identity untouched.
     await page.locator('#fd-ask').press('Escape');
-    await page.locator('.fd-view-as select').selectOption('iss:crew-ti');
+    await demo(page, () => page.locator('.fd-view-as select').selectOption('iss:crew-ti'));
     await page.locator('.ops-navigation a[href$="/crew"]').click();
     await page.locator('[data-commander-person]').first().waitFor();
-    await page.locator('.fd-perspective-switch').click(); await page.locator('[data-surface="ground"]').waitFor();
+    await demo(page, () => page.locator('.fd-perspective-switch').click()); await page.locator('[data-surface="ground"]').waitFor();
     await page.locator('[data-ops-card="iss:crew-lf"] button').click();
     assert.equal((await saved()).activeCrewId, 'iss:crew-ti');
-    await page.locator('.fd-perspective-switch').click();
+    await demo(page, () => page.locator('.fd-perspective-switch').click());
     await page.locator('[data-commander-person]').first().waitFor();
-    assert.equal(await page.getByRole('slider').inputValue(), String(target));
-    assert.equal(await page.locator('.fd-view-as select').inputValue(), 'iss:crew-ti');
+    assert.equal(await demo(page, () => page.getByRole('slider').inputValue()), String(target));
+    assert.equal(await demo(page, () => page.locator('.fd-view-as select').inputValue()), 'iss:crew-ti');
     // Evidence is now a valid last-visited section; both links stay in Demo mode.
-    await page.locator('.fd-demo .fd-secondary-link').click();
+    await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.locator('.evd[data-perspective="onboard"] [data-chart="labs"]').waitFor();
-    await page.locator('.fd-perspective-switch').click();
+    await demo(page, () => page.locator('.fd-perspective-switch').click());
     await page.locator('[data-ops-card]').first().waitFor();
-    await page.locator('.fd-demo .fd-secondary-link').click();
+    await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.locator('.evd[data-perspective="ground"] [data-chart="labs"]').waitFor();
-    await page.locator('.fd-perspective-switch').click();
+    await demo(page, () => page.locator('.fd-perspective-switch').click());
     await page.locator('.evd[data-perspective="onboard"] [data-chart="labs"]').waitFor();
     assert.equal(new URL(page.url()).hash, '#/onboard/personal/evidence');
-    assert.equal(await page.getByRole('slider').inputValue(), String(target));
-    assert.equal(await page.locator('.fd-view-as select').inputValue(), 'iss:crew-ti');
+    assert.equal(await demo(page, () => page.getByRole('slider').inputValue()), String(target));
+    assert.equal(await demo(page, () => page.locator('.fd-view-as select').inputValue()), 'iss:crew-ti');
     assert.equal(await page.locator('.fd-demo .fd-perspective-switch').count(), 1);
     assert.equal(await page.locator('.fd-demo .fd-secondary-link').count(), 1);
     assert.equal(await page.locator('.fd-header .fd-secondary-link,.ops-perspective').count(), 0);

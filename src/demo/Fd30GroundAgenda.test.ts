@@ -19,8 +19,8 @@ describe('Public Ground agenda operational boundary', () => {
       expect(lane.blocks.every(b => !b.movable)).toBe(true);
       expect(JSON.stringify(lane.blocks)).not.toMatch(/Blood collection|Toma de sangre|urine collection|Toma secundaria de orina|pulse|heartRate/);
     }
-    expect(lanes[0].blocks.find(b => b.equipment)?.equipment?.en).toBe('Fictional ergometer');
-    expect(lanes[1].blocks.find(b => b.equipment)?.equipment?.en).toBe('Fictional treadmill');
+    expect(lanes[0].blocks.find(b => b.equipment)?.equipment?.en).toBe('Ergometer');
+    expect(lanes[1].blocks.find(b => b.equipment)?.equipment?.en).toBe('Treadmill');
   });
   it('reuses cards with inspection controls, keeping legacy movable-task behavior intact', () => {
     for (const locale of ['en', 'es'] as const) {

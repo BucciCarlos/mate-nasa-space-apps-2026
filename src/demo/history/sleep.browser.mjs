@@ -1,5 +1,6 @@
 // Optional HIST01 acceptance; set FD30_BASE_URL to the local Vite preview of a build.
 import assert from 'node:assert/strict';
+import { demo } from '../demoDock.helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ headless: true,
   ...(process.env.BROWSER_BIN ? { executablePath: process.env.BROWSER_BIN } : {}), args: ['--no-sandbox'] });
@@ -13,21 +14,21 @@ try {
     const page = await context.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(base); await page.getByRole('button', { name: locale.toUpperCase(), exact: true }).click();
-    await page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click();
+    await demo(page, () => page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click());
     const saved = () => page.evaluate(key => JSON.parse(sessionStorage.getItem(key)), key);
     const seek = async h => {
-      await page.getByRole('slider').evaluate((el, value) => {
+      await demo(page, () => page.getByRole('slider').evaluate((el, value) => {
         Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, value);
         el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, at(h));
-      assert.equal(Number(await page.getByRole('slider').inputValue()), at(h));
+      }, at(h)));
+      assert.equal(Number(await demo(page, () => page.getByRole('slider').inputValue())), at(h));
     };
-    const sameTime = async h => assert.equal(Number(await page.getByRole('slider').inputValue()), at(h));
+    const sameTime = async h => assert.equal(Number(await demo(page, () => page.getByRole('slider').inputValue())), at(h));
     const openSleep = async () => { await page.locator('.fd-nav a[href="#/onboard/personal/sleep"]').click(); await page.locator('.sleep-history').waitFor(); };
-    const switchPerspective = () => page.locator('.fd-perspective-switch').click();
+    const switchPerspective = () => demo(page, () => page.locator('.fd-perspective-switch').click());
     for (let i = 0; i < owners.length; i++) {
       const owner = owners[i];
-      await page.locator('.fd-view-as select').selectOption(owner); await openSleep(); await seek('05:55');
+      await demo(page, () => page.locator('.fd-view-as select').selectOption(owner)); await openSleep(); await seek('05:55');
       assert.equal(await page.locator('.sleep-history').getAttribute('data-sleep-owner'), owner);
       assert.equal(await page.locator('[data-sleep-day]').count(), 7);
       assert.equal(await page.locator('[data-sleep-point]').count(), [6,6,5][i]);
@@ -93,13 +94,13 @@ try {
       assert.equal((await saved()).version, 6);
     }
     // Sources is documentation only, identical across perspectives, and holds no private rows.
-    await page.locator('.fd-demo .fd-secondary-link').click();
+    await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.getByRole('tab', { name: locale === 'es' ? 'Fuentes' : 'Sources', exact: true }).click();
     const onboardSource = await page.locator('[data-fd30-sleep-source]').innerText();
     assert.ok(onboardSource.includes('fd30-sleep.1'));
     assert.doesNotMatch(onboardSource, /iss:sleep:|6:25|FD27|Mei Okada|Lucía Ferraro/);
     await switchPerspective(); await page.locator('[data-ops-card]').first().waitFor();
-    await page.locator('.fd-demo .fd-secondary-link').click();
+    await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.getByRole('tab', { name: locale === 'es' ? 'Fuentes' : 'Sources', exact: true }).click();
     assert.equal(await page.locator('[data-fd30-sleep-source]').innerText(), onboardSource);
     await switchPerspective(); await sameTime('23:59');

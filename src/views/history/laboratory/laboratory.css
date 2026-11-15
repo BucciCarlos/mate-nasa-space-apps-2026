@@ -1,0 +1,9 @@
+.laboratory-history { min-width: 0; }
+.laboratory-history button { min-height: 44px; padding: .65rem; margin: .3rem; cursor: pointer; }
+.laboratory-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .6rem; margin-block: 1rem; }
+.laboratory-days > div, .laboratory-rows > li { border: 1px solid #64777a; border-radius: .5rem; padding: .8rem; }
+.laboratory-days span, .laboratory-days small { display: block; margin-top: .4rem; }
+.laboratory-rows { list-style: none; padding: 0; display: grid; gap: .8rem; }
+.laboratory-history dl { display: grid; grid-template-columns: minmax(100px, 1fr) minmax(0, 2fr); gap: .5rem; }
+.laboratory-history dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .laboratory-history dl { grid-template-columns: 1fr; } }

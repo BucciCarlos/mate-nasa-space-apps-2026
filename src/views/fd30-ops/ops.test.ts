@@ -181,7 +181,7 @@ describe('OPS01 bilingual rendering and absence states', () => {
         const out = renderToStaticMarkup(createElement(AppProvider, { children: createElement(I18nProvider, { locale,
           children: createElement(Fd30Preview, { page: 'ground' }) }) }));
         expect(out).toContain('data-surface="ground"');
-        const demo = out.split('<section class="fd-demo"')[1].split('<div class="fd-workspace"')[0];
+        const demo = out.split('<section class="fd-demo fd-demo-panel"')[1].split('<div class="fd-workspace"')[0];
         expect(demo).toContain(FD30_PUBLIC_TEXT[locale].switchToOnboard);
         expect(demo.match(/fd-perspective-switch/g)).toHaveLength(1);
         expect(demo.match(/fd-secondary-link/g)).toHaveLength(1);

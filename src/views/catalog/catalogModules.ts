@@ -62,8 +62,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       {
         id: 'fd30-exercise', status: 'available', verified: true,
         label: t('FD30 exercise sessions', 'Sesiones de ejercicio FD30'),
-        note: t('Simulated equipment workflow (planned, in progress, completed) for your own profile. Personal: not sent to Ground.',
-          'Flujo de equipo simulado (previsto, en curso, finalizado) para tu propio perfil. Personal: no se envía a Tierra.'),
+        note: t('Equipment workflow (planned, in progress, completed) for your own profile. Personal: not sent to Ground.',
+          'Flujo de equipo (programado, en curso, finalizado) para tu propio perfil. Personal: no se envía a Tierra.'),
         href: { onboard: '#/onboard/personal/exercise' },
       },
       {
@@ -104,13 +104,13 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
     title: t('Immune system', 'Sistema inmunitario'),
     solves: t('Would explain the immune-research context and, later, show real evidence from another crew, kept separate.',
       'Explicaría el contexto de investigación inmunitaria y, más adelante, mostraría evidencia real de otra tripulación, por separado.'),
-    onboard: t('What is studied about immune changes. Nothing here is about you.',
-      'Qué se estudia sobre los cambios inmunitarios. Nada de esto es sobre vos.'),
+    onboard: t('Partly available: your own FD30 sample steps are in Laboratory, and the public evidence is from another crew. Immune monitoring is a future capability.',
+      'Disponible en parte: tus pasos de muestras de FD30 están en Laboratorio, y la evidencia pública es de otra tripulación. El seguimiento inmunológico es una capacidad futura.'),
     ground: {
-      operational: t('No operational data. Sample-collection time would appear in the agenda only if a protocol is approved.',
-        'Sin datos operativos. El tiempo de toma de muestras aparecería en la agenda solo si se aprueba un protocolo.'),
-      medical: t('A future evidence view of real data from another mission, never mapped to this crew.',
-        'Una futura vista de evidencia con datos reales de otra misión, nunca asignados a esta tripulación.'),
+      operational: t('Only the planned sample activity shown in the agenda, without type or result. No immune results.',
+        'Solo la actividad de muestras planificada que muestra la agenda, sin tipo ni resultado. Sin resultados inmunológicos.'),
+      medical: t('Public evidence from another crew, never assigned to this crew. No personal immune records.',
+        'Evidencia pública de otra tripulación, nunca asignada a esta tripulación. Sin registros inmunológicos personales.'),
     },
     backing: { kind: 'risk', sourceId: 'nasa-hrp-risks', risks: [t('Altered Immune System Responses', 'Respuestas alteradas del sistema inmunitario (Altered Immune System Responses)')] },
     dataNeeds: [
@@ -119,12 +119,34 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
     ],
     notBuilt: t('The evidence view is planned for a later milestone and has not been built.',
       'La vista de evidencia está prevista para un hito posterior y no está construida.'),
-    capabilities: [{
-      id: 'osd-575-cytokines', status: 'concept', verified: false,
-      label: t('Inspiration4 cytokine evidence (OSD-575)', 'Evidencia de citoquinas de Inspiration4 (OSD-575)'),
-      note: t('Not implemented. The dataset is registered; its cytokine subset is pending verification.',
-        'No implementada. El conjunto de datos está registrado; su subconjunto de citoquinas está pendiente de verificación.'),
-    }],
+    capabilities: [
+      {
+        id: 'my-samples', status: 'available', verified: true,
+        label: t('My samples', 'Mis muestras'),
+        note: t('Laboratory for your active profile: planned and recorded sample steps in FD30 (taken, analysis started, result available). No values, ranges or immune results.',
+          'Laboratorio del perfil activo: pasos de muestras planificados y registrados en FD30 (tomada, análisis iniciado, resultado disponible). Sin valores, rangos ni resultados inmunológicos.'),
+        href: { onboard: '#/onboard/personal/laboratory' },
+      },
+      {
+        id: 'i4-public-evidence', status: 'available', verified: true,
+        label: t('Inspiration4 · public evidence (another crew)', 'Inspiration4 · evidencia pública (otra tripulación)'),
+        note: t('Public OSDR data from Inspiration4, another crew. Not FD30 records and not this crew’s data. Opens on the laboratory tab.',
+          'Datos públicos de OSDR de Inspiration4, otra tripulación. No son registros de FD30 ni datos de esta tripulación. Se abre en la pestaña de laboratorio.'),
+        href: { onboard: '#/onboard/personal/evidence', ground: '#/demo/fd30/ground/evidence' },
+      },
+      {
+        id: 'osd-575-cytokines', status: 'concept', verified: false,
+        label: t('Inspiration4 cytokine evidence (OSD-575)', 'Evidencia de citoquinas de Inspiration4 (OSD-575)'),
+        note: t('Not implemented. The dataset is registered; its cytokine subset is pending verification.',
+          'No implementada. El conjunto de datos está registrado; su subconjunto de citoquinas está pendiente de verificación.'),
+      },
+      {
+        id: 'immune-monitoring', status: 'concept', verified: false,
+        label: t('Personal immune monitoring', 'Seguimiento inmunológico personal'),
+        note: t('Future capability. No immune measurements, sampling protocol or verified analytes exist for this crew.',
+          'Capacidad futura. No existen mediciones inmunológicas, protocolo de muestreo ni analitos verificados para esta tripulación.'),
+      },
+    ],
   },
   {
     id: 'MOD-SANS', specTier: 'concept', surfaces: ['onboard', 'ground'],
@@ -184,8 +206,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
   {
     id: 'MOD-CREW', specTier: 'concept', surfaces: ['onboard', 'ground'],
     title: t('Crew dynamics', 'Dinámica de la tripulación'),
-    solves: t('Would show shared operational planning context, such as overlaps and rest windows, without judging the team.',
-      'Mostraría contexto operativo compartido, como solapamientos y ventanas de descanso, sin juzgar al equipo.'),
+    solves: t('Shows schedule relationships and planned rest from the fictional mission plan.',
+      'Muestra relaciones horarias y descanso planificado del plan ficticio de misión.'),
     onboard: t('Share operational requests only when you choose. Specified, not implemented.', 'Compartir pedidos operativos solo cuando lo decidas. Especificado, no implementado.'),
     ground: {
       operational: t('Agenda overlaps and planned rest windows as operational facts.', 'Solapamientos de agenda y ventanas de descanso planificadas como hechos operativos.'),
@@ -199,6 +221,11 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
     notBuilt: t('The limited Commander view is specified but not built. No team metric is computed.',
       'La vista limitada del Comandante está especificada pero no construida. No se calcula ninguna métrica de equipo.'),
     capabilities: [{
+      id: 'fd30-crew-dynamics', status: 'available', verified: true,
+      label: t('Crew dynamics · mission plan', 'Dinámica de tripulación · plan de misión'),
+      note: t('FD30 plan only: shared blocks, schedule overlaps and planned rest. No attendance or health inference.', 'Solo plan FD30: bloques compartidos, coincidencias horarias y descanso planificado. Sin inferir asistencia ni salud.'),
+      href: { onboard: '#/onboard/personal/m/crew', ground: '#/demo/fd30/ground/m/crew' },
+    }, {
       id: 'commander-crew', status: 'concept', verified: true,
       label: t('Commander Crew view', 'Vista Tripulación del Comandante'),
       note: t('Specified, not implemented.', 'Especificada, no implementada.'),

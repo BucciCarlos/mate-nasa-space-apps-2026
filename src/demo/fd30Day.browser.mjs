@@ -1,5 +1,6 @@
 // Optional DAY01 browser acceptance against a local build; no application data is persisted outside its browser context.
 import assert from 'node:assert/strict';
+import { demo } from './demoDock.helpers.mjs';
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const browser = await chromium.launch({ headless: true,
   ...(process.env.BROWSER_BIN ? { executablePath: process.env.BROWSER_BIN } : {}), args: ['--no-sandbox'] });
@@ -14,21 +15,21 @@ try {
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(base);
     await page.getByRole('button', { name: locale.toUpperCase(), exact: true }).click();
-    assert.ok(Math.abs(Number(await page.getByRole('slider').inputValue()) - at('05:55')) < 60000);
-    await page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click();
+    assert.ok(Math.abs(Number(await demo(page, () => page.getByRole('slider').inputValue())) - at('05:55')) < 60000);
+    await demo(page, () => page.getByRole('button', { name: locale === 'es' ? 'Pausar' : 'Pause', exact: true }).click());
     const saved = () => page.evaluate(key => JSON.parse(sessionStorage.getItem(key)), key);
     const seek = async h => {
-      await page.getByRole('slider').evaluate((el, value) => {
+      await demo(page, () => page.getByRole('slider').evaluate((el, value) => {
         Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, value);
         el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, at(h));
-      assert.equal(Number(await page.getByRole('slider').inputValue()), at(h));
+      }, at(h)));
+      assert.equal(Number(await demo(page, () => page.getByRole('slider').inputValue())), at(h));
     };
-    const sameTime = async h => assert.equal(Number(await page.getByRole('slider').inputValue()), at(h));
-    const switchPerspective = () => page.locator('.fd-perspective-switch').click();
+    const sameTime = async h => assert.equal(Number(await demo(page, () => page.getByRole('slider').inputValue())), at(h));
+    const switchPerspective = () => demo(page, () => page.locator('.fd-perspective-switch').click());
     const plans = [];
     for (const owner of owners) {
-      await page.locator('.fd-view-as select').selectOption(owner);
+      await demo(page, () => page.locator('.fd-view-as select').selectOption(owner));
       await page.locator('.fd-nav a[href="#/onboard/personal/agenda"]').click();
       await page.locator(`[data-schedule-owner="${owner}"]`).waitFor();
       plans.push(await page.locator('[data-schedule-block]').evaluateAll(nodes => nodes.map(n => n.dataset.scheduleBlock)));
@@ -82,7 +83,7 @@ try {
       }
     }
     assert.equal(new Set(plans.map(p => JSON.stringify(p))).size, 3);
-    await page.locator('.fd-view-as select').selectOption(owners[0]);
+    await demo(page, () => page.locator('.fd-view-as select').selectOption(owners[0]));
     await page.locator('.fd-character').click(); await page.locator('#fd-ask').fill('DAY01 private draft');
     await page.locator('#fd-ask').press('Escape');
     await page.locator('.fd-nav a[href="#/onboard/personal/laboratory"]').click();
@@ -102,12 +103,12 @@ try {
     assert.equal(before.laboratory.filter(s => s.result).length, 2);
     assert.equal(new Set(before.processedIds).size, before.processedIds.length);
     assert.deepEqual(before.profiles[owners[0]].announcedIds, announced);
-    assert.equal(await page.locator('.fd-next').isDisabled(), true);
-    await page.getByRole('button', { name: locale === 'es' ? 'Reproducir' : 'Play', exact: true }).click();
+    assert.equal(await demo(page, () => page.locator('.fd-next').isDisabled()), true);
+    await demo(page, () => page.getByRole('button', { name: locale === 'es' ? 'Reproducir' : 'Play', exact: true }).click());
     assert.equal((await saved()).running, true); // end of script is not end of day
     await seek('23:59');
     assert.equal((await saved()).running, false);
-    assert.equal(await page.getByRole('button', { name: '+15 min', exact: true }).isDisabled(), true);
+    assert.equal(await demo(page, () => page.getByRole('button', { name: '+15 min', exact: true }).isDisabled()), true);
     await switchPerspective(); await page.locator('.ops-role select').selectOption('medical_professional');
     await page.locator('[data-ops-card]').first().locator('button').click();
     assert.equal(await page.locator('.ops-medical-empty').count(), 1);
@@ -132,7 +133,7 @@ try {
     const migratedPage = await migratedContext.newPage(); await migratedPage.goto(base);
     const state = await migratedPage.evaluate(key => JSON.parse(sessionStorage.getItem(key)), key);
     assert.equal(state.version, 6); assert.equal(state.activeCrewId, owners[2]);
-    assert.equal(await migratedPage.getByRole('slider').inputValue(), String(at('10:41')));
+    assert.equal(await demo(migratedPage, () => migratedPage.getByRole('slider').inputValue()), String(at('10:41')));
     assert.deepEqual(state.profiles[owners[2]], profile());
     await migratedContext.close();
     results.push({ locale, width, profiles: 3, midnight: true, perspectiveRoundTrips: true, replay: true, migration: true });

@@ -6,8 +6,9 @@ import type { ProfileState } from './fd30';
 import type { ChatDetail } from './fd30Chat';
 import '../styles/fd30-chat.css';
 
-export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, onOpen }: {
+export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, onOpen, time = Infinity }: {
   profile: ProfileState; character: string; logRef: RefObject<HTMLDivElement>;
+  time?: number;
   onAsk: (text: string, input?: 'text' | 'simulated_voice') => void;
   onDraft: (text: string) => void; onOpen: (detail: ChatDetail) => void;
 }) {
@@ -22,7 +23,7 @@ export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, o
         <summary>{c.voice}</summary><p>{c.voiceHint}</p>
         {CHAT_QUESTIONS.map(intent => <button type="button" key={intent} onClick={() => onAsk(c[intent], 'simulated_voice')}>{c[intent]}</button>)}
       </details>
-      {profile.turns.map((turn, i) => {
+      {profile.turns.filter(turn => turn.reply !== 'exercise' || !turn.answer || turn.answer.at <= time).map((turn, i) => {
         const text = FD30_CHAT_TEXT[turn.lang];
         const detail = turn.answer?.detail;
         return <div className="fd-chat-pair" key={i} lang={turn.lang}>

@@ -7,6 +7,8 @@ const MISSIONS: MissionId[] = ['iss', 'cislunar'];
 export function parseRoute(hash: string): Route | null {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '').replace(/\/+$/, '');
   const parts = path.split('/').filter(Boolean);
+  if (path === 'onboard/personal/m/crew') return { view: 'fd30', page: 'crew-dynamics' };
+  if (path === 'demo/fd30/ground/m/crew') return { view: 'fd30', page: 'ground-crew-dynamics' };
   if (path === 'demo/fd30') return { view: 'fd30', page: 'today' };
   if (path === 'demo/fd30/ground/agenda') return { view: 'fd30', page: 'ground-agenda' };
   if (path === 'demo/fd30/ground/catalog') return { view: 'fd30', page: 'ground-catalog' };
@@ -31,7 +33,9 @@ export function parseRoute(hash: string): Route | null {
 
 export function toHash(route: Route): string {
   switch (route.view) {
-    case 'fd30': return route.page === 'today' ? '#/demo/fd30' : route.page === 'ground' ? '#/demo/fd30/ground' : route.page.startsWith('ground-') ? `#/demo/fd30/ground/${route.page.slice(7)}` : `#/onboard/personal/${route.page}`;
+    case 'fd30': if (route.page === 'crew-dynamics') return '#/onboard/personal/m/crew';
+      if (route.page === 'ground-crew-dynamics') return '#/demo/fd30/ground/m/crew';
+      return route.page === 'today' ? '#/demo/fd30' : route.page === 'ground' ? '#/demo/fd30/ground' : route.page.startsWith('ground-') ? `#/demo/fd30/ground/${route.page.slice(7)}` : `#/onboard/personal/${route.page}`;
     case 'onboard': return `#/onboard/${route.page}`;
     case 'ground': return `#/ground/${route.missionId}/${route.page}`;
     case 'settings': return '#/settings';

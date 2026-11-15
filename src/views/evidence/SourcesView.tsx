@@ -1,3 +1,4 @@
+import { ExerciseProvenance } from '../history/exercise/ExerciseProvenance';
 import { SleepProvenance } from '../history/sleep/SleepProvenance';
 import { useLocale } from '../../i18n/I18nProvider';
 import type { EvidenceSource } from './evidenceTypes';
@@ -15,6 +16,7 @@ export function SourcesView({ sources }: { sources: readonly EvidenceSource[] })
       <h3 id="evd-sources-h">{S.title}</h3>
       <p>{S.intro}</p>
       <SleepProvenance />
+      <ExerciseProvenance />
       <p className="evd-muted">{S.count(sources.length)} · {S.thirdParty}</p>
       {sources.length === 0 ? <p className="evd-empty">{S.empty}</p> : (
         <ul className="evd-sources">
