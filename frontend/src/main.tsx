@@ -90,7 +90,7 @@ const router = createBrowserRouter([
   {
     path: '/demo/fd30',
     element: <Fd30Layout />,
-    children: [{ index: true, element: <Fd30Preview page="today" /> }],
+    children: [{ index: true, element: <Fd30Preview page="today" /> }, { path: 'agenda', element: <Fd30Preview page="agenda" /> }],
   },
   {
     path: '/onboard/personal',
