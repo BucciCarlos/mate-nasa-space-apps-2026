@@ -11,10 +11,10 @@ import { CompanionPanel } from '../views/onboard/CompanionPanel';
 export function NotFound() {
   const t = useT();
   return (
-    <div className="notfound">
+    <div>
       <h1 id="view-h" tabIndex={-1}>{t.common.notFoundTitle}</h1>
       <p>{t.common.notFoundBody}</p>
-      <Link className="btn btn-primary" to="/onboard/today">{t.common.home}</Link>
+      <Link className="inline-flex items-center gap-2 px-4 py-2 rounded-md font-bold bg-accent text-accent-fg no-underline" to="/onboard/today">{t.common.home}</Link>
     </div>
   );
 }
@@ -42,23 +42,23 @@ function Body({ children }: { children?: React.ReactNode }) {
   return (
     <I18nProvider locale={state.locale}>
       {!ready && (
-        <div className="loading-screen" role="status">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-2 bg-bg text-fg text-center p-4" role="status">
           {loadError
             ? <>
               <h1>{t.common.loadingTitle}</h1>
               <p>{t.common.loadError}</p>
-              <code className="loading-error">{loadError}</code>
+              <code className="text-red font-mono text-fs0">{loadError}</code>
             </>
             : <p>{t.common.loadingTitle}</p>}
         </div>
       )}
       {ready && (
       <Shell route={route} onRestart={restart}>
-        <div className={`layout${route.view === 'onboard' ? ' has-companion' : ''}`}>
+        <div className={`flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-4 p-4 items-start`}>
           <ErrorBoundary t={t} onRestart={() => { scenarioReset(Date.now()); navigate('/onboard/today'); }}>
-            <main id="main" className="main">{children ?? <Outlet />}</main>
+            <main id="main" className="min-w-0">{children ?? <Outlet />}</main>
           </ErrorBoundary>
-          {route.view === 'onboard' && <CompanionPanel announce={announce} />}
+          {route.view === 'onboard' ? <CompanionPanel announce={announce} /> : <div className="hidden xl:block" aria-hidden="true" />}
         </div>
         <div className="sr-only" aria-live="polite" aria-atomic="true" aria-label={t.a11y.liveRegion}>{live}</div>
       </Shell>

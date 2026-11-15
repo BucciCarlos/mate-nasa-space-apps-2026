@@ -10,7 +10,7 @@ export function LinkBanner() {
   const link = state.missions[ONBOARD_MISSION_ID].link;
   if (link.status === 'up' || link.downSinceMs === null) return null;
   return (
-    <div className="banner banner-linkdown" role="status">
+    <div className="my-2 px-3 py-2 rounded-md border border-red border-l-4 bg-red-bg text-red font-semibold" role="status">
       <span aria-hidden="true">⚠</span> {t.onboard.linkDownBanner({ time: mt.time(link.downSinceMs) })}
     </div>
   );
