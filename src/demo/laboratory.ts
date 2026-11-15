@@ -14,12 +14,11 @@ export interface LabEvent {
   sourceReview?: 'flagged' | 'not_flagged' | 'not_reported';
   handlingStatus?: 'stored_awaiting_analysis' | 'not_reported';
 }
-function event(kind: LabKind, sampleType: SampleType, time: string, sequence: number): LabEvent {
-  const sampleId = sampleType === 'blood' ? BLOOD_SAMPLE : URINE_SAMPLE;
+function event(kind: LabKind, sampleType: SampleType, time: string, sequence: number, sampleId = sampleType === 'blood' ? BLOOD_SAMPLE : URINE_SAMPLE, crewId: CrewId = 'iss:crew-lf'): LabEvent {
   return { id: `${sampleId}:${kind}`, missionId: 'iss', scenarioSequence: sequence, kind,
     sourceId: kind === 'lab.sample_taken' ? 'demo-collection' : 'demo-analyzer', origin: 'simulated',
     occurredAt: `2027-03-10T${time}:00Z`, receivedAt: `2027-03-10T${time}:00Z`,
-    association: { status: 'confirmed', crewId: 'iss:crew-lf' }, sampleId, sampleType, measurement: null };
+    association: { status: 'confirmed', crewId }, sampleId, sampleType, measurement: null };
 }
 export const LAB_EVENTS: readonly LabEvent[] = [
   event('lab.sample_taken', 'blood', '09:15', 2),
@@ -28,6 +27,22 @@ export const LAB_EVENTS: readonly LabEvent[] = [
   event('lab.analysis_started', 'urine', '09:30', 5),
   event('lab.result_available', 'blood', '11:45', 8),
   event('lab.result_available', 'urine', '11:50', 9),
+];
+/**
+ * LAB04: own fictional scenario records for Tomás and Mei. They are separate samples with their own IDs, owners, plans and
+ * times; nothing is copied from Lucía's samples and no value is ever produced.
+ * Tomás: one blood sample (planned 13:15, taken 13:15, analysis 13:20, result AVAILABILITY reported 15:45, no values).
+ * Mei: one urine sample (planned 16:15, taken 16:15, analysis 16:20, no result in the scripted day).
+ * Times sit in free windows of their agendas (Tomás 13:00–14:00 after the midday meal; Mei 16:00–18:00 after sample processing).
+ */
+export const TI_BLOOD_SAMPLE = 'iss:sample-ti-b1';
+export const MO_URINE_SAMPLE = 'iss:sample-mo-u1';
+export const CREW_LAB_EVENTS: readonly LabEvent[] = [
+  event('lab.sample_taken', 'blood', '13:15', 10, TI_BLOOD_SAMPLE, 'iss:crew-ti'),
+  event('lab.analysis_started', 'blood', '13:20', 11, TI_BLOOD_SAMPLE, 'iss:crew-ti'),
+  event('lab.result_available', 'blood', '15:45', 12, TI_BLOOD_SAMPLE, 'iss:crew-ti'),
+  event('lab.sample_taken', 'urine', '16:15', 13, MO_URINE_SAMPLE, 'iss:crew-mo'),
+  event('lab.analysis_started', 'urine', '16:20', 14, MO_URINE_SAMPLE, 'iss:crew-mo'),
 ];
 export const LAB_HISTORY: LabEvent = {
   id: `${HISTORICAL_BLOOD_SAMPLE}:lab.sample_taken`, missionId: 'iss', scenarioSequence: 1,
@@ -40,6 +55,16 @@ export const LAB_PLAN = {
   blood: { id: 'iss:fd30:lf:planned-blood', start: '2027-03-10T09:15:00Z', end: '2027-03-10T09:20:00Z' },
   urine: { id: 'iss:fd30:lf:planned-urine', start: '2027-03-10T09:25:00Z', end: '2027-03-10T09:30:00Z' },
 } as const;
+export interface LabPlanSlot { id: string; start: string; end: string; sampleId: string }
+/** Planned FD30 collection per owner and sample type. A plan is not a collection and never implies a state. */
+export const LAB_PLANS: Record<CrewId, Partial<Record<SampleType, LabPlanSlot>>> = {
+  'iss:crew-lf': { blood: { ...LAB_PLAN.blood, sampleId: BLOOD_SAMPLE }, urine: { ...LAB_PLAN.urine, sampleId: URINE_SAMPLE } },
+  'iss:crew-ti': { blood: { id: 'iss:fd30:ti:planned-lab', start: '2027-03-10T13:15:00Z', end: '2027-03-10T13:20:00Z', sampleId: TI_BLOOD_SAMPLE } },
+  'iss:crew-mo': { urine: { id: 'iss:fd30:mo:planned-lab', start: '2027-03-10T16:15:00Z', end: '2027-03-10T16:20:00Z', sampleId: MO_URINE_SAMPLE } },
+};
+export const labPlanSlots = (owner: CrewId): (LabPlanSlot & { sampleType: SampleType })[] =>
+  (['blood', 'urine'] as const).flatMap(sampleType => { const slot = LAB_PLANS[owner]?.[sampleType]; return slot ? [{ ...slot, sampleType }] : []; });
+export const LAB_PLAN_IDS: readonly string[] = (Object.keys(LAB_PLANS) as CrewId[]).flatMap(owner => labPlanSlots(owner).map(slot => slot.id));
 export interface LabSample {
   id: string; crewId: CrewId; sampleType: SampleType;
   collection: LabEvent | null; analysis: LabEvent | null; result: LabEvent | null;

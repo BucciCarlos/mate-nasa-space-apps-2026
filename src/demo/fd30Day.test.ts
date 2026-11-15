@@ -21,7 +21,8 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
     expect(previewTime(freshPreview(1000), 1000)).toBe(ENTRY);
     expect(previewTime(seek(freshPreview(1000), DAY_START - 100), 1000)).toBe(DAY_START);
     let s = seek(freshPreview(1000), at('11:50'));
-    expect(nextPreviewEvent(s)).toBeUndefined();
+    // After Lucía's nine events the next scripted event is Tomás's own sample collection (LAB04); Lucía's nine are all received.
+    expect(nextPreviewEvent(s)).toMatchObject({ association: { crewId: 'iss:crew-ti' }, kind: 'lab.sample_taken' });
     expect(s.running).toBe(true);
     expect(previewTime(s, 61000)).toBe(at('11:51'));
     s = seek(s, END - 1000);
@@ -69,8 +70,8 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
       expect(s.processedIds).toEqual(projectDomain(at('11:50')).processedIds);
       expect(previewReduce(s, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) })).toBe(s);
     }
-    expect(DAY_EVENTS).toHaveLength(9);
-    expect(DAY_EVENTS.every(e => e.association.crewId === OWNER)).toBe(true);
+    expect(DAY_EVENTS.filter(e => e.association.crewId === OWNER)).toHaveLength(9); // Lucía's nine are unchanged
+    expect(DAY_EVENTS.filter(e => e.association.crewId !== OWNER).map(e => e.association.crewId)).toEqual(['iss:crew-ti', 'iss:crew-ti', 'iss:crew-ti', 'iss:crew-mo', 'iss:crew-mo']);
   });
   it('preserves every previous block and adds distinct non-overlapping plans through the visual boundary', () => {
     expect(PLAN_VERSION).toBe('fd30-plan.2');

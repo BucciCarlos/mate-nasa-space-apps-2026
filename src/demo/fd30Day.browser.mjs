@@ -103,7 +103,8 @@ try {
     assert.equal(before.laboratory.filter(s => s.result).length, 2);
     assert.equal(new Set(before.processedIds).size, before.processedIds.length);
     assert.deepEqual(before.profiles[owners[0]].announcedIds, announced);
-    assert.equal(await demo(page, () => page.locator('.fd-next').isDisabled()), true);
+    // LAB04: Lucía's nine events are done, but the mission still has Tomás's and Mei's lab events (13:15–16:20).
+    assert.equal(await demo(page, () => page.locator('.fd-next').isDisabled()), false);
     await demo(page, () => page.getByRole('button', { name: locale === 'es' ? 'Reproducir' : 'Play', exact: true }).click());
     assert.equal((await saved()).running, true); // end of script is not end of day
     await seek('23:59');

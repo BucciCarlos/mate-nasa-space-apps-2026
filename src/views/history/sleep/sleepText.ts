@@ -18,7 +18,7 @@ const en = {
   sourceCoverage: 'Nightly duration in minutes, dated by awakening day FD01–FD30 (2027-02-09 to 2027-03-10). Distinct private histories; missing nights are omitted, never filled.',
   sourceTiming: 'A record is available only after both occurrence and receipt, and any linked DAY01 event. Historical preload is not announced as news. No live events are added for Tomás or Mei.',
   sourceAccess: 'Only the active Onboard profile can consult its history. Operations receives the plan; Medical receives no private history and no new authorized summary.',
-  sourceCalc: 'Display converts minutes to h:min. Counts and the view median use received records only; gaps never enter as zero. No sleep phases, scores, clinical limits or stress inference.',
+  sourceCalc: 'Display converts minutes to h:min. Counts and the view median use received records only; gaps never enter as zero. No sleep phases, clinical limits or stress inference. The demonstration score is explained separately.',
   sourceFields: 'Adapter · version · class · scope · unit', sourceFile: 'Canonical source',
   sourceSeparate: 'The published Barger aggregate and NASA context below remain separate evidence from other crews; none of those values is assigned to any crew member.',
 };
@@ -42,7 +42,7 @@ const es: typeof en = {
   sourceCoverage: 'Duración nocturna en minutos, fechada por el día del despertar FD01–FD30 (2027-02-09 a 2027-03-10). Historiales privados distintos; las noches ausentes se omiten, nunca se rellenan.',
   sourceTiming: 'Un registro está disponible solo después de su ocurrencia y recepción, y del evento DAY01 al que esté vinculado. La precarga histórica no se anuncia como novedad. No se agregan eventos en vivo de Tomás ni Mei.',
   sourceAccess: 'Solo el perfil activo de A bordo consulta su historial. Operaciones recibe el plan; Medicina no recibe el historial privado ni nuevos resúmenes autorizados.',
-  sourceCalc: 'La vista convierte minutos a h:min. Los conteos y la mediana de la vista usan solo registros recibidos; los huecos nunca cuentan como cero. Sin fases, puntajes, límites clínicos ni inferencias de estrés.',
+  sourceCalc: 'La vista convierte minutos a h:min. Los conteos y la mediana de la vista usan solo registros recibidos; los huecos nunca cuentan como cero. Sin fases, límites clínicos ni inferencias de estrés. El puntaje de demostración se explica por separado.',
   sourceFields: 'Adaptador · versión · clase · ámbito · unidad', sourceFile: 'Fuente única',
   sourceSeparate: 'El agregado publicado de Barger y el contexto NASA de abajo siguen como evidencia de otras tripulaciones; ninguno de sus valores se asigna al perfil de ningún tripulante.',
 };

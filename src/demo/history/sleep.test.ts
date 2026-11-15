@@ -73,7 +73,7 @@ describe('HIST01 canonical fictional sleep records', () => {
       expect(s.profiles[OWNER].announcedIds).toEqual(announced);
       expect(previewReduce(s, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) })).toBe(s);
     }
-    expect(DAY_EVENTS).toHaveLength(9);
+    expect(DAY_EVENTS.filter(e => e.association.crewId === OWNER)).toHaveLength(9); // Lucía's nine unchanged; LAB04 adds only other owners' lab events
     expect(DAY_EVENTS.filter(e => e.kind === 'sleep.episode_ended')).toHaveLength(1);
     for (const c of CREW.slice(1)) expect(sleepHistory(own(c.id, '23:59'), viewer(c.id), at('23:59'), 'all')?.records.some(r => r.fd === 30)).toBe(false);
   });

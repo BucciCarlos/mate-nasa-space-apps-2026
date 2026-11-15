@@ -1,0 +1,6 @@
+.sleep-score { margin-block: 1.5rem; padding: 1rem; border: 1px solid currentColor; border-radius: .75rem; }
+.sleep-score > strong { font-size: 2rem; font-variant-numeric: tabular-nums; }
+.sleep-score dl { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: .5rem 1rem; }
+.sleep-score dd { margin: 0; }
+.sleep-score-formula { overflow-wrap: anywhere; font-size: .9rem; }
+@media (max-width: 480px) { .sleep-score dl { grid-template-columns: 1fr; } .sleep-score dd { margin-block-end: .5rem; } }

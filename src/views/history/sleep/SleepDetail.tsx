@@ -7,6 +7,7 @@ import { planFor } from '../../../demo/fd30Plan';
 import { useLocale } from '../../../i18n/I18nProvider';
 import { SLEEP_TEXT } from './sleepText';
 import './sleep.css';
+import { SleepScore } from './SleepScore';
 
 export function SleepDetail({ state, owner, time }: { state: PreviewState; owner: CrewId; time: number }) {
   const locale = useLocale(), t = SLEEP_TEXT[locale];
@@ -64,6 +65,7 @@ export function SleepDetail({ state, owner, time }: { state: PreviewState; owner
       <p className="fd-eyebrow">{t.detail}</p><h2 id="sleep-detail-h">{fdLabel(selected.fd)} · {fdDate(selected.fd)}</h2>
       <p>{t.recorded}</p><strong className="sleep-duration" data-sleep-duration>{selected.record ? `${sleepDuration(selected.record.durationMinutes)} ${t.units}` : status(selected)}</strong>
       {selected.record && <dl><dt>{t.ended}</dt><dd>{instant(selected.record.occurredAt)}</dd><dt>{t.received}</dt><dd>{instant(selected.record.receivedAt)}</dd></dl>}
+      <SleepScore state={state} owner={owner} time={time} fd={selected.fd} />
       <div className="sleep-plan"><h3>{t.planned}</h3>{planned ? <p>{instant(planned.start)} → {instant(planned.end)}</p> : <p>{t.noPlan}</p>}<p>{t.planLimit}</p></div>
     </section>
     <details className="sleep-table"><summary>{t.table}</summary><div><table><thead><tr><th>{t.night}</th><th>{t.date}</th><th>{t.recorded} ({t.units})</th><th>{t.status}</th></tr></thead>

@@ -1,6 +1,6 @@
 import type { CrewId, PreviewState } from '../fd30';
 import type { GroundRole } from '../../state/types';
-import { labEvents, labStatus, LAB_PLAN } from '../laboratory';
+import { labEvents, labPlanSlots, labStatus } from '../laboratory';
 import type { LabSample, LabEvent } from '../laboratory';
 import { fdDate, FLIGHT_DAY_ONE } from './sleep';
 
@@ -29,9 +29,9 @@ export function laboratoryHistory(state: PreviewState, viewer: LaboratoryViewer,
   const days = Array.from({ length: currentFd - firstFd + 1 }, (_, i) => {
     const fd = firstFd + i;
     const samples = records.filter(row => labEvents(row.sample).some(e => e.occurredAt.slice(0,10) === fdDate(fd)));
-    // Only FD30 has current plan coverage. Earlier empty days have unknown coverage.
-    const plans = fd === 30 && viewer.owner === 'iss:crew-lf' ? Object.values(LAB_PLAN) : [];
-    return { fd, samples, plans, status: samples.length ? 'recorded' : fd === 30 && viewer.owner !== 'iss:crew-lf' ? 'no_activity' : 'no_record' };
+    // Only FD30 has current plan coverage (each owner's own planned collections). Earlier empty days have unknown coverage.
+    const plans = fd === 30 ? labPlanSlots(viewer.owner) : [];
+    return { fd, samples, plans, status: samples.length ? 'recorded' : fd === 30 && !plans.length ? 'no_activity' : 'no_record' };
   });
   return { owner: viewer.owner, firstFd, currentFd, records, days };
 }

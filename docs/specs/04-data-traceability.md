@@ -508,7 +508,7 @@ After the confirmed finish, show a session summary (reported start/end, calculat
 
 ### 11.8 HIST01 — Original fictional sleep duration history
 
-Authorized solely for the active Onboard profile, distinct from real measured evidence and from the existing metadata-only FD29 workflow history. `src/demo/history/sleep.ts` is the single canonical original script; `sleepSource.ts` publishes its provenance (`demo-body`, `fd30-sleep.1`, `fictional_fd30`, `crew_private`, unit min). Stable owner/FD IDs, awakening FD/date, occurrence and receipt timestamps and optional existing-event reference identify each record. A missing night emits no record. No NASA/population values are used to generate these numbers; no phases, quality/sleep scores, thresholds, stress inference or health verdicts are permitted.
+Authorized solely for the active Onboard profile, distinct from real measured evidence and from the existing metadata-only FD29 workflow history. `src/demo/history/sleep.ts` is the single canonical original script; `sleepSource.ts` publishes its provenance (`demo-body`, `fd30-sleep.1`, `fictional_fd30`, `crew_private`, unit min). Stable owner/FD IDs, awakening FD/date, occurrence and receipt timestamps and optional existing-event reference identify each record. A missing night emits no record. No NASA/population values are used to generate these numbers; no phases, clinical quality scores, thresholds, stress inference or health verdicts are permitted. SLEEP03 permits only the original nonclinical demonstration score specified in §11.11.
 
 There are 85 records: Lucía 28 (FD01–FD30 excluding FD10/FD19), Tomás 29 (through FD29), Mei 28 (through FD29 excluding FD27). Lucía's last three scripted nights FD28/29/30 are 405/395/385 min, a moderate original fictional decline; Tomás has a different stable variation and Mei small variation with one missing historical night. These parameters describe only the demonstration script and are not physiological expectations. FD30 lacks Tomás/Mei records in this cut: do not generate arrival events or infer duration from their 06:00 planned end.
 
@@ -531,3 +531,26 @@ Tomás's comparable ergometer protocol `demo-steady-60.1` has nine earlier sessi
 Lucía and Mei retain small variation around their own historical references. Lucía's existing FD30 completed session is derived at query time from the same confirmed start/finish and `fd30-tel.2` points: 60 elapsed minutes, 61 inclusive timestamps, 57/60 minute intervals with power. Means exclude the final endpoint and the three null intervals, with no interpolation; no pulse summary is stored. This corrects PLAN03 §7.7's 58/61-timestamps-as-minutes proposal. Its `demo-live-60.1` protocol has no defined equivalence to `demo-steady-60.1`, so it is displayed separately with insufficient comparable history. This explicitly documents the remaining protocol limitation rather than inventing comparability. Duration is simulated event elapsed time, not proof of exertion.
 
 Comparison is a scenario calculation following 02 §12.12. The public Sources panel carries metadata/rules only, without private IDs/values/counts. Neither public evidence nor a reservation confirms activity. No new NASA source verification or clinical claim is introduced by HIST02.
+
+### 11.10 LAB04 — Own fictional laboratory journeys for Tomás and Mei
+
+Scoped exception to the earlier statement that Tomás and Mei receive no laboratory events (HIST03). Original fictional workflow records only: no value, no unit, no review flag, no clinical meaning, no copy of Lucía's samples, and no event in Lucía's journey changes. Lucía keeps her nine scripted events, her two FD30 samples and the FD29 stored sample.
+
+| Owner | Sample (ID) | Plan block (FD30) | Collection | Analysis | Result availability |
+|---|---|---|---|---|---|
+| Tomás | blood `iss:sample-ti-b1` | `iss:fd30:ti:planned-lab`, 13:15–13:20 | 13:15 | 13:20 | **15:45**, reported without values |
+| Mei | urine `iss:sample-mo-u1` | `iss:fd30:mo:planned-lab`, 16:15–16:20 | 16:15 | 16:20 | **none** in the scripted day |
+
+Times sit in free windows of each agenda (Tomás 13:00–14:00 after the midday meal; Mei 16:00–18:00 after sample processing). The plan block is a plan, not a collection: until the collection event is received Mate says “no collection event received yet”, History/Detail list no sample, and Today shows the collection as planned, never as a state. Each event has occurrence = receipt, source `demo-collection` / `demo-analyzer`, confirmed association with its owner, `measurement: null`, and scenario sequences 10–14. The day now has 14 scripted events (Lucía's nine + five); Next event is mission-wide and also stops at these five times.
+
+Surfaces read the same canonical receipts (`state.laboratory`): Today card, History 7/30 (FD30 day `plans` per owner), Detail (the sample's own plan time) and the written Mate answer (the owner's own samples from their plan only: Tomás “Blood”, Mei “Urine sample”; never Lucía's “Secondary urine sample”, never the historical FD29 sample). Ground and Medicine keep the generic “Planned personal activity” block with no sample type, state or record; the new plan IDs carry no sample type.
+
+
+### 11.11 SLEEP03 — Demonstration sleep score
+
+The approved SLEEP03 exception supplements six existing FD28/FD29 records (two per owner) with explicit fictional bed episodes, source `mate-scenario-bed`, version `fd30-bed.1`. Duration records remain unchanged. Never derive bed time from the agenda. Formula, inputs, rounding, comparison and missing-data rules are documented in `docs/SLEEP03.md`; parameters are scenario choices, not NASA/Samsung targets or clinical thresholds. Only the active Onboard owner's Sleep detail displays this derived score. Missing bed data yields no score; FD30 remains without bed data. Ground and Medicine receive no score or private history.
+
+
+### 11.12 PUB07 — Laboratory audio and mounted brand
+
+Laboratory spoken summaries are optional English audio for the compatible sample state at the query timestamp: Lucía's four exact state pairs; Tomás's own blood result availability; Mei's own urine analysis. Question then answer; an incompatible query has no audio. Closing chat, switching owner/perspective/page or rewinding before the query cancels playback. A failed clip leaves the complete written EN/ES reply available. Successful guided playback may open only the single result sample explicitly named by the selected dialogue; two-result or analysis summaries choose none. CHAT02 hides future Laboratory reply snapshots on rewind and restores them unchanged when the cursor returns. No new private Ground visibility is granted. Public audio inventory and production provenance: `docs/PUB07.md` and `docs/voice-inventory.json`. The supplied logo is mounted in both FD30 header perspectives with an accessible brand name.

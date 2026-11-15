@@ -6,7 +6,7 @@ import { scheduleInterval, scheduleContinuation } from './fd30Day';
 import { SCHEDULE_TEXT } from '../i18n/fd30Schedule';
 import type { CrewId, PreviewState, Turn } from './fd30';
 import { EQUIPMENT, planFor, plannedExercise } from './fd30Plan';
-import { BLOOD_SAMPLE, URINE_SAMPLE } from './laboratory';
+import { labPlanSlots } from './laboratory';
 import type { LabEvent } from './laboratory';
 import { FD30_CHAT_TEXT } from '../i18n/fd30Chat';
 
@@ -43,15 +43,17 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
     return { at: time, detail: 'exercise', body: `${reservation}\n${status}\n${summary}\n${text.count(history?.records.length ?? 0, history?.days.length ?? 7)}` };
   }
   if (intent === 'laboratory') {
-    const samples = [BLOOD_SAMPLE, URINE_SAMPLE].map(id => state.laboratory.find(s => s.crewId === owner && s.id === id));
-    // A historical preload can never answer a question about today's analyses.
-    const hasPlan = planFor(owner).some(b => b.id === 'iss:fd30:lf:planned-blood');
-    if (!hasPlan && !samples.some(Boolean)) return { at: time, detail: 'laboratory', body: t.noLabs };
+    // Only this owner's own FD30 samples (from their plan), by canonical ID. A historical preload or another profile's
+    // sample can never answer, and a reservation never implies a state: no event received means "no collection received".
+    const slots = labPlanSlots(owner);
+    const samples = slots.map(slot => state.laboratory.find(s => s.crewId === owner && s.id === slot.sampleId));
+    if (!slots.length && !samples.some(Boolean)) return { at: time, detail: 'laboratory', body: t.noLabs };
     const status = (sample: typeof samples[number]) => {
       const events = [sample?.collection, sample?.analysis, sample?.result].filter((e): e is LabEvent => !!e && due(e));
       return events.some(e => e.kind === 'lab.result_available') ? t.labResult : events.some(e => e.kind === 'lab.analysis_started') ? t.labAnalyzing : events.length ? t.labCollected : t.labWaiting;
     };
-    return { at: time, detail: 'laboratory', body: `${t.blood}: ${status(samples[0])}.\n${t.urine}: ${status(samples[1])}.\n${t.labLimit}` };
+    const lines = slots.map((slot, i) => `${slot.sampleType === 'blood' ? t.blood : slots.length === 1 ? t.urineOwn : t.urine}: ${status(samples[i])}.`);
+    return { at: time, detail: 'laboratory', body: `${lines.join('\n')}\n${t.labLimit}` };
   }
   if (intent === 'sleep') {
     const history = sleepHistory(state, { perspective: 'onboard', owner }, time, 'last7');

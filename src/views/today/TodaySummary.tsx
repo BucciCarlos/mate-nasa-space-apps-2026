@@ -7,7 +7,7 @@ import { EQUIPMENT, plannedExercise } from '../../demo/fd30Plan';
 import { exerciseSessionView } from '../../demo/exerciseSession';
 import { exerciseHistory } from '../../demo/history/exercise';
 import { fdDate, fdLabel, sleepDuration, sleepHistory } from '../../demo/history/sleep';
-import { labEvents, labSamples, labStatus } from '../../demo/laboratory';
+import { labEvents, labPlanSlots, labSamples, labStatus } from '../../demo/laboratory';
 import type { LabSample } from '../../demo/laboratory';
 import { ownCheckins } from '../fd30-ops/opsState';
 import type { OpsState } from '../fd30-ops/opsState';
@@ -101,6 +101,8 @@ export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExerc
   const byType = (['blood', 'urine'] as const).flatMap(type => { const found = samples.filter(s => s.sampleType === type).sort(order).at(-1); return found ? [found] : []; });
   const labStatusText = { planned: ft.labPlan, collection: ft.labTaken, analysis: ft.labAnalyzing, result: ft.labResult };
   const newestSample = [...byType].sort(order).at(-1);
+  // A profile with no received sample yet but its own planned collection (Tomás, Mei before the event): show the PLAN as a plan, never as a state.
+  const plannedOnly = byType.length ? [] : labPlanSlots(owner);
 
   // Wellbeing: only the active owner's own check-ins already entered at this cursor. Text is never shown here.
   const checkin = ownCheckins(ops, owner, time).at(-1) ?? null;
@@ -163,6 +165,8 @@ export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExerc
         <span className="td-rows" id="td-lab-v">{byType.length ? byType.map(s => <span className="td-row" key={s.id} data-lab-sample={s.id}>
           <StatusIcon kind={labStatus(s)} />
           <span className="td-rowtext"><b>{labStatusText[labStatus(s)]}</b><span>{s.sampleType === 'blood' ? ft.labBlood : ft.labUrine} · {fmtDate(Date.parse(lastEvent(s).receivedAt), locale)} {fmtClock(Date.parse(lastEvent(s).receivedAt))} {t.sampleTime}</span></span></span>)
+          : plannedOnly.length ? plannedOnly.map(slot => <span className="td-row" key={slot.id} data-lab-planned={slot.sampleId}><StatusIcon kind="planned" />
+              <span className="td-rowtext"><b>{ft.labPlan}</b><span>{slot.sampleType === 'blood' ? ft.labBlood : ft.labUrine} · {fmtClock(Date.parse(slot.start))} {t.sampleTime}</span></span></span>)
           : <span className="td-row"><StatusIcon kind="empty" /><span className="td-rowtext"><b>{t.noSamples}</b></span></span>}</span>
       </Card>
       <Card id="td-wellbeing" className="td-wellbeing" href="#/onboard/personal/wellbeing" labelledby="td-wb-t td-wb-v">

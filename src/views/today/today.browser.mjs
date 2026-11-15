@@ -93,7 +93,8 @@ try {
       if (owner !== owners[0]) assert.deepEqual(labs, [], tag); else assert.ok(labs.length >= 1, tag);
       await keyboardOpen('#td-lab'); await page.waitForURL(/personal\/laboratory/); await page.locator('#fd-view-h').waitFor();
       assert.match(page.url(), /personal\/laboratory/, tag);
-      for (const id of labs) await page.locator(`[data-sample-id="${id}"]`).waitFor();
+      // INT01: the module lists each received sample in its history and opens the selected one in detail.
+      for (const id of labs) await page.locator(`[data-laboratory-record="${id}"]`).waitFor();
       if (labs.length && moment === '11:50') assert.ok(await page.locator('.fd-session-highlight[data-sample-id]').count() >= 1, `highlighted sample ${tag}`);
       assert.equal(await clock(), before, `opening Laboratory keeps the clock ${tag}`);
       await backToday();

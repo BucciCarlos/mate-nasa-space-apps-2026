@@ -1,0 +1,83 @@
+[
+  {
+    "file": "mate-lab-analyzing-en-02.mp3",
+    "text": "Both samples are being analyzed. No results have been received yet.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 4.205714,
+    "integrated_lufs": -16.51,
+    "true_peak_dbtp": -1.26,
+    "sha256": "3792d36c5995fd4eeb9311afbd330594ad28c47b77f49ae20cb491399dc16819"
+  },
+  {
+    "file": "mate-lab-blood-result-en-03.mp3",
+    "text": "Blood result availability has been reported. The urine sample is still being analyzed. There are no usable values to show, and source review has not been reported.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 9.377959,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -1.47,
+    "sha256": "e01a31c9be3194206933655aea97f068f60c3d83f4ee1e2064c46b27c129a6c6"
+  },
+  {
+    "file": "mate-lab-both-results-en-02.mp3",
+    "text": "Result availability has been reported for both samples. There are no usable values to show.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 5.276735,
+    "integrated_lufs": -16.47,
+    "true_peak_dbtp": -1.26,
+    "sha256": "13af8543105178c1d713131666ea7fad07a5ecc37cf41779d41db3fe7c35dffc"
+  },
+  {
+    "file": "mate-lab-mei-answer-en-08.mp3",
+    "text": "Your urine sample is still being analyzed. The result has not arrived yet.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 4.649796,
+    "integrated_lufs": -16.52,
+    "true_peak_dbtp": -1.26,
+    "sha256": "2153d79a0d8552b0919283e1671c3f3dab9c0ab189b0b493878845eb8f0a1c6c"
+  },
+  {
+    "file": "mate-lab-mei-question-en-08.mp3",
+    "text": "What is happening with my urine sample?",
+    "voice": "en_US-ljspeech-medium",
+    "duration_seconds": 2.115918,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -2.88,
+    "sha256": "7fcbc91b88bab0b6eb7185d18c367335ae137a8df79ccb7742e3eaa367472fc3"
+  },
+  {
+    "file": "mate-lab-question-en-03.mp3",
+    "text": "Have my lab results arrived?",
+    "voice": "en_US-ljspeech-medium",
+    "duration_seconds": 1.854694,
+    "integrated_lufs": -16.78,
+    "true_peak_dbtp": -1.27,
+    "sha256": "b5e738249c6136c7f8209a8a6a9fd3e96c7149cab15cea1eae5351e5b2715828"
+  },
+  {
+    "file": "mate-lab-tomas-answer-en-08.mp3",
+    "text": "Your blood result availability has been reported. There are no values to show.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 3.94449,
+    "integrated_lufs": -16.41,
+    "true_peak_dbtp": -1.27,
+    "sha256": "86dd1b6db83e7cd2da1c12bf9e6bf35ad5b66bc1f6340abaa66a87d323c2ce5e"
+  },
+  {
+    "file": "mate-lab-tomas-question-en-08.mp3",
+    "text": "Has my blood result arrived?",
+    "voice": "en_US-bryce-medium",
+    "duration_seconds": 2.35102,
+    "integrated_lufs": -16.27,
+    "true_peak_dbtp": -2.92,
+    "sha256": "6de571c048cde701c8e5cdfee209c952a5e61167aa2bc656cf369865bbd81672"
+  },
+  {
+    "file": "mate-lab-waiting-en-02.mp3",
+    "text": "Not yet. No collection has been received for either sample, and no results have been received.",
+    "voice": "en_US-norman-medium",
+    "duration_seconds": 5.250612,
+    "integrated_lufs": -16.34,
+    "true_peak_dbtp": -1.26,
+    "sha256": "520acfbb47aba9b443f03429b213d1e7127e0f43f7426fa0d8c3ba696bf25131"
+  }
+]

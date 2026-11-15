@@ -26,6 +26,8 @@ export const PLAN_FD30: Fd30Block[] = [
   slot('lf:planned-blood', 'iss:crew-lf', 'task', '09:15', '09:20', { en: 'Blood collection planned', es: 'Toma de sangre prevista' }),
   slot('lf:planned-urine', 'iss:crew-lf', 'task', '09:25', '09:30', { en: 'Secondary urine collection planned', es: 'Toma secundaria de orina prevista' }),
   slot('lf:planned-exercise', 'iss:crew-lf', 'exercise', '10:30', '11:30', { en: 'Ergometer reservation', es: 'Reserva de ergómetro' }, 'demo-ergometer'),
+  slot('ti:planned-lab', 'iss:crew-ti', 'task', '13:15', '13:20', { en: 'Blood collection planned', es: 'Toma de sangre prevista' }),
+  slot('mo:planned-lab', 'iss:crew-mo', 'task', '16:15', '16:20', { en: 'Urine collection planned', es: 'Toma de orina prevista' }),
   slot('ti:planned-exercise', 'iss:crew-ti', 'exercise', '10:30', '11:30', { en: 'Treadmill reservation', es: 'Reserva de cinta' }, 'demo-treadmill'),
   slot('ti:systems', 'iss:crew-ti', 'task', '09:00', '10:00', { en: 'Commander systems review', es: 'Revisión de sistemas del Comandante' }),
   slot('mo:payload', 'iss:crew-mo', 'task', '10:30', '12:00', { en: 'Payload operations', es: 'Operaciones de carga útil' }),

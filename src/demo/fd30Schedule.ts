@@ -1,7 +1,7 @@
 import { DAY_END, DAY_START, EXERCISE_SESSION, OWNER, exerciseSessions } from './fd30';
 import type { CrewId, ExerciseEvent, PreviewState } from './fd30';
 import { planFor, plannedExercise } from './fd30Plan';
-import { BLOOD_SAMPLE, LAB_PLAN, URINE_SAMPLE, labEvents, labSamples } from './laboratory';
+import { labEvents, labPlanSlots, labSamples } from './laboratory';
 import type { LabEvent } from './laboratory';
 
 // View geometry only: the existing plan and mission cursor remain authoritative.
@@ -21,9 +21,10 @@ export function scheduleBlockView(state: PreviewState, owner: CrewId, blockId: s
     module = 'exercise'; rootKind = 'exercise.started';
     events = exerciseSessions(state, owner).filter(s => s.id === EXERCISE_SESSION)
       .flatMap(s => [s.start, s.finish].filter((e): e is ExerciseEvent => !!e && e.sessionId === s.id));
-  } else if (owner === OWNER && (block.id === LAB_PLAN.blood.id || block.id === LAB_PLAN.urine.id)) {
+  } else if (labPlanSlots(owner).some(slot => slot.id === block.id)) {
+    // Exact plan -> own sample association (each owner has only their own planned collections).
     module = 'laboratory'; rootKind = 'lab.sample_taken';
-    const recordId = block.id === LAB_PLAN.blood.id ? BLOOD_SAMPLE : URINE_SAMPLE;
+    const recordId = labPlanSlots(owner).find(slot => slot.id === block.id)!.sampleId;
     events = labSamples(state, owner).filter(s => s.id === recordId)
       .flatMap(s => labEvents(s).filter(e => e.sampleId === s.id && e.sampleType === s.sampleType));
   }

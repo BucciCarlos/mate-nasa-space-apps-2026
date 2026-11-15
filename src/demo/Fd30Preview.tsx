@@ -14,6 +14,7 @@ import { SleepDetail } from '../views/history/sleep/SleepDetail';
 import { ExerciseDetail } from './ExerciseDetail';
 import { Fd30Timebar } from './Fd30Timebar';
 import { TodaySummary } from '../views/today/TodaySummary';
+import { useDialogueVoice } from './voice/useDialogueVoice';
 import { DemoDock } from './DemoDock';
 import { Fd30PersonalAgenda } from './Fd30PersonalAgenda';
 import { Fd30Conversation } from './Fd30Conversation';
@@ -30,6 +31,7 @@ import '../styles/fd30.css';
 import '../styles/fd30-imp05.css';
 import '../styles/secondary-nav.css';
 import '../styles/fd30-demo-dock.css';
+import { BrandImage } from '../views/shared/BrandMark';
 
 function Arrow() {
   return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12H20M14 6L20 12L14 18" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg>;
@@ -147,6 +149,16 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
     setShowing(true); setAnnouncement(t.labOpened);
     navigate({ view: 'fd30', page: 'laboratory' });
   };
+  // VOICE06: spoken lab dialogue. Guided playback opens the blood detail once, only after the answer ended successfully.
+  const guidedVoiceOpened = useRef(new Set<string>());
+  const voice = useDialogueVoice({ chatOpen: chatOpen && !onGround, owner, onGround, page, cursor: missionTime, onEnded: (key, sampleId) => {
+    // The dialogue names the sample to open (never a fixed one); it must belong to the active profile and have its result.
+    const current = stateRef.current;
+    const sample = current.laboratory.find(s => s.crewId === current.activeCrewId && s.id === sampleId);
+    if (current.playback !== 'guided' || guidedVoiceOpened.current.has(key) || !sample?.result) return;
+    guidedVoiceOpened.current.add(key);
+    openTodayLab(sample.id, sample.result.id);
+  } });
   const openSleep = () => openPersonal('sleep');
   const openExercise = () => openPersonal('exercise');
   const openLaboratory = () => openPersonal('laboratory');
@@ -195,7 +207,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
     <div className={`fd30${chatOpen && !onGround ? ' fd-chat-open' : ''}${onGround ? ' fd30-ground' : ''}`} data-surface={onGround ? 'ground' : 'onboard'}>
       <a className="skip" href="#fd-main" onClick={e => { e.preventDefault(); document.getElementById('fd-main')?.focus(); }}>{messages.a11y.skipToContent}</a>
       <header className="fd-header">
-        <a className="fd-brand" href={onGround ? '#/demo/fd30/ground' : '#/demo/fd30'}>{messages.common.appName}<span>{onGround ? o.ground : t.onboard}</span></a>
+        <a className="fd-brand" href={onGround ? '#/demo/fd30/ground' : '#/demo/fd30'} aria-label={`${messages.common.appName} · ${onGround ? o.ground : t.onboard}`}><BrandImage name={messages.common.appName} /></a>
         {onGround ? <nav className="fd-nav" aria-label={messages.a11y.missionNav}><a href="#/demo/fd30/ground" aria-current={page === 'ground' ? 'page' : undefined}>{p.overview}</a><a href="#/demo/fd30/ground/agenda" aria-current={page === 'ground-agenda' ? 'page' : undefined}>{p.agenda}</a><a href="#/demo/fd30/ground/catalog" aria-current={page === 'ground-catalog' ? 'page' : undefined}>{p.catalog}</a></nav> : <nav className="fd-nav" aria-label={messages.a11y.missionNav}>
           <a href="#/demo/fd30" aria-current={page === 'today' ? 'page' : undefined}>{t.today}</a>
           <a href="#/onboard/personal/agenda" aria-current={page === 'agenda' ? 'page' : undefined}>{t.agendaNav}</a>
@@ -245,7 +257,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
         {chatOpen && !onGround && <aside className="fd-dock" aria-label={t.characterDescription}>
           <section id="fd-chat-panel" className="fd-chat" aria-labelledby="fd-chat-h">
             <header><div><h2 id="fd-chat-h">{crew.character}</h2><small>{t.private}</small></div><button ref={closeRef} type="button" aria-label={t.closeChat} onClick={closeChat}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3L13 13M3 13L13 3" stroke="currentColor" strokeWidth="1.5" /></svg></button></header>
-            <Fd30Conversation profile={profile} character={crew.character} logRef={logRef} time={missionTime}
+            <Fd30Conversation profile={profile} character={crew.character} logRef={logRef} time={missionTime} owner={owner} voice={voice}
               onAsk={(text, input = 'text') => dispatch({ type: 'ask', owner, text, lang: locale, now: Date.now(), input })}
               onDraft={text => dispatch({ type: 'draft', owner, text })}
               onOpen={detail => { if (detail === 'agenda') { navigate({ view: 'fd30', page: 'agenda' }); } else openPersonal(detail); }} />

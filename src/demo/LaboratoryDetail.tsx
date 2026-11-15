@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useT } from '../i18n/I18nProvider';
 import { OWNER } from './fd30';
 import type { CrewId, PreviewState } from './fd30';
-import { BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, LAB_PLAN, LAB_VERSION, URINE_SAMPLE, labEvents, labIncomplete, labSamples } from './laboratory';
+import { BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, LAB_PLANS, LAB_VERSION, URINE_SAMPLE, labEvents, labIncomplete, labSamples } from './laboratory';
 import type { LabSample, SampleType } from './laboratory';
 
 export const labHeadingId = (id: string) => `fd-lab-${id}`;
@@ -13,7 +13,8 @@ function Sample({ sample, sampleType, historical = false, highlighted = false }:
 }) {
   const t = useT().fd30;
   const heading = useRef<HTMLHeadingElement>(null);
-  const plan = LAB_PLAN[sampleType];
+  // The sample's own owner plan (Lucía, Tomás and Mei each have different times); never another profile's.
+  const plan = LAB_PLANS[sample?.crewId ?? OWNER][sampleType] ?? LAB_PLANS[OWNER][sampleType]!;
   const id = sample?.id ?? (sampleType === 'blood' ? BLOOD_SAMPLE : URINE_SAMPLE);
   const events = sample ? labEvents(sample) : [];
   const review = sample?.result?.sourceReview ?? 'not_reported';

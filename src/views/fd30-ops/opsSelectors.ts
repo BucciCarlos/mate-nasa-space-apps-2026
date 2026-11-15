@@ -1,7 +1,7 @@
 import { CREW } from '../../demo/fd30';
 import type { CrewId, PreviewState } from '../../demo/fd30';
 import { EQUIPMENT, planFor } from '../../demo/fd30Plan';
-import { LAB_PLAN } from '../../demo/laboratory';
+import { LAB_PLAN_IDS } from '../../demo/laboratory';
 import type { Bilingual, GroundRole, ScheduleBlock } from '../../state/types';
 import { COMMANDER, visibleRequests } from './opsState';
 import type { OpsState } from './opsState';
@@ -11,7 +11,7 @@ const personalTitle: Bilingual = { en: 'Planned personal activity', es: 'Activid
 export function operationalPlan(owner: CrewId): OperationalBlock[] {
   return planFor(owner).map(b => ({ id: b.id, kind: b.kind, start: b.start, end: b.end,
     ...(b.continuesAfterDay ? { continuesAfterDay: true } : {}),
-    title: { ...(b.id === LAB_PLAN.blood.id || b.id === LAB_PLAN.urine.id ? personalTitle : b.title) }, equipment: b.equipmentId ? { ...EQUIPMENT[b.equipmentId] } : null }));
+    title: { ...(LAB_PLAN_IDS.includes(b.id) ? personalTitle : b.title) }, equipment: b.equipmentId ? { ...EQUIPMENT[b.equipmentId] } : null }));
 }
 export function operationalCrew(time: number) {
   return CREW.map(c => {

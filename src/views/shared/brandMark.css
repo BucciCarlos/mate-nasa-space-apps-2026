@@ -1,0 +1,22 @@
+/* MATE-BRAND01/03: colors chosen for contrast on the FD30 paper (#f6f4ec). Petrol body, turquoise accent. */
+.brand-lockup { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.brand-mark { flex: none; display: block; width: 30px; height: 30px; }
+.brand-mark-body { fill: #1d4c55; }
+.brand-mark-straw,
+.brand-mark-pulse { fill: none; stroke: #17807b; stroke-linecap: round; stroke-linejoin: round; }
+.brand-mark-straw { stroke-width: 2; }
+.brand-mark-pulse { stroke-width: 1.8; }
+
+/* Wordmark typography: a rounded system stack that suits the soft gourd silhouette. No webfont is loaded.
+   The theme's `.fd-brand span` rule styles the perspective label (and hides it on narrow screens); these
+   selectors are more specific so the name keeps its own style. */
+.fd-brand .brand-lockup { display: inline-flex; font-size: inherit; color: inherit; letter-spacing: 0; }
+.fd-brand .brand-mark-name {
+  display: block; font-family: ui-rounded, 'Arial Rounded MT Bold', 'Varela Round', 'Trebuchet MS', system-ui, sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: .16em; line-height: 1; color: inherit; white-space: nowrap;
+}
+@media (max-width: 760px) { .fd-brand .brand-mark-name { font-size: 13px; } }
+
+/* Logo test (image). Height chosen to keep the letters legible; the bar grows accordingly. */
+.fd-brand .brand-logo { display: block; width: 56px; height: 56px; flex: none; align-self: center; }
+@media (max-width: 760px) { .fd-brand .brand-logo { width: 46px; height: 46px; } }

@@ -19,7 +19,7 @@ describe('HIST03 canonical sample history', () => {
     expect(query(s,'05:55','all').days[0].status).toBe('no_record');
     expect(query(s,'05:55').days.at(-1)).toMatchObject({ status: 'no_record', samples: [] });
     expect(query(s,'05:55').days.at(-1)?.plans).toHaveLength(2);
-    expect(JSON.stringify(s)).toBe(before); expect(DAY_EVENTS).toHaveLength(9);
+    expect(JSON.stringify(s)).toBe(before); expect(DAY_EVENTS.filter(e => e.association.crewId === OWNER)).toHaveLength(9);
   });
   it('clips each milestone from stale state, including delayed reception, without inferring results', () => {
     const s = seek('11:50');
@@ -59,7 +59,8 @@ describe('HIST03 canonical sample history', () => {
     }
     for (const crew of CREW.slice(1)) {
       const own={ ...s,activeCrewId: crew.id }; const view=query(own,'23:59','all');
-      expect(view.records).toEqual([]); expect(view.days.at(-1)?.status).toBe('no_activity');
+      // LAB04: each owner has a planned FD30 collection, so before it is received day 30 is 'no_record' with its own plan.
+      expect(view.records).toEqual([]); expect(view.days.at(-1)?.status).toBe('no_record'); expect(view.days.at(-1)?.plans).toHaveLength(1);
       expect(view.days[0].status).toBe('no_record');
     }
   });

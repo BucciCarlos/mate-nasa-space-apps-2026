@@ -1,0 +1,26 @@
+export const SLEEP_SCORE_TEXT = {
+  en: {
+    title: 'Demonstration sleep score', points: 'points · rounded half up',
+    noRecord: 'Score unavailable · no record received at this cursor.', missingBed: 'Score unavailable · recorded time in bed is missing.', invalidBed: 'Score unavailable · invalid or incompatible scenario data.',
+    duration: 'Duration component (up to 70 points)', efficiency: 'Efficiency component (up to 30 points, scaled by duration)',
+    bed: 'Scenario time in bed (min)', percent: 'Derived efficiency (%)', awakenings: 'Awakenings', noAwakenings: 'No awakenings record · zero score weight',
+    noComparison: 'No comparison · the immediately preceding FD has no available score.', steady: 'No appreciable change (less than 1 unrounded point)',
+    compared: 'Compared with', delta: 'points',
+    explanation: 'Duration also influences the efficiency component. These are formula limits, not effective independent weights. Displayed scores are rounded; comparisons use unrounded values.',
+    parameters: 'Scenario parameters: 480 min; efficiency band 70–95%.',
+    formula: 'D = 70 × r; E = 30 × clamp((eff − 70) / 25, 0, 1) × r; r = min(duration / 480, 1); eff = 100 × duration / time in bed.',
+    provenance: 'Original M.A.T.E. formula and fictional scenario episodes (mate-sleep-score.1 / fd30-bed.1). Not a NASA or Samsung formula, not a clinical assessment. No connected sensor, sleep phases or agenda-derived measurements. Awakenings have zero weight.',
+  },
+  es: {
+    title: 'Puntaje de sueño de demostración', points: 'puntos · redondeo con mitad hacia arriba',
+    noRecord: 'Puntaje no disponible · sin registro recibido a esta hora del cursor.', missingBed: 'Puntaje no disponible · falta tiempo en cama registrado.', invalidBed: 'Puntaje no disponible · datos de escenario inválidos o incompatibles.',
+    duration: 'Componente de duración (hasta 70 puntos)', efficiency: 'Componente de eficiencia (hasta 30 puntos, escalado por duración)',
+    bed: 'Tiempo en cama de escenario (min)', percent: 'Eficiencia derivada (%)', awakenings: 'Despertares', noAwakenings: 'Sin registro de despertares · peso cero en el puntaje',
+    noComparison: 'Sin comparación · el FD inmediatamente anterior no tiene puntaje disponible.', steady: 'Sin cambio apreciable (menos de 1 punto sin redondear)',
+    compared: 'Comparado con', delta: 'puntos',
+    explanation: 'La duración también influye en el componente de eficiencia. Son límites de la fórmula, no pesos efectivos independientes. Los puntajes se muestran redondeados; la comparación usa valores sin redondear.',
+    parameters: 'Parámetros del escenario: 480 min; banda de eficiencia 70–95%.',
+    formula: 'D = 70 × r; E = 30 × clamp((eff − 70) / 25, 0, 1) × r; r = min(duración / 480, 1); eff = 100 × duración / tiempo en cama.',
+    provenance: 'Fórmula propia de M.A.T.E. y episodios ficticios de escenario (mate-sleep-score.1 / fd30-bed.1). No es una fórmula de NASA ni Samsung ni una evaluación clínica. Sin sensor conectado, fases del sueño ni mediciones derivadas de Agenda. Los despertares tienen peso cero.',
+  },
+} as const;

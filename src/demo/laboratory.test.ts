@@ -50,7 +50,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
   });
   it('shares one ordered clock/journal with unchanged wake and 60-minute exercise event times', () => {
     let state = freshPreview(1000);
-    expect(DAY_EVENTS.map(e => e.occurredAt.slice(11, 16))).toEqual(['06:00', '09:15', '09:20', '09:25', '09:30', '10:30', '11:30', '11:45', '11:50']);
+    expect(DAY_EVENTS.map(e => e.occurredAt.slice(11, 16))).toEqual(['06:00', '09:15', '09:20', '09:25', '09:30', '10:30', '11:30', '11:45', '11:50', '13:15', '13:20', '15:45', '16:15', '16:20']);
     const preload = state.processedIds.length;
     for (const event of DAY_EVENTS) {
       expect(nextPreviewEvent(state)?.id).toBe(event.id);

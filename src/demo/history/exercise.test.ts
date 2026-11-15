@@ -105,7 +105,7 @@ describe('HIST02 private exercise history', () => {
       expect(s.profiles[OWNER]).toEqual(memories);
       expect(previewReduce(s, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) })).toBe(s);
     }
-    expect(DAY_EVENTS).toHaveLength(9);
+    expect(DAY_EVENTS.filter(e => e.association.crewId === OWNER)).toHaveLength(9); // Lucía's events unchanged; LAB04 adds only other owners' lab events
     for (const c of CREW.slice(1)) expect(exerciseHistory(own(c.id, '23:59'), viewer(c.id), at('23:59'), 'all')?.records.some(r => r.fd === 30)).toBe(false);
   });
   it('denies other owners and Ground roles; Ground/Commander projections remain plan-only', () => {

@@ -57,6 +57,51 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     s = ask(seek(s, '09:00'), t.laboratory, lang);
     expect(answer(s).body).not.toContain(t.labResult);
   });
+  const renderAtCursor = (state: ReturnType<typeof freshPreview>) => renderToStaticMarkup(createElement(I18nProvider, { locale: lang,
+    children: createElement(Fd30Conversation, { profile: state.profiles[state.activeCrewId], character: 'Mate', time: previewTime(state, wall),
+      logRef: { current: null }, onAsk: () => {}, onDraft: () => {}, onOpen: () => {} }) }));
+  for (const queryTime of ['11:45', '11:50']) it(`hides the ${queryTime} laboratory reply on rewind and restores it once at the query cursor`, () => {
+    let state = ask(seek(freshPreview(wall), queryTime), t.laboratory, lang);
+    const turns = state.profiles[OWNER].turns;
+    const snapshot = JSON.stringify(turns);
+    expect(answer(state).body).toContain(`${t.blood}: ${t.labResult}`);
+    expect(answer(state).body).toContain(`${t.urine}: ${queryTime === '11:50' ? t.labResult : t.labAnalyzing}`);
+    const visible = renderAtCursor(state);
+    expect(visible).toContain(t.labResult);
+    expect(visible.match(/class="fd-chat-pair"/g)).toHaveLength(1);
+    state = seek(state, '09:00');
+    expect(renderAtCursor(state)).not.toContain(t.labResult);
+    expect(renderAtCursor(state)).not.toContain('class="fd-chat-pair"');
+    expect(state.profiles[OWNER].turns).toEqual(turns);
+    state = seek(state, queryTime);
+    expect(renderAtCursor(state)).toBe(visible);
+    expect(state.profiles[OWNER].turns).toHaveLength(1);
+    expect(JSON.stringify(state.profiles[OWNER].turns)).toBe(snapshot);
+    expect(previewTime(state, wall)).toBe(at(queryTime));
+  });
+  it('keeps Lucia laboratory results out of Tomas and Mei conversations at 11:50', () => {
+    let state = ask(seek(freshPreview(wall), '11:50'), t.laboratory, lang, 'simulated_voice');
+    const lucia = state.profiles[OWNER];
+    for (const crew of CREW.slice(1)) {
+      state = previewReduce(state, { type: 'select', crewId: crew.id });
+      expect(state.profiles[crew.id].turns).toEqual([]);
+      expect(renderAtCursor(state)).not.toContain(t.labResult);
+      state = ask(state, t.laboratory, lang, 'simulated_voice');
+      // LAB04: Tomás (blood) and Mei (urine) have their own FD30 sample. At 11:50 neither has a received event: no state is
+      // deduced from the reservation, and nothing of Lucía's results or samples is shown.
+      const own = crew.id === 'iss:crew-ti' ? `${t.blood}: ${t.labWaiting}.` : `${t.urineOwn}: ${t.labWaiting}.`;
+      expect(answer(state).body).toBe(`${own}\n${t.labLimit}`);
+      expect(answer(state).body).not.toContain(t.noLabs);
+      expect(answer(state).body).not.toContain(t.urine); // Lucía's secondary urine sample
+      expect(renderAtCursor(state)).toContain(own);
+      expect(renderAtCursor(state)).not.toContain(t.labResult);
+      expect(state.profiles[OWNER]).toBe(lucia);
+      expect(previewTime(state, wall)).toBe(at('11:50'));
+    }
+    state = previewReduce(state, { type: 'select', crewId: OWNER });
+    expect(renderAtCursor(state)).toContain(`${t.blood}: ${t.labResult}`);
+    expect(state.profiles[OWNER].turns).toHaveLength(1);
+  });
   it('uses the same answer path for simulated voice, retains a typed draft, and round-trips persistence', () => {
     let s = seek(freshPreview(wall), '10:45');
     s = previewReduce(s, { type: 'draft', owner: OWNER, text: 'private draft' });
@@ -86,7 +131,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
       expect(answer(s).body).toContain(t.exerciseWaiting);
       expect(answer(s).body).not.toContain(t.exerciseLive);
       s = ask(s, t.laboratory, lang);
-      expect(answer(s).body).toBe(t.noLabs);
+      expect(answer(s).body).toBe(`${c.id === 'iss:crew-ti' ? `${t.blood}: ${t.labWaiting}.` : `${t.urineOwn}: ${t.labWaiting}.`}\n${t.labLimit}`);
       expect(previewTime(s, wall)).toBe(clock);
       expect(s.profiles[OWNER]).toBe(lucia);
       const stale = previewReduce(s, { type: 'ask', owner: OWNER, text: 'private', lang, now: wall });

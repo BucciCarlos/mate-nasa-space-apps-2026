@@ -1,6 +1,6 @@
 import { chatIntent, scriptedAnswer } from './fd30Chat';
 import type { ChatAnswer } from './fd30Chat';
-import { LAB_EVENTS, LAB_HISTORY, initialLab, ingestLab, labEvents, labSamples, validLab } from './laboratory';
+import { CREW_LAB_EVENTS, LAB_EVENTS, LAB_HISTORY, initialLab, ingestLab, labEvents, labSamples, validLab } from './laboratory';
 import type { LabSample } from './laboratory';
 
 // Isolated FD30 fixture (IMP02 + IMP03 + IMP04). The published M1 clock, plan, storage and medical queue are untouched.
@@ -71,7 +71,7 @@ export function elapsedMinutes(session: ExerciseSession): number | null {
   const duration = Date.parse(session.finish.occurredAt) - Date.parse(session.start.occurredAt);
   return duration >= 0 ? duration / 60_000 : null;
 }
-export const DAY_EVENTS = [WAKE_EVENT, ...EXERCISE_EVENTS, ...LAB_EVENTS]
+export const DAY_EVENTS = [WAKE_EVENT, ...EXERCISE_EVENTS, ...LAB_EVENTS, ...CREW_LAB_EVENTS]
   .sort((a, b) => Date.parse(a.occurredAt) - Date.parse(b.occurredAt) || a.scenarioSequence - b.scenarioSequence);
 export function nextPreviewEvent(state: PreviewState) {
   return DAY_EVENTS.find(e => !state.processedIds.includes(e.id));
