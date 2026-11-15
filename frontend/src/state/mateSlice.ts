@@ -253,30 +253,31 @@ export const mateSlice = createSlice({
   },
 });
 
-// Multi-arg thunks: call sites read like `planChangeSent('iss', taskId, 30, Date.now())`.
-export const localeSet = (locale: Locale): any => (dispatch: any) => dispatch(mateSlice.actions.localeSet(locale));
-export const groundRoleSet = (role: AppState['groundRole']): any => (dispatch: any) => dispatch(mateSlice.actions.groundRoleSet(role));
-export const planChangeSent = (missionId: MissionId, taskId: string, advanceMinutes: AdvanceMinutes, nowMs: number) =>
-  (dispatch: any) => dispatch(mateSlice.actions.planChangeSent({ missionId, taskId, advanceMinutes, nowMs }));
-export const linkStatusSet = (missionId: MissionId, status: 'up' | 'down', nowMs: number) =>
-  (dispatch: any) => dispatch(mateSlice.actions.linkStatusSet({ missionId, status, nowMs }));
-export const clockTick = (nowMs: number): any => (dispatch: any) => dispatch(mateSlice.actions.clockTick(nowMs));
-export const noticeSeen = (missionId: MissionId, noticeId: string) =>
-  (dispatch: any) => dispatch(mateSlice.actions.noticeSeen({ missionId, noticeId }));
-export const companionAsked = (missionId: MissionId, input: CompanionInput, nowMs: number) =>
-  (dispatch: any) => dispatch(mateSlice.actions.companionAsked({ missionId, input, nowMs }));
-export const companionActionsExecuted = (missionId: MissionId, turnId: string) =>
-  (dispatch: any) => dispatch(mateSlice.actions.companionActionsExecuted({ missionId, turnId }));
-export const observationSaved = (p: { missionId: MissionId; crewId: string; topics: ObservationTopic[]; privateNote: UserText | null; relatedChangeId: string | null; share: { comment: UserText | null } | null; nowMs: number }) =>
-  (dispatch: any) => dispatch(mateSlice.actions.observationSaved(p));
-export const uiRangeSet = (range: Interval | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiRangeSet(range));
-export const uiHighlightSet = (target: HighlightTarget | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiHighlightSet(target));
-export const uiCompanionToggle = (open?: boolean): any => (dispatch: any) => dispatch(mateSlice.actions.uiCompanionToggle(open));
-export const uiSourceOpen = (sourceId: string | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiSourceOpen(sourceId));
-export const uiObservationPrefill = (prefill: ObservationPrefill | null): any => (dispatch: any) => dispatch(mateSlice.actions.uiObservationPrefill(prefill));
-export const uiLastRoute = (route: Route): any => (dispatch: any) => dispatch(mateSlice.actions.uiLastRoute(route));
-export const companionCustomized = (name: string, color: CompanionColor) =>
-  (dispatch: any) => dispatch(mateSlice.actions.companionCustomized({ name, color }));
-export const scenarioReset = (nowMs: number): any => (dispatch: any) => dispatch(mateSlice.actions.scenarioReset(nowMs));
+// Multi-arg thunks: call sites read like `dispatch(planChangeSent('iss', taskId, 30, Date.now()))`.
+type Thunk = (dispatch: (a: unknown) => void) => void;
+export const localeSet = (locale: Locale): Thunk => (dispatch) => { dispatch(mateSlice.actions.localeSet(locale)); };
+export const groundRoleSet = (role: AppState['groundRole']): Thunk => (dispatch) => { dispatch(mateSlice.actions.groundRoleSet(role)); };
+export const planChangeSent = (missionId: MissionId, taskId: string, advanceMinutes: AdvanceMinutes, nowMs: number): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.planChangeSent({ missionId, taskId, advanceMinutes, nowMs })); };
+export const linkStatusSet = (missionId: MissionId, status: 'up' | 'down', nowMs: number): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.linkStatusSet({ missionId, status, nowMs })); };
+export const clockTick = (nowMs: number): Thunk => (dispatch) => { dispatch(mateSlice.actions.clockTick(nowMs)); };
+export const noticeSeen = (missionId: MissionId, noticeId: string): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.noticeSeen({ missionId, noticeId })); };
+export const companionAsked = (missionId: MissionId, input: CompanionInput, nowMs: number): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.companionAsked({ missionId, input, nowMs })); };
+export const companionActionsExecuted = (missionId: MissionId, turnId: string): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.companionActionsExecuted({ missionId, turnId })); };
+export const observationSaved = (p: { missionId: MissionId; crewId: string; topics: ObservationTopic[]; privateNote: UserText | null; relatedChangeId: string | null; share: { comment: UserText | null } | null; nowMs: number }): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.observationSaved(p)); };
+export const uiRangeSet = (range: Interval | null): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiRangeSet(range)); };
+export const uiHighlightSet = (target: HighlightTarget | null): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiHighlightSet(target)); };
+export const uiCompanionToggle = (open?: boolean): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiCompanionToggle(open)); };
+export const uiSourceOpen = (sourceId: string | null): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiSourceOpen(sourceId)); };
+export const uiObservationPrefill = (prefill: ObservationPrefill | null): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiObservationPrefill(prefill)); };
+export const uiLastRoute = (route: Route): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiLastRoute(route)); };
+export const companionCustomized = (name: string, color: CompanionColor): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.companionCustomized({ name, color })); };
+export const scenarioReset = (nowMs: number): Thunk => (dispatch) => { dispatch(mateSlice.actions.scenarioReset(nowMs)); };
 
 export default mateSlice.reducer;

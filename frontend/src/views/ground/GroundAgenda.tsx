@@ -14,8 +14,10 @@ import { Badge, StatusBadge } from '../shared/Badge';
 import { useNow } from '../../state/useNow';
 import { useMissionTime } from '../shared/useMissionTime';
 
+const primaryBtn = 'inline-flex items-center gap-2 px-4 py-2 rounded-md font-bold bg-accent text-accent-fg border border-transparent disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer';
+
 export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: GroundRole }) {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
   const t = useT();
   const locale = useLocale();
   const now = useNow(30_000);
@@ -41,7 +43,7 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
   const onSelect = (b: ScheduleBlock) => setSelectedId(b.id);
   const send = () => {
     if (!selected || !preview?.ok || !canSend) return;
-    planChangeSent(missionId, selected.id, minutes, Date.now());
+    dispatch(planChangeSent(missionId, selected.id, minutes, Date.now()));
     setSentFlash(true);
     window.setTimeout(() => setSentFlash(false), 2500);
   };
@@ -49,26 +51,28 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
   const statusOf = (changeId: string) => messages.find((m) => m.direction === 'uplink' && m.changeId === changeId);
   const statusLabel = (s: 'queued' | 'in_transit' | 'delivered') => (s === 'queued' ? t.message.queued : s === 'in_transit' ? t.message.inTransit : t.message.delivered);
 
+  const opt = (on: boolean) => `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-line bg-bg3 cursor-pointer ${on ? 'bg-accent text-accent-fg font-semibold border-transparent' : ''}`;
+
   return (
-    <div className="ground-agenda">
-      <section className="panel panel-main" aria-labelledby="ground-agenda-h">
-        <div className="panel-head">
+    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,360px)] gap-4 items-start">
+      <section className="border border-line rounded-md bg-bg2 p-4" aria-labelledby="ground-agenda-h">
+        <div className="flex items-center gap-2 flex-wrap">
           <h1 id="ground-agenda-h">{t.ground.agendaTitle}</h1>
-          <span className="muted">{t.agenda.planVersion({ version: plan.version })}</span>
+          <span className="text-fg2 text-fs0">{t.agenda.planVersion({ version: plan.version })}</span>
           <Badge kind="simulated" />
         </div>
-        <p className="muted">{t.ground.agendaHint}</p>
+        <p className="text-fg2 text-fs0 mt-1">{t.ground.agendaHint}</p>
         <Timeline range={range} lanes={lanes} nowMs={missionNow} selectedId={selectedId} onSelect={onSelect} />
-        <section className="sent-changes" aria-labelledby="sent-h">
+        <section className="mt-4" aria-labelledby="sent-h">
           <h2 id="sent-h">{t.ground.sentChanges}</h2>
-          {changes.length === 0 ? <p className="empty">{t.ground.noChanges}</p> : (
-            <ul className="row-list">
+          {changes.length === 0 ? <p className="text-center text-fg2 py-4">{t.ground.noChanges}</p> : (
+            <ul className="flex flex-col divide-y divide-line border border-line rounded-md overflow-hidden">
               {[...changes].reverse().map((c) => {
                 const task = plan.blocks.find((b) => b.id === c.taskId);
                 const msg = statusOf(c.id);
                 return (
-                  <li key={c.id} className="row">
-                    <span className="mono">{mt.time(c.createdAtMs)}</span>
+                  <li key={c.id} className="flex flex-wrap gap-2 items-center px-3 py-2">
+                    <span className="font-mono text-fs0 text-fg2">{mt.time(c.createdAtMs)}</span>
                     <span>{t.ground.changeRow({ task: task ? task.title[locale] : c.taskId, minutes: c.advanceMinutes, version: c.toVersion })}</span>
                     {msg && <StatusBadge kind={msg.status} label={statusLabel(msg.status)} />}
                   </li>
@@ -79,36 +83,38 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
         </section>
       </section>
 
-      <aside className="panel panel-side" aria-labelledby="task-panel-h">
+      <aside className="border border-line rounded-md bg-bg2 p-4" aria-labelledby="task-panel-h">
         <h2 id="task-panel-h">{t.ground.taskPanelTitle}</h2>
-        {!selected ? <p className="empty">{t.ground.selectTask}</p> : (
+        {!selected ? <p className="text-center text-fg2 py-4">{t.ground.selectTask}</p> : (
           <>
-            <div className="task-detail">
-              <div className="task-title">{selected.title[locale]}</div>
-              <div className="muted">{t.blocks[selected.kind]} · {fmtInterval(selected, locale)}</div>
-              <div className="muted">{t.ground.affectedCrew}: {selected.crewIds.map((id) => crew.find((c) => c.id === id)?.name ?? id).join(', ')}</div>
+            <div className="my-2">
+              <div className="text-fs2 font-semibold">{selected.title[locale]}</div>
+              <div className="text-fg2 text-fs0">{t.blocks[selected.kind]} · {fmtInterval(selected, locale)}</div>
+              <div className="text-fg2 text-fs0">{t.ground.affectedCrew}: {selected.crewIds.map((id) => crew.find((c) => c.id === id)?.name ?? id).join(', ')}</div>
             </div>
-            {!selected.movable ? <p className="warn">{t.ground.notMovable}</p> : (
+            {!selected.movable ? <p className="text-amber text-fs0" role="alert">{t.ground.notMovable}</p> : (
               <>
-                <fieldset className="advance-opts">
-                  <legend>{t.ground.advanceBy}</legend>
-                  {ADVANCE_OPTIONS.map((m) => (
-                    <label key={m} className={`opt${minutes === m ? ' is-on' : ''}`}>
-                      <input type="radio" name="advance" value={m} checked={minutes === m} onChange={() => setMinutes(m)} />
-                      {t.ground.minutes({ n: m })}
-                    </label>
-                  ))}
+                <fieldset className="my-2">
+                  <legend className="font-semibold text-fs1 mb-1">{t.ground.advanceBy}</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {ADVANCE_OPTIONS.map((m) => (
+                      <label key={m} className={opt(minutes === m)}>
+                        <input type="radio" name="advance" value={m} className="sr-only" checked={minutes === m} onChange={() => setMinutes(m)} />
+                        {t.ground.minutes({ n: m })}
+                      </label>
+                    ))}
+                  </div>
                 </fieldset>
-                <h3>{t.ground.rulePreview}</h3>
+                <h3 className="font-semibold text-fs1 mt-2">{t.ground.rulePreview}</h3>
                 {preview && preview.ok && (
-                  <div className="preview">
-                    <p className="mono">{t.ground.newTime({ before: fmtInterval(selected, locale), after: fmtInterval({ start: preview.plan.blocks.find((b) => b.id === selected.id)!.start, end: preview.plan.blocks.find((b) => b.id === selected.id)!.end }, locale) })}</p>
+                  <div className="my-2">
+                    <p className="font-mono text-fs0">{t.ground.newTime({ before: fmtInterval(selected, locale), after: fmtInterval({ start: preview.plan.blocks.find((b) => b.id === selected.id)!.start, end: preview.plan.blocks.find((b) => b.id === selected.id)!.end }, locale) })}</p>
                     {preview.perCrew.map((pc) => (
-                      <div key={pc.crewId} className="preview-crew">
+                      <div key={pc.crewId} className="my-2">
                         <RestWindowCard rest={pc.rest} name={crew.find((c) => c.id === pc.crewId)?.name ?? pc.crewId} />
-                        <ul className="moves">
+                        <ul className="list-disc pl-5 text-fs0">
                           {pc.moves.map((mv) => (
-                            <li key={mv.blockId}><span className="blk-kind">{t.blocks[mv.kind]}</span> {mv.title[locale]}: {fmtInterval(mv.before, locale)} → {fmtInterval(mv.after, locale)}</li>
+                            <li key={mv.blockId}><span className="uppercase tracking-[0.06em] text-[9px] opacity-80">{t.blocks[mv.kind]}</span> {mv.title[locale]}: {fmtInterval(mv.before, locale)} → {fmtInterval(mv.after, locale)}</li>
                           ))}
                         </ul>
                       </div>
@@ -116,22 +122,22 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
                   </div>
                 )}
                 {preview && !preview.ok && (
-                  <p className="warn" role="alert">
+                  <p className="text-amber text-fs0 my-1" role="alert">
                     {preview.reason === 'conflict'
                       ? t.ground.conflict({ blocks: preview.blockIds.map((id) => plan.blocks.find((b) => b.id === id)?.title[locale] ?? id).join(', ') })
                       : preview.reason === 'rest_window_eliminated' ? t.ground.restEliminated : t.ground.notMovable}
                   </p>
                 )}
-                <details className="rule-note">
-                  <summary>{t.agenda.planningRule}</summary>
-                  <p>{t.agenda.planningRuleBody}</p>
+                <details className="border border-line rounded-md px-2 py-1 my-2 text-fs0">
+                  <summary className="cursor-pointer text-accent">{t.agenda.planningRule}</summary>
+                  <p className="mt-1">{t.agenda.planningRuleBody}</p>
                 </details>
                 {canSend ? (
-                  <button type="button" className="btn btn-primary" disabled={!preview?.ok} onClick={send}>{t.ground.sendUpdate}</button>
+                  <button type="button" className={primaryBtn} disabled={!preview?.ok} onClick={send}>{t.ground.sendUpdate}</button>
                 ) : (
-                  <p className="muted">{t.ground.readOnlyRole}</p>
+                  <p className="text-fg2 text-fs0">{t.ground.readOnlyRole}</p>
                 )}
-                {sentFlash && <p className="ok" role="status">{t.ground.sent}</p>}
+                {sentFlash && <p className="text-green font-semibold" role="status">{t.ground.sent}</p>}
               </>
             )}
           </>

@@ -36,3 +36,9 @@ def get_scenario(mission_id: str) -> dict:
 @router.get("/sources")
 def list_sources() -> list[dict]:
     return json.loads(_load("sources.json"))
+
+
+@router.get("/fd30")
+def get_fd30() -> dict:
+    """FD30 visual-cut fixture (IMP02+IMP03+IMP04): clock, wake, rest, exercise, lab."""
+    return json.loads(_load("fd30.json"))

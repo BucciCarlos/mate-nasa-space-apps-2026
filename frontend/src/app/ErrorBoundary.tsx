@@ -20,10 +20,10 @@ export class ErrorBoundary extends Component<Props, State> {
     const { t } = this.props;
     if (!this.state.failed) return this.props.children;
     return (
-      <main className="error-view" id="main">
-        <h1>{t.common.errorTitle}</h1>
+      <main className="border border-red rounded-md px-4 py-4 bg-red-bg" id="main">
+        <h1 className="text-red">{t.common.errorTitle}</h1>
         <p>{t.common.errorBody}</p>
-        <button type="button" className="btn btn-primary" onClick={() => { this.setState({ failed: false }); this.props.onRestart(); }}>
+        <button type="button" className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-md font-bold bg-red text-white border border-red cursor-pointer" onClick={() => { this.setState({ failed: false }); this.props.onRestart(); }}>
           {t.common.restartScenario}
         </button>
       </main>

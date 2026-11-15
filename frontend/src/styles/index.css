@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./base.css";
+@import "./ground.css";
+@import "./onboard.css";
+@import "./fd30.css";
+
+/* Map the design tokens (defined in tokens.css) into Tailwind utilities so
+   components can use bg-surface / text-ink / border-line / rounded-md /
+   text-fs1 / font-mono etc. instead of raw CSS. Tokens stay the single source
+   of truth; this only exposes them to the utility layer. */
+@theme inline {
+  /* Spacing */
+  --spacing: 4px;
+  /* Corner radii */
+  --radius-sm: var(--r-1);
+  --radius-md: var(--r-2);
+  --radius-lg: var(--r-3);
+  /* Font stacks */
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+  /* Type scale (fs-0..fs-4) */
+  --text-fs0: var(--fs-0);
+  --text-fs1: var(--fs-1);
+  --text-fs2: var(--fs-2);
+  --text-fs3: var(--fs-3);
+  --text-fs4: var(--fs-4);
+  /* Brand / semantic colors (default + surface overrides) */
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --color-focus: var(--focus);
+  /* Surface-scoped palette (recomputed per [data-surface]) */
+  --color-bg: var(--bg);
+  --color-bg2: var(--bg-2);
+  --color-bg3: var(--bg-3);
+  --color-fg: var(--fg);
+  --color-fg2: var(--fg-2);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-companion: var(--companion);
+  /* FD30 IMP02 surface palette (scoped to the .fd30 surface) */
+  --color-fd-ink: #233d3e;
+  --color-fd-quiet: #526461;
+  --color-fd-paper: #f6f4ec;
+  --color-fd-rule: #d9ddd1;
+  --color-fd-sage: #e4eadd;
+  --color-fd-rust: #8e4631;
+  --color-fd-card: #faf9f4;
+  --color-fd-cream: #eee0cd;
+  --color-fd-line: #a6b99e;
+  --color-fd-line-dark: #587462;
+}
