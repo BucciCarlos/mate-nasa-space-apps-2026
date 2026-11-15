@@ -51,6 +51,8 @@ export const en = {
       link: 'Link',
       crew: 'Crew',
       log: 'Log',
+      catalog: 'Catalog',
+      evidence: 'Sources & evidence',
     },
   },
   link: {

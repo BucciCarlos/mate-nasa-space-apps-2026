@@ -51,6 +51,8 @@ export const es: Messages = {
       link: 'Enlace',
       crew: 'Tripulación',
       log: 'Registro',
+      catalog: 'Catálogo',
+      evidence: 'Fuentes y evidencia',
     },
   },
   link: {

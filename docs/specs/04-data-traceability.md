@@ -1,6 +1,6 @@
 # 04 — Data and traceability
 
-Status: draft for team review · Sources consulted on 2026-11-14. Unverified items are marked and have a defined fallback.
+Status: draft for team review · Sources consulted on 2026-11-14; DATA03 local subset register closed on 2026-11-15 (§9.1). Unverified items are marked and have a defined fallback.
 
 ## 1. Data policy (normative, MUST)
 
@@ -12,7 +12,7 @@ Status: draft for team review · Sources consulted on 2026-11-14. Unverified ite
 
 **Forbidden**
 
-1. Inventing physiological values, clinical thresholds, probabilities, risk scores or predictions, or presenting fabricated personal history as measured evidence. Explicitly simulated workflow history with no clinical values is permitted only under §11.
+1. Inventing physiological values (except the explicitly simulated Lucía Exercise pulse defined in §11.7), clinical thresholds, probabilities, risk scores or predictions, or presenting fabricated personal history as measured evidence. Explicitly simulated workflow history with no clinical values is permitted only under §11.
 2. Attributing real data from any person to a fictional crew member, or combining records of different people into a baseline.
 3. Filling an unobserved period, such as the in-flight phase of a dataset that has no in-flight samples.
 4. Presenting an environmental or area measurement as a personal dose or exposure.
@@ -80,10 +80,10 @@ A status records what was checked and by which review. **It is not a permission 
 | `nasa-hrp-ongoing` | Ongoing HRP Research in Space · NASA HRP (**challenge resource**) | https://www.nasa.gov/hrp/ongoing-hrp-research/ | Context for concept cards (e.g. Standard Measures, Tempus Pro, Immune Biomarkers) | verified [R0] (page content reviewed) | same |
 | `csa-radiation` | Monitoring radiation for astronaut health · Canadian Space Agency (**challenge resource**) | https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp | MOD-RAD text: neutrons contribute about 30 % of total radiation on the ISS; CANS measures neutrons continuously and autonomously | verified [R0]; re-check the quote before release | CSA site terms; short quotes with link |
 | `csa-why-science` | Why do we conduct science experiments in space? · CSA (**challenge resource**) | https://www.asc-csa.gc.ca/eng/iss/science/why-do-we-conduct-science-experiments-in-space.asp | Concept cards: context such as the accelerated-aging analogy | verified [R0] (page content reviewed) | same |
-| `osdr-osd-575` | SpaceX Inspiration4 Blood Serum Metabolic Panel and Immune/Cardiac Cytokine Arrays · NASA OSDR | https://osdr.nasa.gov/bio/repo/data/studies/OSD-575 | MOD-LABS (metabolic panel) | verified [R1]: files downloaded, columns and units inspected. [R2]: the selected analytes re-checked (4 codes × 7 timepoints, no gaps, no duplicates). | OSDR terms: distributed under NASA's Science Information Policy (SPD-41a: open availability and reuse, subject to applicable restrictions) [R2]. Cite the dataset; credit "Data are courtesy of the NASA Open Science Data Repository". The conditions for redistributing the derived subset are recorded before any data is committed (§9). |
+| `osdr-osd-575` | SpaceX Inspiration4 Blood Serum Metabolic Panel and Immune/Cardiac Cytokine Arrays · NASA OSDR | https://osdr.nasa.gov/bio/repo/data/studies/OSD-575 | MOD-LABS (metabolic panel) | verified [R1]: files downloaded, columns and units inspected. [R2]: the selected analytes re-checked (4 codes × 7 timepoints, no gaps, no duplicates). | OSDR terms: distributed under NASA's Science Information Policy (SPD-41a: open availability and reuse, subject to applicable restrictions) [R2]. Cite the dataset; credit "Data are courtesy of the NASA Open Science Data Repository". DATA03: DataCite declares CC0 1.0 at study level, distinct from public file access; conditions, versions, reconstructed citations and hashes closed in §9.1. |
 | `osdr-osd-569` | Whole Blood Measurements from the SpaceX Inspiration4 Mission · NASA OSDR | https://osdr.nasa.gov/bio/repo/data/studies/OSD-569 | MOD-LABS (complete blood count) | same as OSD-575 | same as OSD-575 |
 | `osdr-eda` | Environmental Data Application · NASA OSDR | https://visualization.osdr.nasa.gov/eda/ | MOD-ENV | **partial** [R0, R1]: coverage checked; the unit (ppm) is taken from the application's label; sensor and location within the ISS are not documented | Cite OSDR (EDA credit line). Redistribution conditions recorded before any data is committed (§9). |
-| `cdaweb-iss-tepc` | ISS_DOSANL_TEPC · NASA SPDF/CDAWeb (data provider: NASA Space Radiation Analysis Group, JSC) | https://cdaweb.gsfc.nasa.gov/misc/NotesI.html#ISS_DOSANL_TEPC · DOI 10.48322/0ba1-1764 | MOD-RAD | **partial:** metadata verified [R1]; product notes opened [R2]; data not downloaded; location code not decoded | The SPDF data use policy declares CC0 unless otherwise indicated [R2]. This product's notes must be checked for specific conditions before that default is applied (§9). Cite the DOI. |
+| `cdaweb-iss-tepc` | ISS_DOSANL_TEPC · NASA SPDF/CDAWeb (data provider: NASA Space Radiation Analysis Group, JSC) | https://cdaweb.gsfc.nasa.gov/misc/NotesI.html#ISS_DOSANL_TEPC · DOI 10.48322/0ba1-1764 | MOD-RAD | **partial:** DATA03 validates 9,998 DOSE readings in [2014-03-01, 2014-03-08) UTC; product notes checked; location code still not decoded | The SPDF data use policy declares CC0 unless otherwise indicated [R2]. DATA02/DATA03 found no product-specific restriction in the notes; conditions and hashes closed in §9.1. Cite provider and DOI. |
 | `nasa-std-3001-v1` | NASA-STD-3001 Vol. 1 Rev C · NASA | https://www.nasa.gov/wp-content/uploads/2023/11/nasa-std-3001-vol-1-rev-c-with-signature.pdf | MOD-RAD text: [V1 4030] is an **individual** career effective-dose limit (below 600 mSv), a radiation-protection limit for a person. Shown as standard text only, and never related to area-monitor data. | verified [R2]: Vol. 1 Rev C §4.8.2, p. 39 | public |
 | `nasa-std-3001-v2` | NASA-STD-3001 Vol. 2 Rev F · NASA | https://www.nasa.gov/wp-content/uploads/2025/05/nasa-std-3001-vol-2.pdf | MOD-ENV text: [V2 6004] system requirement, one-hour average ppCO₂ no greater than 3 mmHg | verified [R2]: Vol. 2 Rev F §6.2.1.3, p. 53 | public |
 | `osdr-radlab` | RadLab · NASA OSDR | https://visualization.osdr.nasa.gov/radlab/ | M4 SHOULD: per-module ISS dose series | **pending** [R1]: application and documentation returned HTTP 500; units undocumented | — |
@@ -238,7 +238,7 @@ interface I4Labs {
   - NASA-STD-3001 Vol. 1 [V1 4030] is a radiation-protection limit **for an individual crew member**: a career effective dose below 600 mSv (Vol. 1 Rev C §4.8.2). It is shown as standard text, separately from the area-monitor series.
   - **No personal dose, and no fraction or percentage of that limit, is ever computed from `DOSE`.**
 - **SHOULD (M4):** `DOSE_EQ60` (µSv/min) with the same caveats; DONKI solar events on the same timeline; RadLab per-module series once units are documented.
-- **Fallback:** until data is downloaded and checked, "No data loaded" with the card and the text content.
+- **DATA03 loaded subset:** 9,998 sorted DOSE readings in [2014-03-01, 2014-03-08) UTC, with the 83.8-minute gap unfilled; §9.1 fixes provenance and hashes. **Fallback:** absent or invalid input still shows "No data loaded" with the card and text only.
 
 ## 7. MOD-SLEEP evidence (M2)
 
@@ -335,8 +335,71 @@ Short, simulated plan items, bilingual, with no clinical specifics:
 - **What does not establish redistribution conditions:**
   - removing columns or deriving a subset: the subset is still a redistribution;
   - a file being listed as `restricted: false`.
-- **Raw source files are never committed.** Only validated derived subsets in `src/data/evidence/*.json`, with attribution, links and checksums of the raw files, are committed, and only once their conditions are recorded. This is pending; it does not block publishing documentation that contains no data.
+- **Raw source files are never committed.** Only validated derived subsets in `src/data/evidence/*.json`, with attribution, links and checksums of the raw files, are eligible for incorporation, and only once their conditions are recorded. The three DATA03 subsets below have completed this register; CO₂ remains excluded. This local integration does not authorize a commit, push or deployment.
 - No NASA insignia, logotype or seal, no mission patches and no images of real astronauts anywhere (03 §4).
+
+### 9.1 DATA03 redistribution register — closed for these three subsets (2026-11-15)
+
+Scope: local incorporation of the three validated derived JSON files below, through the existing Evidence entry point, equally available from Ground and Onboard. Historical evidence remains separate from FD30 profiles and telemetry. No raw CSV, internal report, test fixture or numeric CO₂ series is included. Apache-2.0 does not relicense third-party data.
+
+**Review and integrity.** DATA02 snapshots were consulted on 2026-11-15; DATA03 verified the prepared SHA-256 values and reran the checkout's actual EVD01 validators without downloading the datasets again. OSDR terms/FAQ, SPDF policy/TEPC product notes and the primary sleep manuscript were also reopened for this register. DataCite metadata and public-file listings are pinned by the DATA02 snapshot hashes below; DATA03 does not claim a new export from the OSDR Citation button.
+
+#### Inspiration4 — `i4-labs.json`
+
+- Sources: [OSD-575](https://osdr.nasa.gov/bio/repo/data/studies/OSD-575), study version **3**, DOI [10.26030/mc5d-p710](https://doi.org/10.26030/mc5d-p710); [OSD-569](https://osdr.nasa.gov/bio/repo/data/studies/OSD-569), study version **4**, DOI [10.26030/e0rx-sh52](https://doi.org/10.26030/e0rx-sh52). These are study versions, not independent CSV revision numbers. OSDR file-storage version IDs: CMP `cU9WaLCMtADOzPgij1cv03MrP5hIChCm`; CBC `O8LdEy3Gc9WA68CKNZQKBWTNIBGZ13Ht`.
+- Conditions: [OSDR terms](https://science.nasa.gov/reference/osdr-help-terms-and-conditions/) distribute data under NASA's Science Information Policy and request bibliographic citation and acknowledgement. The [DataCite OSD-575](https://api.datacite.org/dois/10.26030/mc5d-p710) and [OSD-569](https://api.datacite.org/dois/10.26030/e0rx-sh52) records declare **CC0 1.0 at study level**. The official file listings declare these two SUBMITTED CSV files public (`restricted: false`); this is download accessibility, **not a separate file licence**. No contrary restriction specific to these selected files was found in the consulted listings. This conclusion does not cover controlled sequences or other files.
+- Credit requested by the [OSDR FAQ](https://science.nasa.gov/reference/osdr-faq/): Data are courtesy of the NASA Open Science Data Repository (https://osdr.nasa.gov/bio/repo).
+- Transformations: select the five specified analytes from SUBMITTED only; keep code, relative timepoint, value and source unit; merge the two required CBC `(FEMALE)` variants into base IDs; remove SEX and reference ranges; exclude other analytes including race-coefficient eGFR; NA→null (zero selected nulls). No conversion, added precision, interpolation, cross-code averaging or sampling dates inferred. Source analyte names remain provenance metadata; no sex field or sex assignment appears in records or UI.
+- Content: **140** records = four codes × five analytes × seven ground timepoints, zero duplicates/nulls. No in-flight samples or bridging line, clinical interpretation, flags, ranges, identity mapping or claim of anonymity.
+
+**Citations reconstructed from DataCite**, not copied from OSDR's Citation panel. DataCite's literal publisher is NASA GeneLab; the display repository is NASA Open Science Data Repository. BibTeX/RIS button text was not available during DATA02 and has not been checked. Do not label these strings as official portal exports:
+
+- OSD-575: Mason, Christopher E; Overbey, Eliah G; Grigorev, Kirill; Nelson, Theodore M (2024). SpaceX Inspiration4 Blood Serum Metabolic Panel and Immune/Cardiac Cytokine Arrays (Comprehensive Metabolic Panel and Multiplex). NASA Open Science Data Repository, Version 3. https://doi.org/10.26030/mc5d-p710
+- OSD-569: Mason, Christopher E; Overbey, Eliah G.; Grigorev, Kirill; Nelson, Theodore M; Garcia Medina, J. Sebastian (2024). Whole Blood Measurements from the SpaceX Inspiration4 Mission (RNA-seq, epitranscriptome, WGS, clonal hematopoiesis, CBC). NASA Open Science Data Repository, Version 4. https://doi.org/10.26030/e0rx-sh52
+
+#### Radiation — `tepc-dose.json`
+
+- Source/credit: NASA Space Radiation Analysis Group, Johnson Space Center; distributed by NASA SPDF/CDAWeb, **ISS_DOSANL_TEPC**, DOI [10.48322/0ba1-1764](https://doi.org/10.48322/0ba1-1764). This is a working dataset citation, not an exported BibTeX claim.
+- Conditions: [SPDF policy](https://hdrl.gsfc.nasa.gov/data_use_policy.html) applies CC0 unless otherwise noted and expects source citation. [Product notes](https://cdaweb.gsfc.nasa.gov/misc/NotesI.html#ISS_DOSANL_TEPC) contain no product-specific restriction. Keep provider credit and DOI.
+- Version: TEPC serial 1003, analysis software 3.1, HAPI metadata 2.0. HAPI exposes no archive-file revision: pin the raw response SHA-256 below instead. Software version is not a dataset-file revision.
+- Transformations: parse the complete actual response (which exceeds the requested bounds), retain only `2014-03-01T00:00:00Z <= t < 2014-03-08T00:00:00Z`, select Time/DOSE, sort ascending, reject duplicates/invalid/fill/negative values. Preserve original seconds and precision; no resampling, gap filling, interpolation, integration or personal-dose conversion.
+- Validated content: **9,998** distinct non-null readings in **µGy/min**, first `2014-03-01T00:00:12.000Z`, last `2014-03-07T23:59:58.000Z`. The nominal 10,080 slots are not a reconstructed uniform grid. The **83.8-minute** no-row interval between `2014-03-04T22:53:11.000Z` and `2014-03-05T00:16:59.000Z` stays visible and unbridged. DATA01's preliminary 10,007 equals the validated count plus nine out-of-window rows (its original algorithm was not reproduced); DATA02's 9,998 governs this integration.
+- Limit: **area monitor**, not any person's dose. Internal location code is undecoded; LOCATION and FLAG are absent in HAPI. No invented location, integrated dose, personal limit percentage or DOSE_EQ60 is included.
+
+#### Sleep — `sleep-aggregate.json`
+
+- Primary source: Barger LK, Flynn-Evans EE, Kubey A, Walsh L, Ronda JM, Wang W, Wright KP Jr, Czeisler CA (2014). Prevalence of sleep deficiency and use of hypnotic drugs in astronauts before, during, and after spaceflight: an observational study. *The Lancet Neurology* **13(9):904–912**. DOI [10.1016/S1474-4422(14)70122-X](https://doi.org/10.1016/S1474-4422(14)70122-X); [PubMed](https://pubmed.ncbi.nlm.nih.gov/25127232/), [primary author manuscript](https://pmc.ncbi.nlm.nih.gov/articles/PMC4188436/), available in PMC from 2015-09-01. No numeric-dataset version is claimed.
+- Conditions: © 2014 Elsevier Ltd., all rights reserved; **no open licence for article text, figures or tables is asserted**. Incorporate only the four published numerical mean/SD facts, with citation and original descriptions of method/population. Do not reproduce figures, table composition or manuscript text. Consultation HTML stays outside the app.
+- Transformation/content: four ISS wrist-actigraphy means/SD in hours per night: 6.41/0.65, 5.86/0.94, 6.09/0.67, 6.95/1.04, for approximately three months before, last 11 days before, flight, first post-flight week. Population: 21 astronauts, 13 ISS missions, 3,248 in-flight days. No recalculation or individual series. The published medication fact (12/16) has its own denominator; never 12/21. These are other crews, never Lucía, Tomás or Mei.
+
+#### SHA-256 register
+
+The derived files are copied byte-for-byte. The raw inputs and metadata below remain outside the app; stable original URLs are provenance links, never browser fetches.
+
+| Derived file | SHA-256 |
+|---|---|
+| `i4-labs.json` | `ce46fbec7621ecfee217d4dfcdf94f2bd175ef46c811d4196f6237c0d92705dc` |
+| `tepc-dose.json` | `caae7e6f2470b3402d437bc8a48c06dd834c3ba94dd91150543da284fa8d5a68` |
+| `sleep-aggregate.json` | `95b860c712336e2d2c6987aba31bad8b97ebebec6f43660c7a4d0a172c0c232c` |
+
+| Original / metadata snapshot | Stable source | Accessed UTC | SHA-256 |
+|---|---|---|---|
+| `CMP_SUBMITTED.csv` | [Source](https://osdr.nasa.gov/geode-py/ws/studies/OSD-575/download?source=datamanager&file=LSDS-8_Comprehensive_Metabolic_Panel_CMP.upload_SUBMITTED.csv) | 2026-11-15T09:37:36.425616+00:00 | `dab247eb794edab59aaaa683c85fd1f2dbf4ae3684872739338e10ead4192a0c` |
+| `CBC_SUBMITTED.csv` | [Source](https://osdr.nasa.gov/geode-py/ws/studies/OSD-569/download?source=datamanager&file=LSDS-7_Complete_Blood_Count_CBC.upload_SUBMITTED.csv) | 2026-11-15T09:37:36.670876+00:00 | `10a878b009eb2ea11a13fe92ad698098858639e8ed02f5ee849431313b9457d3` |
+| `datacite575.json` | [Source](https://api.datacite.org/dois/10.26030/mc5d-p710) | 2026-11-15T09:37:35.033398+00:00 | `104c55261f2f19db56fec49505d50363545c8b631fb1255e587dda1bfefc4731` |
+| `datacite569.json` | [Source](https://api.datacite.org/dois/10.26030/e0rx-sh52) | 2026-11-15T09:37:35.262155+00:00 | `3d117fd7725096f2009617d1b099a418c3db12f8773baf2d6891772a21e6a3b6` |
+| `files575.json` | [Source](https://osdr.nasa.gov/osdr/data/osd/files/575) | 2026-11-15T09:37:34.866704+00:00 | `4c2430cfcbcd979125761984815ba8d9c8fb7899330eba02cb90bd48d5b19c00` |
+| `files569.json` | [Source](https://osdr.nasa.gov/osdr/data/osd/files/569) | 2026-11-15T09:37:34.880399+00:00 | `5fa72a93326ca73ea76f953d4ac0cdd3ee2623ec9c4343415fde28fe808cbfdc` |
+| `tepc-info.json` | [Source](https://cdaweb.gsfc.nasa.gov/hapi/info?id=ISS_DOSANL_TEPC) | 2026-11-15T09:37:35.458759+00:00 | `d88000e901530e37ce572769d738ad3e2009c34172457d615123731b3081f69f` |
+| `tepc-hapi.csv` | [Source](https://cdaweb.gsfc.nasa.gov/hapi/data?id=ISS_DOSANL_TEPC&time.min=2014-03-01T00:00:00Z&time.max=2014-03-08T00:00:00Z&format=csv) | 2026-11-15T09:38:23.295990+00:00 | `73797d0d342ea63e70f89933e244c2048bce0dea818809aaae24fd1daf81ec5b` |
+
+**Decision:** conditions and credits recorded for these three subsets; no blocking contradictory restriction identified within this scope. CO₂ remains **Pending verification**, with no numeric artifact or graph: unit, detector, internal location and EDA version are still unconfirmed. OSDR Citation-button comparison and TEPC internal-location decoding remain explicit provenance limitations, not claims of completed verification.
+
+### 9.2 Local loading and perspective continuity (DATA03)
+
+The three byte-identical JSON files load eagerly at build time through the existing `evidenceData.ts` glob; no browser NASA requests, private report imports or production test fixtures. `#/onboard/personal/evidence` and `#/demo/fd30/ground/evidence` stay in the same FD30 container, retaining mission clock and active profile on return. Ground Evidence grants no medical access. The internal M1 Ground Evidence renderer is preserved; its public URL now redirects to FD30 Ground Evidence (MATE-FD30-01). Sources exposes version, citation, credit, reuse conditions and derived-file SHA-256.
+
+Rendering: one analyte at a time (28 points = four codes × seven moments; all five yield 140), split across pre/post-flight runs. TEPC plots all 9,998 points in two runs; the accessible table initially shows 100 and adds 200 per request. Its existing duration label rounds 83.8 minutes to 84; geometry keeps original timestamps. Four sleep aggregates are shown as published; CO₂ stays pending without a numeric plot. Evidence on FD30 uses its light paper palette in both perspectives, scoped away from M1 Ground.
 
 ## 10. Data pipeline (M2)
 
@@ -365,11 +428,11 @@ All following events occur Mar 10, 2027 (UTC). Their arrival is local Onboard at
 | 4 · 09:25 | `lab.sample_taken`, urine `iss:sample-lf-u1`, `demo-collection` | Urine: sample taken. |
 | 5 · 09:30 | `lab.analysis_started`, same urine sample, `demo-analyzer` | Urine: analyzing. |
 | 6 · 10:30 | `exercise.started`, `iss:session-lf-1`, `demo-exercise` | Exercise: in progress. |
-| 7 · 11:30 | `exercise.finished`, same session/source | Exercise: completed; summary says No metrics available. Character marks unread news; chat stays closed. |
+| 7 · 11:30 | `exercise.finished`, same session/source | Exercise: completed session summary; historical simulated telemetry remains labelled (§11.7), with no live pulse. Character marks unread news; chat stays closed. |
 | 8 · 11:45 | `lab.result_available`, same blood sample/analyzer, **hypothetical future onboard analysis** | Result available; No usable values; No comparable record; source review not reported. Character marks news; no medical inference. |
 | 9 · 11:50 | `lab.result_available`, same urine sample/analyzer, **optional future path**, not part of the main acceptance | Same explicit no-values/no-review states, on the urine sample only. |
 
-All numeric clinical values, measured sleep duration/quality, stress scores, laboratory ranges and exercise physiological metrics are absent (`null`/unavailable with a reason), not zero or interpolated. Exercise event times describe a simulated session workflow; any calculated elapsed session time is labelled Calculated from simulated equipment events, never active exercise dose or proof of exertion. No source event is generated merely because a plan time was reached.
+All numeric clinical values, measured sleep duration/quality, stress scores and laboratory ranges are absent; exercise physiological metrics are also absent except the explicitly simulated pulse fixture in §11.7. Absent fields remain `null`/unavailable with a reason, not zero or interpolated. Exercise event times describe a simulated session workflow; any calculated elapsed session time is labelled Calculated from simulated equipment events, never active exercise dose or proof of exertion. No source event is generated merely because a plan time was reached.
 
 The main walkthrough is wake → completed training → lab result, with collection/analysis transitions processed between them. Inactive profiles receive only their own confirmed events; for this fixture Tomás and Mei have no personal sensor records and show the corresponding empty states. They still have distinct characters, private state and M1 plan notices when affected. An event at 06:00 does not move to 04:30 just because Ground advanced a planned rest window: planned and received timelines remain independent.
 
@@ -401,7 +464,8 @@ For every signal shown in the main day, preload or optional extension, expose: s
 |---|---|---|---|---|
 | Planned rest | Simulated agenda, scenario version/block ID | Planned start/end, UTC; planned duration, min | Planned; Calculated from simulated plan; FD29/FD30 inflight | Available plan only, not measured sleep |
 | Sleep episode end / recorded sleep | `demo-body`, fictional adapter; actual body sensor not selected/verified | Episode-ended state, no physical unit; event time UTC. Sleep duration/efficiency/latency units and values require a verified measurement contract | Simulated workflow report; inflight FD30 | Event available; measured sleep absent: No record. No duration or quality is inferred from the plan or completion event |
-| Exercise | `demo-exercise`, fictional equipment adapter; no real ARED/T2/CEVIS feed connected | Session state, no unit; reported event times UTC; optional elapsed session time in min | Simulated start/finish workflow; elapsed time Calculated from those events, not physiological dose; inflight FD29 preload/FD30 day | State available; physiological metrics absent. No speed, load, heart rate or energy value is invented; future metric units must be source-defined |
+| Exercise | `demo-exercise`, fictional equipment adapter; no real ARED/T2/CEVIS feed connected | Session state, no unit; reported event times UTC; optional elapsed session time in min | Simulated start/finish workflow; elapsed time Calculated from those events, not physiological dose; inflight FD29 preload/FD30 day | State available; no real physiological metrics. Synthetic W/rpm (§11.6) and the sole simulated pulse exception (§11.7) are labelled separately. No energy expenditure or clinical interpretation |
+| IMP05 synthetic equipment telemetry | `demo-exercise-telemetry`, original `fd30-tel.2` fixture, no real equipment feed | Mechanical power W and cadence rpm; occurrence/receipt UTC | Deterministic synthetic data, explicitly not measured; FD30 Lucía session only | 61 minute slots, three null pairs; reveal only received points at cursor; no clinical inference or Ground sharing (§11.6) |
 | Blood and secondary urine samples | `demo-collection` / `demo-analyzer`; fictional collection workflow and hypothetical future onboard analyzer, assay capability unverified | Sample type/ID, handling and analysis/result state, no physical unit; event times UTC; analyte/unit not specified until usable source data exists | Simulated workflow, not measured or estimated biochemistry; inflight FD30 and separate historical workflow | Status available; clinical values and comparable records absent. Source review not reported by default. Current-practice storage/return context remains separate from the future analyzer rail |
 | Historical workflow | `demo-history`, fixture version + owner-scoped record ID | Plan/session/sample statuses and documented fictional dates; units as above | Simulated preload; earlier fictional inflight day identified per record | Readable from day start, not a measured baseline and not replayed as news |
 | Voluntary check-in | Active crew member, observation ID, Your entry | Qualitative day comment/leisure preference; unit not applicable | User-entered context; session entry time, inflight FD30 | Available only if voluntarily saved; no score, clinical interpretation or device attribution; missing entry is not a negative signal |
@@ -415,3 +479,25 @@ No field gets a guessed unit or instrument just to complete the card. Equipment 
 Three advanced team drafts have been received: the wellbeing/family/recovery proposal, the instrument/parameter and clinical-level matrix, and the physiological-data inventory. They are proposals, not approved clinical rules or measured datasets. Authorship, discipline attribution and specialist endorsement are pending where not established; receipt is not validation. Public specs stay self-contained and do not link to internal draft folders.
 
 The adopted scope is qualitative private context and explicit per-signal provenance, not inferred stress, readiness colors, prescribed exercise/nutrition, automatic medical escalation, covert sharing of private messages or new hardware integration. Optional local fictional capsule handling is specified in 02 §12.8 and does not imply real communications infrastructure. All other draft proposals require their own sources, validation and explicit product decision before reconsideration; absence of those conclusions does not block the neutral FD30 day.
+
+
+### 11.6 IMP05 — Explicit synthetic equipment telemetry exception
+
+This authorized exception permits a deterministic **synthetic FD30 equipment** series, never measured flight data or real personal history. IMP06 adds the sole simulated pulse channel described in §11.7. `exerciseTelemetry.ts`, version `fd30-tel.2`, source `demo-exercise-telemetry`, owner `iss:crew-lf`, session `iss:session-lf-1`: 61 one-minute slots from 10:30 to 11:30 inclusive, with `workload_w` (mechanical power, W) and `cadence_rpm` (rpm). Acquisition and receipt timestamps match only in this local fixture. Slots at 10:52, 10:53 and 10:54 contain null for both variables. Keep them missing, not zero or interpolated. Values follow a fixed original illustrative pattern, not a physiological model or exercise prescription.
+
+Always label **Simulated telemetry · FD30 — not measured / Telemetría simulada · FD30 — no medida**, including chart, table and source detail. It is a separate provenance category from the simulated workflow, the plan, user entries and real evidence. It is never a comparable baseline, clinical indicator or source of thresholds, risk, calories, sleep scores or laboratory values. The general prohibition on invented physiology in §1 and §11.1 continues, except the narrow simulated pulse extension in §11.7.
+
+The selector filters both occurrence and receipt at the chosen mission time and confirms owner/session. Before 10:30: no received points; at 10:41: 12 slots received; at/after 11:30: 61 slots, 58 usable pairs, three null slots. Future timestamps may appear as chart axis/plan only, without future samples/values. The fixed 10:30–11:30 axes and split paths keep the gap visible once reached. Show W and rpm on separate scales with units, never one ambiguous shared scale. Supply an accessible table and textual counts; no clinical colors/bands. Rewind clips both representations identically. Tomás/Mei show no telemetry and keep their own planned reservations. Nothing is sent to Ground.
+
+`fd30Plan.ts`, `fd30-plan.1`, `demo-plan` copies plan context without modifying M1 and adds generic fictional equipment reservations and Lucía's collection slots. Future plan blocks are visibly planned; they never imply samples taken, exercise begun or results received. Telemetry fixtures do not enter snapshot state or workflow processed IDs. The optional 12:05 family extension is outside this IMP05 window and is not enabled here.
+
+
+### 11.7 IMP06 — Lucía’s simulated Exercise session panel
+
+Only the owner-scoped Exercise detail gains a synthetic `pulse_bpm` channel in `fd30-tel.2`, alongside unchanged W/rpm minute slots. It is an original deterministic illustrative pattern (no physiological model); the same 10:52–10:54 null gap applies. Display **Simulated telemetry / Telemetría simulada** beside the values, plus the not-measured disclosure. Use bpm in EN and lpm in ES. No real instrument, NASA measurement, clinical interpretation, threshold, zone, traffic light, steps, calories or Ground access is added. Tomás and Mei receive no readings. FD29 history remains without measurements.
+
+A reservation alone exposes no session readings. Require the confirmed owner/session start event, occurrence and receipt at/before the cursor before revealing either KPIs or graph/table samples. During the session, pulse and elapsed mm:ss are primary; W/rpm secondary. Elapsed time is calculated from the received start to the selected mission cursor, not an independent wall clock or an exercise dose.
+
+The current reading belongs to the one-minute acquisition slot `[occurredAt, occurredAt + 1 min)` containing the cursor and must already be received. A null value, missing current slot or expired earlier sample renders **No current reading / Sin lectura actual** for that variable; never carry the previous reading forward or turn missing into zero. Acquisition/receipt filters and confirmed identity apply to all three series. Rewind removes future values/points.
+
+After the confirmed finish, show a session summary (reported start/end, calculated duration and received/usable-slot counts) and the historical graph/table. No live pulse or current W/rpm remains. During the session use three separate neutral scales (pulse, W, rpm), with units and an accessible four-column table; preserve null gaps. A closed summary does not imply clinical recovery or a successful prescription. No reducer, route or shared-navigation change is required.

@@ -12,7 +12,7 @@ On long missions, astronauts carry much of the responsibility for noticing chang
 
 - **Onboard:** each crew member has one personal companion that stays the same before, during and after flight. It explains what changed in their context, helps them record observations, and lets them decide what to share.
 - **Ground:** a professional console where mission operators and medical professionals follow each mission, each seeing only what their role allows.
-- **One shared state through a simulated Ground–space link**, so pending deliveries and loss of signal are visible rather than hidden.
+- **One FD30 state and mission clock across both perspectives.** The simulated link and delivery queues from M1 remain internal regression features.
 
 M.A.T.E. is a prototype for demonstration. **It is not a medical device.** It does not diagnose, does not recommend treatments, and never decides whether someone may perform a task.
 
@@ -43,11 +43,11 @@ npm run preview      # serves dist/ at http://localhost:4173
 
 After `npm install`, the app makes no network requests: every page, style and data file is served by the local server, so it works without internet. `dist/index.html` must be served (for example with `npm run preview`), not opened as a file.
 
-Milestone M1 (the integration journey below) is implemented. M2–M4 (evidence views, module catalog, body map, three-phase journey) are not built yet.
+FD30 is the only public experience: `/` opens Onboard › Today. Ground opens the FD30 overview; Onboard returns to the last operational section (Today on first use). M1 code and regression tests remain internal, without a public UI entry.
 
-### FD30 visual cut (IMP02, local preview)
+### FD30 public entry and perspectives
 
-Run `npm run dev -- --host 127.0.0.1 --port 5173` and open **http://127.0.0.1:5173/#/demo/fd30**. This separate fictional ISS fixture starts at 05:55 UTC on FD30, as Lucía Ferraro, with Sprout visible and chat closed. M1 remains at `#/onboard/today` and `#/ground/iss/agenda`, with its own state and medical channel; the preview also has a link back to it.
+Run `npm run dev -- --host 127.0.0.1 --port 5173` and open **http://127.0.0.1:5173/**. The canonical Today route is `#/demo/fd30`; Ground is `#/demo/fd30/ground`, and its read-only crew schedule is `#/demo/fd30/ground/agenda`. Both perspectives share the FD30 clock/profile and preserve language, chat, draft and Mate position. Catalog and Sources & evidence remain accessible. Legacy M1 URLs are replaced with FD30 equivalents (or the corresponding overview), without an old-screen flash or redirect history entry. M1 task editing, link queues, medical delivery channel and cislunar scenario are internal only.
 
 1. Before advancing, open **Sleep** from navigation, Today or Sprout's info card (the ⓘ button beside the character). All use `#/onboard/personal/sleep`; FD29 simulated history is already readable. Return to Today.
 2. In **Demo mode**, choose **Next event**. The 06:00 simulated episode-ended report updates Today and Sleep; Sprout reacts and its ⓘ button shows a “!” badge, without opening chat or the card and without navigating. Open ⓘ to read the news and choose **View my summary**: it opens the same Sleep detail.
@@ -57,9 +57,11 @@ Run `npm run dev -- --host 127.0.0.1 --port 5173` and open **http://127.0.0.1:51
 5. Drag Sprout with mouse or touch; releasing a drag does not open chat. Tap to open chat in its independent side/bottom panel. Focus the character with Tab and press **M** to enable arrows (8 px), Shift+arrows (32 px), Enter to save and Escape to cancel. **Home** resets only that companion. There is no Position button or floating position menu. The ⓘ button opens an on-demand card (closed by default, independent of chat; Escape closes it and returns focus to ⓘ) that holds the keyboard hints and shows the move instructions while you move.
 6. Use **View as** in Demo mode to switch Lucía/Sprout, Tomás/Beacon and Mei/Sail. Each keeps its position, conversation and draft. FD30 keeps running; the wake report belongs only to Lucía. Resize temporarily adapts the visible position without replacing the saved preference. The earlier single-profile preview snapshot is migrated; M1 storage is untouched.
 
-This cut has Today and Sleep only, three isolated crew profiles, scripted chat replies about Sleep, and original inline SVG/CSS characters for Sprout and Sail. Beacon (Tomás) is a trial that shows the CC0 RobotExpressive sprite sheet from release v0.1.0 of `KanadeK/robot-expressive-codex-pet`; its source, license and credits are in `src/demo/assets/robot-expressive/`. Exercise, Laboratory, Commander, check-in and family capsules are not implemented here. It is a visual review slice, not completion of the full M1.1 specifications. No deployment is included.
+The public FD30 menus expose the available operational sections. Ground schedule reuses the wide timeline, anchored crew names and card list, with existing FD30 plans; browsing, selecting or centering never changes mission time. Autonomy remains a concept in the Catalog and offers no M1 link. No deployment is included.
 
-### Guided journey (milestone M1)
+### Internal regression journey (milestone M1)
+
+Historical reference for the preserved internal code/tests (`npm test`), not an accessible public workflow. Public aliases now resolve to FD30; the following M1 controls are not offered there.
 
 1. Open the app. You start **Onboard**, as Lucía Ferraro (fictional) on the ISS.
 2. Switch to **Ground** › ISS › Agenda as *Mission operator*. Select "Payload hardware swap" and advance it by 90 minutes. The preview shows how the planned rest window changes.
@@ -125,7 +127,7 @@ En misiones largas, los astronautas cargan con buena parte de la responsabilidad
 
 - **A Bordo:** cada tripulante tiene un compañero personal que es el mismo antes, durante y después del vuelo. Le explica qué cambió en su contexto, lo ayuda a registrar observaciones y le permite decidir qué compartir.
 - **Tierra:** una consola profesional donde operadores de misión y profesionales médicos siguen cada misión, cada uno viendo solo lo que su rol permite.
-- **Un estado compartido a través de un enlace Tierra–nave simulado**, para que las entregas pendientes y la pérdida de señal se vean en lugar de ocultarse.
+- **Un solo estado y reloj de misión FD30 entre ambas perspectivas.** El enlace simulado y las colas de entrega de M1 quedan como funciones de regresión internas.
 
 M.A.T.E. es un prototipo de demostración. **No es un dispositivo médico.** No diagnostica, no recomienda tratamientos y nunca decide si alguien puede realizar una tarea.
 
@@ -156,11 +158,11 @@ npm run preview      # sirve dist/ en http://localhost:4173
 
 Después de `npm install`, la app no hace ninguna petición de red: todas las páginas, estilos y datos los sirve el servidor local, así que funciona sin internet. `dist/index.html` debe servirse (por ejemplo con `npm run preview`), no abrirse como archivo.
 
-El hito M1 (el recorrido guiado de abajo) está implementado. M2–M4 (vistas de evidencia, catálogo de módulos, mapa corporal, viaje en tres fases) todavía no están construidos.
+FD30 es la única experiencia pública: `/` abre A bordo › Hoy. Tierra abre la portada FD30; A bordo vuelve a la última sección operativa (Hoy en el primer uso). El código y las pruebas de regresión de M1 quedan internos, sin entrada pública a su interfaz.
 
-### Corte visual FD30 (IMP02, vista local)
+### Entrada pública y perspectivas FD30
 
-Ejecutá `npm run dev -- --host 127.0.0.1 --port 5173` y abrí **http://127.0.0.1:5173/#/demo/fd30**. Este escenario ficticio separado de la EEI empieza a las 05:55 UTC de FD30, como Lucía Ferraro, con Sprout visible y el chat cerrado. M1 conserva sus rutas `#/onboard/today` y `#/ground/iss/agenda`, su estado y su canal médico; el corte también incluye un enlace para volver.
+Ejecutá `npm run dev -- --host 127.0.0.1 --port 5173` y abrí **http://127.0.0.1:5173/**. La ruta canónica de Hoy es `#/demo/fd30`; Tierra usa `#/demo/fd30/ground` y su agenda de consulta `#/demo/fd30/ground/agenda`. Ambas perspectivas comparten reloj y perfil de FD30 y conservan idioma, chat, borrador y posición de Mate. Catálogo y Fuentes y evidencia siguen accesibles. Las URLs de M1 se reemplazan por equivalentes FD30 o por la portada de la perspectiva, sin mostrar la pantalla vieja ni agregar una entrada de redirección al historial. La edición de tareas, las colas del enlace, el canal de entrega médica y el escenario cislunar de M1 quedan solo internos.
 
 1. Antes de avanzar, abrí **Sueño** desde navegación, Hoy o la tarjeta de información de Sprout (el botón ⓘ junto al personaje). Todos llegan a `#/onboard/personal/sleep`; el historial simulado de FD29 ya se puede consultar. Volvé a Hoy.
 2. En **Modo muestra**, elegí **Siguiente evento**. El reporte simulado de fin de episodio de las 06:00 actualiza Hoy y Sueño; Sprout reacciona y su botón ⓘ muestra una insignia «!», sin abrir el chat ni la tarjeta y sin navegar. Abrí ⓘ para leer la novedad y elegí **Ver mi resumen**: abre el mismo detalle de Sueño.
@@ -170,9 +172,11 @@ Ejecutá `npm run dev -- --host 127.0.0.1 --port 5173` y abrí **http://127.0.0.
 5. Arrastrá a Sprout con mouse o dedo; soltar un arrastre no abre el chat. Tocarlo abre el panel lateral/inferior independiente. Enfocá el personaje con Tab y pulsá **M** para activar flechas (8 px), Shift+flechas (32 px), Enter para guardar y Escape para cancelar. **Home** restablece solo a ese compañero. No hay botón de Posición ni menú flotante de posición. El botón ⓘ abre una tarjeta a pedido (cerrada por defecto, independiente del chat; Escape la cierra y devuelve el foco a ⓘ) que contiene las instrucciones de teclado y muestra las de movimiento mientras movés al personaje.
 6. Usá **Ver como** en Modo muestra para alternar Lucía/Sprout, Tomás/Beacon y Mei/Sail. Cada uno conserva posición, conversación y borrador. FD30 sigue corriendo; el reporte de despertar solo corresponde a Lucía. Cambiar el ancho adapta la posición visible sin reemplazar la preferencia guardada. Se migra el corte previo de un perfil; el almacenamiento de M1 no se modifica.
 
-Este corte incluye solo Hoy y Sueño, tres perfiles separados, respuestas guionadas sobre Sueño y personajes SVG/CSS originales para Sprout y Sail. Beacon (Tomás) es una prueba que muestra la hoja de sprites RobotExpressive (CC0) del release v0.1.0 de `KanadeK/robot-expressive-codex-pet`; su fuente, licencia y créditos están en `src/demo/assets/robot-expressive/`. No implementa Ejercicio, Laboratorio, Comandante, check-in ni cápsula familiar. Es una parte para revisión visual, no la implementación completa de M1.1. No incluye despliegue.
+Los menús públicos de FD30 muestran las secciones operativas disponibles. La Agenda de Tierra reutiliza la línea de tiempo amplia, los nombres anclados y las tarjetas con los planes existentes: consultar, seleccionar o centrar no cambia la hora de misión. Autonomía sigue como concepto en Catálogo, sin enlace a M1. No incluye despliegue.
 
-### Recorrido guiado (hito M1)
+### Recorrido de regresión interno (hito M1)
+
+Referencia histórica del código y las pruebas conservadas (`npm test`), sin acceso público al recorrido. Las URLs antiguas llevan a FD30; los controles de M1 descriptos abajo no se ofrecen allí.
 
 1. Abrí la app. Empezás **A Bordo**, como Lucía Ferraro (ficticia) en la EEI.
 2. Pasá a **Tierra** › EEI › Agenda como *Operador de misión*. Seleccioná «Cambio de hardware de carga útil» y adelantalo 90 minutos. La vista previa muestra cómo cambia la ventana de descanso planificada.

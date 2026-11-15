@@ -67,6 +67,7 @@ The perspective switch exists because the prototype runs both ends of the system
 | Badge EN | Badge ES | Meaning |
 |---|---|---|
 | Simulated | Simulado | Part of the fictional scenario: crew, agenda, link, plans, conversation |
+| Simulated telemetry | Telemetría simulada | Original deterministic FD30 W/rpm fixture and sole Lucía pulse exception, explicitly not measured (IMP05/IMP06, 04 §11.6–§11.7) |
 | Your entry | Tu registro | Entered by the crew member in this session |
 | NASA resource | Recurso NASA | Content from a NASA page or standard |
 | Partner resource | Recurso de agencia asociada | Content from a partner agency (e.g. CSA) |
@@ -340,3 +341,36 @@ Provide persistent Onboard entries Sleep / Sueño, Exercise / Ejercicio and Labo
 Today and Observations offer Optional check-in, clearly subordinate to the day summary. It opens the existing Observations view in the private qualitative path of 02 §12.7: day comment or leisure preference, no required score or response. Save privately, Cancel and Skip are reachable without advancing the day; simply leaving the form is allowed. A saved entry says Private check-in — not shared / Check-in privado — no se comparte. Do not show guilt prompts, adherence percentages, inferred mood, medical/Commander sharing controls or automatic leisure booking. The ordinary M1 medical-summary form remains a different path with its existing consent preview.
 
 Only if the optional family extension is enabled, a brief capsule notice appears beside the recipient's character after the main journey, still with chat closed. It shows Fictional local capsule and Open capsule, not the message body. Explicit Open capsule opens an owner-scoped local text panel labelled with fictional sender, recipient and provenance; Close returns focus to its opener. It neither opens chat nor auto-plays media, and never appears in Commander Crew or Ground. Keep this separate from automatic medical monitoring and from the core acceptance; see 05 §10.6.
+
+
+### 8.9 IMP05 — Time exploration and Exercise telemetry
+
+The Demo area gains a labelled mission-UTC slider, previous/next event, ±15 minutes, play/pause and exploration/guided selector. Range: 05:55–12:00; slider minute steps with exact event buttons. Time changes never navigate in default exploration or reset chat/drafts/companion position. Explicit guided mode has only the once-per-start exception in 02 §12.9.
+
+Today shows only the active person's planned agenda/equipment; reservations remain distinct from received exercise state. Exercise adds neutral SVG plots (power W, cadence rpm; IMP06 also simulated pulse bpm/lpm), a fixed full-session time axis, a receipt cursor, split lines at missing slots and a table toggle. Labels and live-region status are bilingual, with no color-only meaning. The synthetic label and source/version/session remain visible. At no-data moments show the reason, never empty bars implying zero. All controls and table columns fit narrow screens; graph/table selection survives time/profile changes.
+
+
+### 8.10 IMP06 — Exercise session hierarchy
+
+In the personal Exercise detail, show the reservation before confirmed start. In progress, lead with large pulse and elapsed mm:ss, then smaller W/rpm, each synthetic reading labelled Simulated telemetry / Telemetría simulada. Keep graph/table below; move detailed event provenance into disclosure rather than competing with the readings. No current slot/value means No current reading / Sin lectura actual, without stale values. At finish, replace current readings with a summary; historical samples remain inspectable. Keep the same cursor, owner isolation, bilingual units, neutral colors and keyboard/table access. Do not change Today, CAT01 navigation or Ground.
+
+### 8.11 AGD01 — Personal FD30 Schedule / Agenda
+
+Add Schedule / Agenda to FD30 personal navigation at `#/onboard/personal/agenda`; M1 `#/onboard/agenda` and Ground remain unchanged. Reuse `planFor(activeCrewId)`, the FD30 mission cursor and received events, with no additional agenda, clock or reducer. Show a wide horizontally scrollable single-person timeline with UTC ticks, an owner label, a Now / Ahora marker and an accessible list alternative. Include future plan blocks beyond the playback window (such as Mei's exercise); browsing them never advances mission time. Center on now / Centrar en ahora only scrolls the viewport. Profile name and UTC context remain visible on narrow screens while the grid moves. Ticks update the marker without recentering a user's scroll.
+
+Selecting a block exposes its planned interval, type and equipment if assigned. A reservation remains Planned even when a separate received simulated event confirms an activity. Link to the personal Exercise or Laboratory module only through an exact block→session/sample association and a received, confirmed same-owner start/collection within the planned interval. Do not infer links from task titles, create missing predecessors, or borrow another person's record. No event means an explicit plan-only state. Rewind removes future confirmations and links. Mate stays mounted and visible, with shared clock/profile, private data and position preserved through navigation. No Ground, M1 or medical-sharing change is authorized by AGD01.
+
+### 8.12 OPS01 — Crew, voluntary wellbeing and Ground FD30
+
+Offer Wellbeing / Bienestar and Operational requests / Solicitudes operativas in personal context navigation; replace the latter with Crew / Tripulación for Tomás. Crew is read-only operational planning, shared equipment reservations and explicit received operational messages. Noncommanders cannot reveal it through a direct hash. Wellbeing reuses the private Observations pattern: optional day comment or leisure preference, free text, Save privately / Guardar en privado, Cancel / Cancelar and Skip / Omitir, plus own entry history. No scores, inferred status, sharing control or automatic submission. Requests are a separate view with an exact-message consent preview; private notes are not prefilled or attached.
+
+Ground FD30 has three cards, one per fictional person, with original illustrated portraits labelled fictional, current planned activity, current/next equipment reservation and elapsed planned-block time only when a current block exists. One neutral teal bar represents that time fraction, not health or confirmed work; its text explains the limit. With no block, show a reason and no bar, never a false zero. Opening a card focuses the operational detail; Operations receives the plan, and Medical additionally sees the explicit absence of authorized FD30 summaries. Role selection cannot reveal personal records. No clinical traffic lights, risk indicators or scientific role are added.
+
+The FD30 perspective switch preserves Onboard identity and state, uses the existing mission controls, and keeps M1 internal (legacy public URLs redirect to FD30). Ground hides personal companion/chat, source-event labels and personal announcements. Onboard returns to its last operational section (Today initially; Catalog/Evidence do not overwrite it) with Mate, chat, drafts and position intact. EN/ES and mobile layouts retain all controls without horizontal overflow. Historical Evidence stays its separate labelled view and is never used as a live FD30 reading.
+
+
+### Public navigation cut — MATE-FD30-01
+
+This overrides public-entry/perspective references above; M1 screen descriptions remain internal regression documentation. `/` opens FD30 Onboard Today. Onboard's Ground action opens the FD30 overview; Ground offers overview, crew schedule, Catalog and a secondary Sources & evidence access, plus Onboard returning to the last operational page (Today initially). Catalog/Evidence visits do not overwrite that return destination. Use the same mission clock/profile/session throughout; retain language, conversation, draft, open chat and Mate position when returning.
+
+No M1 menu, link or companion action is public. Autonomy is conceptual in FD30, without a link or an Available claim for the internal rule/link engine. Legacy URLs are replaced with FD30 equivalents before painting. Ground's reused wide timeline has three anchored names and a card-list alternative, reflects FD30 Now, and is consultation only. Its privacy-safe plan labels, equipment and planned state do not confirm attendance. No task edit, delivery queue or medical channel is carried over. EN/ES and mobile retain Sources & evidence and the personal Agenda.

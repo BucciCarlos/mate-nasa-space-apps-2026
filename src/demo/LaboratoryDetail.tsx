@@ -62,10 +62,10 @@ function Sample({ sample, sampleType, historical = false, highlighted = false }:
   </article>;
 }
 
-export function LaboratoryDetail({ state, owner }: { state: PreviewState; owner: CrewId }) {
+export function LaboratoryDetail({ state, owner, highlight = true }: { state: PreviewState; owner: CrewId; highlight?: boolean }) {
   const t = useT().fd30;
   const samples = labSamples(state, owner);
-  const selected = state.profiles[owner].highlightedSampleId;
+  const selected = highlight ? state.profiles[owner].highlightedSampleId : null;
   const history = samples.find(s => s.id === HISTORICAL_BLOOD_SAMPLE);
   return <>
     <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal} / {t.laboratory}</p><h1 id="fd-view-h" tabIndex={-1}>{t.labTitle}</h1><p>{t.labIntro}</p></div>

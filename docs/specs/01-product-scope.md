@@ -12,13 +12,17 @@ The challenge states that on long missions "astronauts carry much of the respons
 
 The prototype is a static web application and a decision-support demonstration. It is not a medical device: it does not diagnose, prescribe, or decide whether anyone may perform a task.
 
+### Public experience — MATE-FD30-01
+
+The public cut is FD30 only: Onboard and Ground are perspectives of the same fictional ISS mission, sharing its existing clock/profile/session. `/` opens Onboard Today. Ground opens the overview; returning Onboard restores the last operational section or Today on first use. Catalog and Sources & evidence remain accessible. Legacy M1 URLs redirect to FD30; M1's code and regression tests, task editing, simulated delivery queues, medical channel and cislunar UI remain internal. Ground's schedule is read-only and uses the existing FD30 plans. This entry/navigation change does not expand catalog scope or alter data/history contracts.
+
 ## 2. Principles (MUST in every milestone)
 
 | ID | Principle |
 |---|---|
 | P1 | **One companion across phases.** The same companion (name, appearance, memory of the person's own records) accompanies pre-flight, in-flight and post-flight. |
 | P2 | **Context before interpretation.** M.A.T.E. explains what changed in the crew member's context (agenda, link, environment). It never infers a health outcome it has no evidence for, and says so explicitly. |
-| P3 | **No invented science.** No fabricated physiological values, clinical histories presented as measured evidence, thresholds, probabilities, risk scores or predictions. Explicitly simulated workflow history has the limits in 04 §11. People, agendas, plans, link behaviour and conversation may be simulated and are always labelled as simulated. |
+| P3 | **No invented science.** No fabricated physiological values (sole exception: explicitly simulated FD30 Lucía pulse under 04 §11.7), clinical histories presented as measured evidence, thresholds, probabilities, risk scores or predictions. Explicitly simulated workflow history has the limits in 04 §11. People, agendas, plans, link behaviour and conversation may be simulated and are always labelled as simulated. |
 | P4 | **Provenance at the point of use.** Every data-bearing element shows where it comes from (03 §5, 04 §2). |
 | P5 | **Private by default.** Private notes and companion conversations never leave Onboard. Ground only receives summaries the crew member explicitly chooses to share. |
 | P6 | **No readiness verdicts.** Never "fit/unfit", "apto/no apto" or equivalents. No flow depends on a cognitive test. |

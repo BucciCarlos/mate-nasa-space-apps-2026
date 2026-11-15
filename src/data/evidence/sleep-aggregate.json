@@ -1,0 +1,52 @@
+{
+  "sourceId": "barger-2014",
+  "accessedAt": "2026-11-15",
+  "citation": {
+    "authors": "Barger LK, Flynn-Evans EE, Kubey A, Walsh L, Ronda JM, Wang W, Wright KP Jr, Czeisler CA",
+    "title": "Prevalence of sleep deficiency and use of hypnotic drugs in astronauts before, during, and after spaceflight: an observational study",
+    "journal": "The Lancet Neurology",
+    "year": 2014,
+    "volume": "13(9)",
+    "pages": "904–912",
+    "doi": "10.1016/S1474-4422(14)70122-X"
+  },
+  "population": {
+    "en": "ISS subgroup: 21 astronauts on 13 missions, 2006–2011; other crews, not the fictional M.A.T.E. profiles. Medication reports use a separate denominator of 16 ISS crew members.",
+    "es": "Subgrupo EEI: 21 astronautas de 13 misiones, 2006–2011; otras tripulaciones, distintas de los perfiles ficticios de M.A.T.E. Los informes de medicación usan un denominador separado de 16 tripulantes de la EEI."
+  },
+  "counts": {
+    "astronauts": 21,
+    "missions": 13,
+    "inflightDays": 3248
+  },
+  "method": {
+    "en": "Observational study; sleep obtained estimated by wrist actigraphy, with daily sleep and medication logs. Published means and standard deviations in hours per night; no individual series. Periods: two weeks about three months before launch, last 11 days before launch, inflight, first seven days after landing.",
+    "es": "Estudio observacional; sueño obtenido estimado por actigrafía de muñeca, con diarios de sueño y medicación. Medias y desviaciones estándar publicadas en horas por noche; sin serie individual. Períodos: dos semanas unos tres meses antes del lanzamiento, últimos 11 días antes, vuelo y primeros siete días después del aterrizaje."
+  },
+  "groups": [
+    {
+      "id": "preflight_3m",
+      "hoursObtained": 6.41,
+      "sd": 0.65
+    },
+    {
+      "id": "preflight_11d",
+      "hoursObtained": 5.86,
+      "sd": 0.94
+    },
+    {
+      "id": "inflight",
+      "hoursObtained": 6.09,
+      "sd": 0.67
+    },
+    {
+      "id": "postflight_1w",
+      "hoursObtained": 6.95,
+      "sd": 1.04
+    }
+  ],
+  "hypnotics": {
+    "users": 12,
+    "of": 16
+  }
+}

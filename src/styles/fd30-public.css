@@ -1,0 +1,19 @@
+/* Public FD30 additions only; the legacy timeline/cards keep their defaults. */
+.fd30 :is(.fd-ground-agenda, .fd-ground-catalog) { --fg: var(--ink); --fg-2: var(--quiet); --bg: var(--paper); --bg-2: #fffdf8; --bg-3: #ece9df; --line: var(--rule); --accent: #137d83; --focus: var(--rust); --red: #8e4631; --amber: #8c5b16; --amber-bg: #f5ead2; color: var(--ink); }
+.fd-ground-agenda { min-width: 0; }
+.fd-ground-agenda .gat .blk { position: absolute; z-index: 1; }
+.fd-ground-agenda .gat .gat-name { z-index: 5; }
+.fd-ground-agenda .ga-views button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); font-weight: 700; }
+.fd-ground-agenda .gac { gap: 16px; }
+.fd-ground-agenda .gac-card { padding: 16px; }
+.fd-ground-agenda .gac-item { grid-template-columns: minmax(0, 1fr) auto; }
+.fd-ground-agenda .gac-time { grid-column: 1 / -1; }
+.fd-ground-agenda .gac-item button { color: var(--ink); background: #fffdf8; border-color: #9fafa4; }
+.fd-ground-plan-note { color: var(--quiet); font-size: 13px; line-height: 1.6; }
+.fd-ground-plan-detail { margin: 24px 0; border: 1px solid var(--rule); border-radius: 5px; padding: 20px; }
+.fd-ground-plan-detail h2 { font: 400 25px Georgia, serif; margin: 0 0 14px; }
+.fd-ground-plan-detail p, .fd-ground-plan-detail strong { font-size: 13px; line-height: 1.6; }
+.fd30-ground .fd-nav { flex-wrap: wrap; gap: 12px 22px; }
+@media (max-width: 600px) {
+  .fd30-ground .fd-nav { gap: 8px 15px; }
+}

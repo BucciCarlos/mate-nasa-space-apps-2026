@@ -8,9 +8,10 @@ import { navigate, toHash } from './routes';
 import { useNow } from '../state/useNow';
 import { flightDay, missionTimeMs } from '../domain/time';
 import { fmtTime } from '../i18n/format';
+import '../styles/secondary-nav.css';
 
 const ONBOARD_PAGES: OnboardPage[] = ['today', 'agenda', 'observations'];
-const GROUND_PAGES: GroundPage[] = ['agenda', 'link', 'crew', 'log'];
+const GROUND_PAGES: GroundPage[] = ['agenda', 'link', 'crew', 'log', 'catalog', 'evidence'];
 
 export function Shell({ route, onRestart, children }: { route: Route; onRestart: () => void; children: ReactNode }) {
   const { state, dispatch } = useApp();
@@ -82,7 +83,11 @@ export function Shell({ route, onRestart, children }: { route: Route; onRestart:
         <nav className="subnav" aria-label={t.a11y.missionNav}>
           {route.view === 'onboard'
             ? ONBOARD_PAGES.map((p) => <a key={p} href={toHash({ view: 'onboard', page: p })} aria-current={route.page === p ? 'page' : undefined}>{t.shell.nav[p]}</a>)
-            : GROUND_PAGES.map((p) => <a key={p} href={toHash({ view: 'ground', missionId: route.missionId, page: p })} aria-current={route.page === p ? 'page' : undefined}>{t.shell.nav[p]}</a>)}
+            : <>
+              {GROUND_PAGES.filter((p) => p !== 'evidence').map((p) => <a key={p} href={toHash({ view: 'ground', missionId: route.missionId, page: p })} aria-current={route.page === p ? 'page' : undefined}>{t.shell.nav[p]}</a>)}
+              {/* Sources & evidence is a secondary access: same route, set apart from the working modules. */}
+              <a className="subnav-secondary" href={toHash({ view: 'ground', missionId: route.missionId, page: 'evidence' })} aria-current={route.page === 'evidence' ? 'page' : undefined}>{t.shell.nav.evidence}</a>
+            </>}
         </nav>
       )}
       {children}

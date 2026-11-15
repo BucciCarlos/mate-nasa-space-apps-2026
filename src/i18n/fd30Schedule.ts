@@ -1,0 +1,31 @@
+const en = {
+  title: 'Your schedule', intro: 'Your planned day, with received activity events kept separate.',
+  timeline: 'Personal schedule timeline', browse: 'Browse the timeline; this does not change mission time.',
+  center: 'Center on now', earlier: 'Earlier', later: 'Later', now: 'Now', utc: 'UTC',
+  row: 'Personal plan', select: 'Select an activity to see its details.',
+  selected: 'Selected activity', hours: 'Planned time (UTC)', type: 'Type', equipment: 'Equipment',
+  planned: 'Planned', plannedOnly: 'Plan only. No associated activity event received at this mission time.',
+  planShort: 'Plan', eventShort: 'Event',
+  confirmed: 'Confirmed by received event · simulated', event: 'Latest associated event',
+  occurred: 'Occurred (UTC)', received: 'Received (UTC)', source: 'Source',
+  openExercise: 'Open your Exercise', openLaboratory: 'Open your Laboratory',
+  list: 'Browse as a list', dayBefore: 'previous day',
+  stages: { 'exercise.started': 'Session started', 'exercise.finished': 'Session finished',
+    'lab.sample_taken': 'Sample taken', 'lab.analysis_started': 'Analysis started', 'lab.result_available': 'Result available' },
+};
+const es: typeof en = {
+  title: 'Tu agenda', intro: 'Tu día planificado, separado de los eventos de actividad recibidos.',
+  timeline: 'Línea de tiempo de la agenda personal', browse: 'Desplazá la agenda para consultar; esto no cambia la hora de misión.',
+  center: 'Centrar en ahora', earlier: 'Antes', later: 'Después', now: 'Ahora', utc: 'UTC',
+  row: 'Plan personal', select: 'Elegí una actividad para consultar sus detalles.',
+  selected: 'Actividad seleccionada', hours: 'Horario planificado (UTC)', type: 'Tipo', equipment: 'Equipo',
+  planned: 'Planificado', plannedOnly: 'Solo planificación. No se recibió un evento asociado a esta actividad a la hora de misión.',
+  planShort: 'Plan', eventShort: 'Evento',
+  confirmed: 'Confirmado por evento recibido · simulado', event: 'Último evento asociado',
+  occurred: 'Ocurrió (UTC)', received: 'Recibido (UTC)', source: 'Fuente',
+  openExercise: 'Abrir tu Ejercicio', openLaboratory: 'Abrir tu Laboratorio',
+  list: 'Consultar como lista', dayBefore: 'día anterior',
+  stages: { 'exercise.started': 'Sesión iniciada', 'exercise.finished': 'Sesión finalizada',
+    'lab.sample_taken': 'Muestra tomada', 'lab.analysis_started': 'Análisis iniciado', 'lab.result_available': 'Resultado disponible' },
+};
+export const SCHEDULE_TEXT = { en, es };

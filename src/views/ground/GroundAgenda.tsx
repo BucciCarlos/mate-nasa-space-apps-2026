@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AdvanceMinutes, GroundRole, MissionId, ScheduleBlock } from '../../state/types';
 import { ADVANCE_OPTIONS } from '../../state/types';
 import { useApp } from '../../state/AppProvider';
 import { selectGroundPlan } from '../../state/selectors';
 import { useLocale, useT } from '../../i18n/I18nProvider';
-import { fmtInterval } from '../../i18n/format';
+import { fmtDate, fmtClock, fmtInterval } from '../../i18n/format';
 import { advanceTask } from '../../domain/agenda';
 import { DAY_MS, missionTimeMs, toIso, toMs } from '../../domain/time';
-import { Timeline } from '../shared/Timeline';
+import { GroundTimeline } from './GroundTimeline';
+import { GroundCards } from './GroundCards';
+import { groundAgendaText } from './groundAgendaText';
+import '../../styles/ground-agenda.css';
 import { RestWindowCard } from '../shared/RestWindowCard';
 import { Badge, StatusBadge } from '../shared/Badge';
 import { useNow } from '../../state/useNow';
@@ -23,8 +26,15 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [minutes, setMinutes] = useState<AdvanceMinutes>(90);
   const [sentFlash, setSentFlash] = useState(false);
+  // View and selection live here, so switching between timeline and cards keeps both (and the period).
+  const [view, setView] = useState<'timeline' | 'cards'>('timeline');
+  const timelineScroll = useRef<number | null>(null);
+  const detail = useRef<HTMLElement>(null);
+  const g = groundAgendaText[locale];
 
-  useEffect(() => { setSelectedId(null); }, [missionId]);
+  useEffect(() => { setSelectedId(null); timelineScroll.current = null; }, [missionId]);
+  // On narrow screens the detail sits below the agenda: bring it into view when something is selected.
+  useEffect(() => { if (selectedId) detail.current?.scrollIntoView({ block: 'nearest' }); }, [selectedId]);
 
   // Ground covers the current mission day and the next one (03 §2)
   const range = useMemo(() => {
@@ -49,7 +59,7 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
   const statusLabel = (s: 'queued' | 'in_transit' | 'delivered') => (s === 'queued' ? t.message.queued : s === 'in_transit' ? t.message.inTransit : t.message.delivered);
 
   return (
-    <div className="ground-agenda">
+    <div className={`ground-agenda${selected ? ' has-detail' : ''}`}>
       <section className="panel panel-main" aria-labelledby="ground-agenda-h">
         <div className="panel-head">
           <h1 id="ground-agenda-h">{t.ground.agendaTitle}</h1>
@@ -57,7 +67,14 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
           <Badge kind="simulated" />
         </div>
         <p className="muted">{t.ground.agendaHint}</p>
-        <Timeline range={range} lanes={lanes} nowMs={missionNow} selectedId={selectedId} onSelect={onSelect} />
+        <div className="ga-views" role="group" aria-label={g.views}>
+          <button type="button" className={`btn btn-ghost btn-sm${view === 'timeline' ? ' is-on' : ''}`} aria-pressed={view === 'timeline'} onClick={() => setView('timeline')}>{g.viewTimeline}</button>
+          <button type="button" className={`btn btn-ghost btn-sm${view === 'cards' ? ' is-on' : ''}`} aria-pressed={view === 'cards'} onClick={() => setView('cards')}>{g.viewCards}</button>
+          <span className="muted">{fmtDate(range.start, locale)} {fmtClock(range.start)} → {fmtDate(range.end, locale)} {fmtClock(range.end)} {t.common.utc}</span>
+        </div>
+        {view === 'timeline'
+          ? <GroundTimeline range={range} lanes={lanes} nowMs={missionNow} selectedId={selectedId} onSelect={onSelect} scrollRef={timelineScroll} />
+          : <GroundCards range={range} lanes={lanes} selectedId={selectedId} onSelect={onSelect} />}
         <section className="sent-changes" aria-labelledby="sent-h">
           <h2 id="sent-h">{t.ground.sentChanges}</h2>
           {changes.length === 0 ? <p className="empty">{t.ground.noChanges}</p> : (
@@ -78,9 +95,10 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
         </section>
       </section>
 
-      <aside className="panel panel-side" aria-labelledby="task-panel-h">
+      {selected && <aside className="panel panel-side" aria-labelledby="task-panel-h" ref={detail}>
+        <button type="button" className="btn btn-ghost btn-sm ga-close" onClick={() => setSelectedId(null)}>{g.closeDetail}</button>
         <h2 id="task-panel-h">{t.ground.taskPanelTitle}</h2>
-        {!selected ? <p className="empty">{t.ground.selectTask}</p> : (
+        {(
           <>
             <div className="task-detail">
               <div className="task-title">{selected.title[locale]}</div>
@@ -135,7 +153,7 @@ export function GroundAgenda({ missionId, role }: { missionId: MissionId; role: 
             )}
           </>
         )}
-      </aside>
+      </aside>}
     </div>
   );
 }

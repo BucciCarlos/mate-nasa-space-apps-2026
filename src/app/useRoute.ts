@@ -1,15 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import type { Route } from '../state/types';
-import { parseRoute } from './routes';
+import { publicHash, publicRoute } from './publicRoutes';
 
 function current(): Route {
-  return parseRoute(window.location.hash) ?? { view: 'notfound' };
+  return publicRoute(window.location.hash);
 }
 
 export function useRoute(): Route {
   const [route, setRoute] = useState<Route>(current);
-  useEffect(() => {
-    const onChange = () => setRoute(current());
+  useLayoutEffect(() => {
+    const onChange = () => {
+      const next = current();
+      const canonical = publicHash(window.location.hash);
+      // Replace this history entry: Back never re-enters an alias or paints the M1 shell.
+      if (window.location.hash !== canonical) window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}${canonical}`);
+      setRoute(next);
+    };
+    onChange();
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);

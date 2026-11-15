@@ -1,0 +1,46 @@
+/* Ground agenda only: wide timeline (.gat), crew cards (.gac) and the detail-on-selection layout. Imported by GroundAgenda.tsx. */
+[data-surface="ground"] .ground-agenda:not(.has-detail) { grid-template-columns: minmax(0, 1fr); }
+[data-surface="ground"] .ground-agenda .panel-main { min-width: 0; }
+[data-surface="ground"] .ga-views { display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; margin: var(--sp-3) 0; }
+[data-surface="ground"] .ga-views .btn.is-on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+[data-surface="ground"] .ga-views .muted { margin-left: auto; font-size: var(--fs-0); }
+[data-surface="ground"] .ga-close { float: right; }
+
+/* Wide timeline: 80 px per hour, names sticky on the left, aligned with their rows. */
+[data-surface="ground"] .gat-tools { display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; margin-bottom: var(--sp-2); font-size: var(--fs-0); }
+[data-surface="ground"] .gat-now-readout { font-weight: 700; color: var(--red); font-family: var(--mono); }
+[data-surface="ground"] .gat-scroll { overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--line); border-radius: var(--r-2); background: var(--bg-2); }
+[data-surface="ground"] .gat-scroll:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+[data-surface="ground"] .gat-inner { position: relative; }
+[data-surface="ground"] .gat-axis, [data-surface="ground"] .gat-lane { display: flex; }
+[data-surface="ground"] .gat-lane { border-top: 1px solid var(--line); }
+[data-surface="ground"] .gat-corner, [data-surface="ground"] .gat-name { position: sticky; left: 0; z-index: 5; flex: 0 0 auto; box-sizing: border-box; background: var(--bg-3); border-right: 1px solid var(--line); }
+[data-surface="ground"] .gat-corner { display: flex; align-items: flex-end; padding: var(--sp-2); font-size: 11px; color: var(--fg-2); z-index: 6; }
+[data-surface="ground"] .gat-name { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: var(--sp-2); }
+[data-surface="ground"] .gat-name small { color: var(--fg-2); font-size: 11px; }
+[data-surface="ground"] .gat-axis-track { position: relative; flex: 0 0 auto; height: 46px; font-family: var(--mono); font-size: 11px; color: var(--fg-2); }
+[data-surface="ground"] .gat-tick { position: absolute; bottom: 4px; padding-left: 4px; }
+[data-surface="ground"] .gat-date { position: absolute; top: 4px; padding-left: 4px; font-weight: 700; color: var(--fg); white-space: nowrap; }
+[data-surface="ground"] .gat-now-chip { position: absolute; top: 3px; transform: translateX(-50%); z-index: 3; padding: 1px 8px; border-radius: 999px; background: var(--red); color: #fff; font-weight: 700; font-size: 12px; white-space: nowrap; }
+[data-surface="ground"] .gat-track { position: relative; flex: 0 0 auto; height: 92px; }
+[data-surface="ground"] .gat-grid { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--line); }
+[data-surface="ground"] .gat-now-line { position: absolute; top: 0; bottom: 0; width: 0; border-left: 3px solid var(--red); z-index: 2; pointer-events: none; }
+[data-surface="ground"] .gat .blk { font-size: 12px; top: 10px; height: 72px; }
+[data-surface="ground"] .gat .blk-kind { font-size: 10px; }
+
+/* Crew cards: columns on desktop, stacked on mobile. */
+[data-surface="ground"] .gac { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--sp-4); align-items: start; }
+[data-surface="ground"] .gac-card { background: var(--bg-3); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); min-width: 0; }
+[data-surface="ground"] .gac-card h3 { margin: 0 0 var(--sp-2); display: flex; flex-direction: column; }
+[data-surface="ground"] .gac-card h3 small { font-weight: 400; color: var(--fg-2); font-size: var(--fs-0); }
+[data-surface="ground"] .gac-card ul { list-style: none; margin: 0; padding: 0; }
+[data-surface="ground"] .gac-item { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: var(--sp-2); align-items: start; padding: var(--sp-2) var(--sp-2); border-top: 1px solid var(--line); border-left: 3px solid transparent; }
+[data-surface="ground"] .gac-item.is-selected { border-left-color: var(--accent); outline: 2px solid var(--accent); outline-offset: -2px; }
+[data-surface="ground"] .gac-time { font-size: var(--fs-0); }
+[data-surface="ground"] .gac-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+[data-surface="ground"] .gac-title { font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  [data-surface="ground"] .gac { grid-template-columns: minmax(0, 1fr); }
+  [data-surface="ground"] .gac-item { grid-template-columns: minmax(0, 1fr) auto; }
+  [data-surface="ground"] .gac-time { grid-column: 1 / -1; }
+}

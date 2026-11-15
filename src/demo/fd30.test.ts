@@ -88,7 +88,7 @@ describe('Floating companions — private preferences and safe positions', () =>
     const legacy = { version: 1, sessionStartMs: 1000, offsetMs: 300000, wakeReceived: true,
       profiles: { [OWNER]: { seen: true, draft: 'unfinished', turns: [{ text: 'resumen', lang: 'es', reply: 'sleep' }] } } };
     const s = restorePreview(JSON.stringify(legacy), 2000);
-    expect(s.version).toBe(4);
+    expect(s.version).toBe(5);
     expect(s.sessionStartMs).toBe(1000);
     expect(s.offsetMs).toBe(300000);
     expect(s.wakeReceived).toBe(true);
@@ -185,7 +185,7 @@ describe('IMP03 exercise — owner-scoped workflow, journal and migration', () =
     const legacy = { version: 2, sessionStartMs: 1000, offsetMs: 500000, wakeReceived: true, activeCrewId: 'iss:crew-ti',
       profiles: Object.fromEntries(CREW.map((c, i) => [c.id, { seen: true, draft: `private-${i}`, turns: [{ text: `turn-${i}`, lang: 'es', reply: 'sleep' }], position: { x: i / 4, y: .4 } }])) };
     const restored = restorePreview(JSON.stringify(legacy), 10000);
-    expect(restored.version).toBe(4);
+    expect(restored.version).toBe(5);
     expect(restored.activeCrewId).toBe(legacy.activeCrewId);
     expect(restored.sessionStartMs).toBe(legacy.sessionStartMs);
     expect(restored.offsetMs).toBe(legacy.offsetMs);
@@ -212,5 +212,88 @@ describe('IMP03 exercise — owner-scoped workflow, journal and migration', () =
     const backwards = ingestExercise(incomplete, [EXERCISE_EVENTS[0]], due);
     expect(backwards.exercise).toEqual(incomplete.exercise);
     expect(backwards.diagnostics[0].status).toBe('rejected');
+  });
+});
+
+describe('IMP05 reversible time and guided replay', () => {
+  const at = (time: string) => Date.parse(`2027-03-10T${time}:00Z`);
+  const seek = (s: ReturnType<typeof freshPreview>, time: string) => previewReduce(s, { type: 'seek', now: 1000, target: at(time) });
+  it('reconstructs exact receipt boundaries, never leaving future samples/results in the past', async () => {
+    const { projectDomain } = await import('./fd30');
+    for (const time of ['05:55', '09:14', '09:15', '10:00', '10:41', '11:30', '11:44', '11:45', '12:00']) {
+      const forward = previewReduce(freshPreview(1000), { type: 'tick', now: 1000 + at(time) - START });
+      const rewound = seek(seek(freshPreview(1000), '12:00'), time);
+      expect({ processedIds: rewound.processedIds, exercise: rewound.exercise, laboratory: rewound.laboratory,
+        diagnostics: rewound.diagnostics, wakeReceived: rewound.wakeReceived }).toEqual(projectDomain(at(time)));
+      expect(rewound.exercise).toEqual(forward.exercise);
+      expect(rewound.laboratory).toEqual(forward.laboratory);
+      expect(rewound.processedIds).toEqual(forward.processedIds);
+    }
+    expect(seek(freshPreview(1000), '09:14').laboratory).toHaveLength(1);
+    expect(seek(freshPreview(1000), '11:44').laboratory.some(s => s.result)).toBe(false);
+    expect(seek(freshPreview(1000), '11:45').laboratory.filter(s => s.result)).toHaveLength(1);
+  });
+  it('keeps all private data, read and announced IDs across rewind, repeated replay and reload', () => {
+    let s = seek(freshPreview(1000), '11:45');
+    s = previewReduce(s, { type: 'ask', owner: OWNER, text: 'my session', lang: 'en' });
+    s = previewReduce(s, { type: 'draft', owner: OWNER, text: 'private draft' });
+    s = previewReduce(s, { type: 'position', owner: OWNER, position: { x: .25, y: .7 } });
+    s = previewReduce(s, { type: 'seen', owner: OWNER });
+    for (const e of EXERCISE_EVENTS) s = previewReduce(s, { type: 'exercise/view', owner: OWNER, sessionId: EXERCISE_SESSION, eventId: e.id });
+    s = previewReduce(s, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) });
+    const profiles = s.profiles;
+    const back = seek(s, '05:55');
+    expect(back.profiles).toBe(profiles);
+    expect(latestNews(back, OWNER)).toBeNull();
+    const again = seek(back, '11:45');
+    expect(again.profiles).toBe(profiles);
+    expect(new Set(again.processedIds).size).toBe(again.processedIds.length);
+    expect(previewReduce(again, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) })).toBe(again);
+    expect(restorePreview(JSON.stringify(again), 1000)).toEqual(again);
+    expect(profiles[OWNER].turns[0].lang).toBe('en');
+    expect(seek(previewReduce(again, { type: 'select', crewId: 'iss:crew-ti' }), '10:41').activeCrewId).toBe('iss:crew-ti');
+  });
+  it('clamps endpoints, pauses without drift and resumes continuously', async () => {
+    const { END } = await import('./fd30');
+    let s = previewReduce(freshPreview(1000), { type: 'seek', now: 1000, target: START - 1 });
+    expect(previewTime(s, 1000)).toBe(START);
+    s = previewReduce(s, { type: 'running/set', now: 2000, running: false });
+    expect(previewTime(s, 32000)).toBe(START + 1000);
+    s = previewReduce(s, { type: 'running/set', now: 32000, running: true });
+    expect(previewTime(s, 33000)).toBe(START + 2000);
+    s = previewReduce(s, { type: 'seek', now: 33000, target: END + 100 });
+    expect(previewTime(s, 99999999)).toBe(END);
+    expect(s.offsetMs).toBeGreaterThanOrEqual(0);
+    expect(previewReduce(s, { type: 'seek', now: 33000, target: NaN })).toBe(s);
+  });
+  it('guides only a newly processed active-owner start, once, and never on seek/profile selection', () => {
+    let s = previewReduce(freshPreview(1000), { type: 'playback/set', mode: 'guided' });
+    s = seek(s, '10:29');
+    expect(s.guidedRequest).toBeNull();
+    s = previewReduce(s, { type: 'next', now: 1000 });
+    expect(s.guidedRequest).toEqual({ owner: OWNER, eventId: EXERCISE_EVENTS[0].id });
+    s = previewReduce(s, { type: 'guided/consume', owner: OWNER, eventId: EXERCISE_EVENTS[0].id });
+    s = seek(s, '10:29');
+    s = previewReduce(s, { type: 'next', now: 1000 });
+    expect(s.guidedRequest).toBeNull();
+    expect(s.profiles[OWNER].guidedOpenedIds).toEqual([EXERCISE_EVENTS[0].id]);
+    expect(seek(previewReduce(freshPreview(1000), { type: 'playback/set', mode: 'guided' }), '10:30').guidedRequest).toBeNull();
+    let other = previewReduce(freshPreview(1000), { type: 'select', crewId: 'iss:crew-ti' });
+    other = previewReduce(other, { type: 'playback/set', mode: 'guided' });
+    other = previewReduce(seek(other, '10:29'), { type: 'next', now: 1000 });
+    expect(other.guidedRequest).toBeNull();
+    expect(previewReduce(other, { type: 'select', crewId: OWNER }).guidedRequest).toBeNull();
+    expect(previewReduce(seek(freshPreview(1000), '10:29'), { type: 'next', now: 1000 }).guidedRequest).toBeNull();
+  });
+  it('migrates v4 private data while rebuilding receipts at its clock and defaults to exploration', () => {
+    const future = seek(freshPreview(1000), '11:45');
+    const old = { ...future, version: 4, offsetMs: 0 };
+    const loaded = restorePreview(JSON.stringify(old), 1000);
+    expect(loaded.version).toBe(5);
+    expect(loaded.playback).toBe('explore');
+    expect(loaded.profiles[OWNER].turns).toEqual(future.profiles[OWNER].turns);
+    expect(loaded.laboratory.some(s => s.result)).toBe(false);
+    expect(loaded.wakeReceived).toBe(false);
+    expect(loaded.guidedRequest).toBeNull();
   });
 });

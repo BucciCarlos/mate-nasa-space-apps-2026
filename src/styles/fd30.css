@@ -330,26 +330,18 @@
   .fd-header .fd-nav a { font-size: 12px; }
 }
 
-/* Beacon: RobotExpressive sprite (src/demo/assets/robot-expressive/SOURCE.md). Every frame is shown through the same
-   124 x 98 source-pixel window (x 34, y 100 of its cell), so idle and waving share one baseline and never shift. --s keeps
-   the waving hand inside the button plus the 8 px viewport margin. Rows: 0 idle (6 frames), 3 waving (4 frames). */
-.beacon-sprite { --s: 1.1; display: block; position: relative; }
-.beacon-sprite::before { content: ""; position: absolute; left: 50%; bottom: 0; width: calc(80px * var(--s)); height: calc(9px * var(--s)); margin-left: calc(-40px * var(--s)); border-radius: 50%; background: #243d3e; opacity: .12; }
-.beacon-frame { position: absolute; left: 50%; bottom: 2px; width: calc(124px * var(--s)); height: calc(98px * var(--s)); margin-left: calc(-62px * var(--s));
-  background-repeat: no-repeat; background-size: calc(1536px * var(--s)) calc(2288px * var(--s));
-  background-position: calc(var(--s) * -34px) calc(var(--s) * -100px); }
-.beacon-sprite.is-news .beacon-frame { transform: translateY(-3px); }
-/* Fixed frames, used as is with reduced motion: idle frame 0, and waving frame 2 while the chat is open. */
-.beacon-sprite.is-greeting .beacon-frame { background-position: calc(var(--s) * -418px) calc(var(--s) * -724px); }
+/* Companion motion. The SVG art is the original FD30 one. Rest: a slow sway of the whole figure (.crew-sway, so it never fights the
+   hover/pose transforms of .sprout-body). Greeting: FloatingCompanion sets .is-greeting for one short opening of the chat; the right arm
+   (already raised by the component) waves once. With reduced motion there is no animation: rest is the drawn pose and the greeting is
+   the same static raised-arm pose for that short time. */
+.crew-sway { transform-origin: 90px 175px; }
+.crew-wave-arm { transform-box: fill-box; transform-origin: 10% 90%; }
 @media (prefers-reduced-motion: no-preference) {
-  .beacon-frame { animation: beacon-idle 3s steps(6, jump-none) infinite; }
-  /* Idle keeps running underneath (same animation, never restarted); the later wave overrides it while it lasts, then idle shows again. */
-  .beacon-sprite.is-greeting .beacon-frame { animation: beacon-idle 3s steps(6, jump-none) infinite, beacon-wave 1s steps(4, jump-none) 2; }
-  @keyframes beacon-idle { from { background-position: calc(var(--s) * -34px) calc(var(--s) * -100px); } to { background-position: calc(var(--s) * -994px) calc(var(--s) * -100px); } }
-  @keyframes beacon-wave { from { background-position: calc(var(--s) * -34px) calc(var(--s) * -724px); } to { background-position: calc(var(--s) * -610px) calc(var(--s) * -724px); } }
+  .crew-sway { animation: crew-sway 4.5s ease-in-out infinite; }
+  .is-greeting .crew-wave-arm { animation: crew-wave 1.5s ease-in-out 1; }
+  @keyframes crew-sway { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2.5px) rotate(.8deg); } }
+  @keyframes crew-wave { 0%, 100% { transform: rotate(0); } 20%, 60% { transform: rotate(-16deg); } 40%, 80% { transform: rotate(8deg); } }
 }
-@media (max-width: 600px) { .beacon-sprite { --s: .82; } }
-@media (max-height: 600px) { .beacon-sprite { --s: .75; } }
 
 /* On-demand info card: the character keeps a discreet info button; only it (or a move in progress) shows the card.
    The button is a sibling of the character button, so it never starts or ends a drag. News is marked with a "!" badge,

@@ -1,0 +1,13 @@
+/* Secondary access to "Sources & evidence": set apart from the working modules, still always visible (also on mobile). */
+.subnav { flex-wrap: wrap; }
+.subnav .subnav-secondary { margin-left: auto; font-size: var(--fs-0); color: var(--fg-2); border: 1px dashed var(--line); }
+.subnav .subnav-secondary[aria-current="page"] { color: var(--fg); border-style: solid; }
+@media (max-width: 600px) { .subnav .subnav-secondary { margin-left: 0; } }
+
+.fd-secondary-link { align-self: center; margin-bottom: 20px; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; color: var(--quiet); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.fd-secondary-link[aria-current="page"] { color: var(--ink); border-color: var(--ink); }
+.fd-secondary-link:hover { color: var(--ink); }
+.fd30-ground .fd-secondary-link { margin-left: auto; }
+.fd-evidence-hint { margin: 24px 0 0; font-size: 12px; color: var(--quiet); }
+.fd-evidence-hint a { color: inherit; }
+@media (max-width: 600px) { .fd-secondary-link { margin-bottom: 8px; } }

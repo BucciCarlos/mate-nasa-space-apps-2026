@@ -23,6 +23,14 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   // The info card is on demand: it starts closed and only the info button (or a move in progress) shows it.
   const [infoOpen, setInfoOpen] = useState(false);
   const [moving, setMoving] = useState(false);
+  // The greeting runs once per chat opening (not on drag or on the info button) and then returns to rest even with the chat still open.
+  const [greeting, setGreeting] = useState(false);
+  useEffect(() => {
+    if (!chatOpen) { setGreeting(false); return; }
+    setGreeting(true);
+    const timer = window.setTimeout(() => setGreeting(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [chatOpen]);
   const [dragPoint, setDragPoint] = useState<Point | null>(null);
   const initialBounds = { x: 8, y: 180, width: window.innerWidth - 16, height: Math.max(0, window.innerHeight - 188) };
   // Geometry lives in a ref and is read at render. A measurement overwrites it (latest wins) and bumps a counter to re-render.
@@ -131,7 +139,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
           if (delta) setDragPoint(dropAt({ x: point.x + delta[0], y: point.y + delta[1] }));
           if (e.key === 'Enter' || e.key === 'Escape') { if (e.key === 'Enter') commit(point); setDragPoint(null); setMoving(false); }
         }}>
-        <CrewCharacter shape={crew.shape} pose={actualPose} greeting={chatOpen} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
+        <CrewCharacter shape={crew.shape} pose={actualPose} greeting={greeting} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
       </button>
       <button className="fd-info" ref={infoButton} type="button" aria-expanded={infoOpen} aria-controls={cardOpen ? 'fd-companion-card' : undefined}
         aria-label={news && !infoOpen ? `${t.companionInfo} · ${t.news}` : t.companionInfo} onClick={() => setInfoOpen(open => !open)}>

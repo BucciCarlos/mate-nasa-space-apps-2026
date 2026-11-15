@@ -9,6 +9,8 @@ import { GroundAgenda } from '../views/ground/GroundAgenda';
 import { GroundLink } from '../views/ground/GroundLink';
 import { GroundCrew } from '../views/ground/GroundCrew';
 import { GroundLog } from '../views/ground/GroundLog';
+import { ModuleCatalog } from '../views/catalog/ModuleCatalog';
+import { EvidenceSuite } from '../views/evidence/EvidenceSuite';
 import { OnboardToday } from '../views/onboard/OnboardToday';
 import { OnboardAgenda } from '../views/onboard/OnboardAgenda';
 import { OnboardObservations } from '../views/onboard/OnboardObservations';
@@ -40,7 +42,7 @@ function Body() {
   switch (route.view) {
     case 'ground': {
       const props = { missionId: route.missionId, role: state.groundRole };
-      content = route.page === 'agenda' ? <GroundAgenda {...props} /> : route.page === 'link' ? <GroundLink {...props} /> : route.page === 'crew' ? <GroundCrew {...props} /> : <GroundLog {...props} />;
+      content = route.page === 'agenda' ? <GroundAgenda {...props} /> : route.page === 'link' ? <GroundLink {...props} /> : route.page === 'crew' ? <GroundCrew {...props} /> : route.page === 'catalog' ? <ModuleCatalog perspective="ground" role={state.groundRole} /> : route.page === 'evidence' ? <EvidenceSuite perspective="ground" /> : <GroundLog {...props} />;
       break;
     }
     case 'onboard':

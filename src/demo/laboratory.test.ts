@@ -144,13 +144,13 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     const legacy = { ...old, version: 3, processedIds: original.processedIds.filter(id => !id.includes('sample') && id !== LAB_HISTORY.id),
       profiles: Object.fromEntries(Object.entries(original.profiles).map(([id, profile]) => { const { labSeenIds: _seen, highlightedSampleId: _highlight, ...rest } = profile; return [id, rest]; })) };
     const loaded = restorePreview(JSON.stringify(legacy), wallAt('11:30'));
-    expect(loaded.version).toBe(4);
+    expect(loaded.version).toBe(5);
     expect(loaded.sessionStartMs).toBe(original.sessionStartMs);
     expect(loaded.offsetMs).toBe(original.offsetMs);
     expect(loaded.exercise).toEqual(original.exercise);
     expect(loaded.wakeReceived).toBe(original.wakeReceived);
     expect(loaded.profiles[OWNER]).toEqual({ ...original.profiles[OWNER], labSeenIds: [], highlightedSampleId: null });
-    expect(loaded.laboratory).toHaveLength(1);
+    expect(loaded.laboratory).toEqual(original.laboratory);
     expect(loaded.processedIds).toEqual(expect.arrayContaining(legacy.processedIds));
     const catchUp = previewReduce(loaded, { type: 'tick', now: wallAt('11:45') });
     expect(latestPersonalEvent(catchUp, OWNER)?.id).toBe(LAB_EVENTS[4].id);

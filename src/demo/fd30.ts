@@ -1,3 +1,5 @@
+import { chatIntent, scriptedAnswer } from './fd30Chat';
+import type { ChatAnswer } from './fd30Chat';
 import { LAB_EVENTS, LAB_HISTORY, initialLab, ingestLab, labEvents, labSamples, validLab } from './laboratory';
 import type { LabSample } from './laboratory';
 
@@ -12,11 +14,13 @@ export const CREW = [
 ] as const;
 export type CrewId = typeof CREW[number]['id'];
 export interface Position { x: number; y: number }
-export interface ProfileState { seen: boolean; draft: string; turns: Turn[]; position: Position | null; exerciseSeenIds: string[]; highlightedSessionId: string | null; labSeenIds: string[]; highlightedSampleId: string | null }
+export interface ProfileState { announcedIds: string[]; guidedOpenedIds: string[]; seen: boolean; draft: string; turns: Turn[]; position: Position | null; exerciseSeenIds: string[]; highlightedSessionId: string | null; labSeenIds: string[]; highlightedSampleId: string | null }
 export function historyFor(crewId: CrewId) {
   return { ...HISTORY, crewId, id: `iss:history:${crewId.slice(-2)}:rest-fd29` };
 }
 export const START = Date.parse('2027-03-10T05:55:00Z');
+export const END = Date.parse('2027-03-10T12:00:00Z');
+export const clampMissionTime = (time: number) => Math.max(START, Math.min(END, time));
 export const WAKE = Date.parse('2027-03-10T06:00:00Z');
 export const WAKE_EVENT = {
   id: 'iss:fd30:lf:wake-1', missionId: 'iss', scenarioSequence: 1,
@@ -73,7 +77,7 @@ export const DAY_EVENTS = [WAKE_EVENT, ...EXERCISE_EVENTS, ...LAB_EVENTS]
 export function nextPreviewEvent(state: PreviewState) {
   return DAY_EVENTS.find(e => !state.processedIds.includes(e.id));
 }
-function receivedPersonalEvents(state: PreviewState, crewId: CrewId) {
+export function receivedPersonalEvents(state: PreviewState, crewId: CrewId) {
   const receivedIds = [
     ...exerciseSessions(state, crewId).flatMap(s => [s.start?.id, s.finish?.id]),
     ...labSamples(state, crewId).flatMap(s => labEvents(s).map(e => e.id)),
@@ -117,36 +121,57 @@ export function ingestExercise(state: PreviewState, events: readonly ExerciseEve
   return result;
 }
 export function previewReply(state: PreviewState, owner: CrewId, text: string): Turn['reply'] {
-  if (/laboratory|lab\b|blood|urine|sample|result|laboratorio|sangre|orina|muestra|resultado/i.test(text)) return 'laboratory';
-  if (/exercise|training|ejercicio|entrenamiento/i.test(text)) return 'exercise';
-  if (/sleep|rest|sueño|dormi|descanso/i.test(text)) return 'sleep';
+  const intent = chatIntent(text);
+  if (intent) return intent;
   if (/summary|resumen/i.test(text)) {
     const event = latestPersonalEvent(state, owner);
     return event && 'sampleId' in event ? 'laboratory' : event && 'sessionId' in event ? 'exercise' : 'sleep';
   }
   return 'fallback';
 }
-export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'fallback' }
+export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' }
 export interface PreviewState {
-  version: 4; processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
+  version: 5; playback: 'explore' | 'guided'; running: boolean;
+  guidedRequest: { owner: CrewId; eventId: string } | null;
+  processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
   diagnostics: { eventId: string; sourceId: string; status: 'rejected' | 'unassigned' }[]; sessionStartMs: number; offsetMs: number; wakeReceived: boolean;
   activeCrewId: CrewId; profiles: Record<CrewId, ProfileState>;
 }
 export type PreviewAction = { type: 'tick' | 'next'; now: number }
+  | { type: 'seek'; now: number; target: number }
+  | { type: 'playback/set'; mode: 'explore' | 'guided' }
+  | { type: 'running/set'; running: boolean; now: number }
+  | { type: 'events/announce'; owner: CrewId; ids: string[] }
+  | { type: 'guided/consume'; owner: CrewId; eventId: string }
   | { type: 'select'; crewId: CrewId }
   | { type: 'laboratory/view'; owner: CrewId; sampleId: string; eventId: string }
   | { type: 'exercise/view'; owner: CrewId; sessionId: string; eventId: string }
   | { type: 'seen'; owner: CrewId } | { type: 'draft'; owner: CrewId; text: string }
   | { type: 'position'; owner: CrewId; position: Position | null }
-  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es' } | { type: 'reset'; now: number };
+  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' } | { type: 'reset'; now: number };
 export function freshPreview(now: number): PreviewState {
-  const profile = (): ProfileState => ({ seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
-  return { version: 4, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
+  const profile = (): ProfileState => ({ announcedIds: [], guidedOpenedIds: [], seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
+  return { version: 5, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
     exercise: [{ id: EXERCISE_HISTORY[0].sessionId, crewId: OWNER, start: EXERCISE_HISTORY[0], finish: EXERCISE_HISTORY[1] }], sessionStartMs: now, offsetMs: 0, wakeReceived: false, activeCrewId: OWNER,
     profiles: { [OWNER]: profile(), 'iss:crew-ti': profile(), 'iss:crew-mo': profile() } };
 }
 export function previewTime(state: PreviewState, now: number) {
-  return START + Math.max(0, now - state.sessionStartMs) + state.offsetMs;
+  return clampMissionTime(START + (state.running ? Math.max(0, now - state.sessionStartMs) : 0) + state.offsetMs);
+}
+function ingestDue(state: PreviewState, time: number): PreviewState {
+  let result = state;
+  for (const event of DAY_EVENTS) {
+    if (result.processedIds.includes(event.id) || Date.parse(event.receivedAt) > time || Date.parse(event.occurredAt) > time) continue;
+    if ('sampleId' in event) result = ingestLab(result, [event], time);
+    else if ('sessionId' in event) result = ingestExercise(result, [event], time);
+    else result = { ...result, wakeReceived: true, processedIds: [...result.processedIds, event.id] };
+  }
+  return result;
+}
+export function projectDomain(target: number) {
+  const projected = ingestDue(freshPreview(0), clampMissionTime(target));
+  const { processedIds, exercise, laboratory, wakeReceived, diagnostics } = projected;
+  return { processedIds, exercise, laboratory, wakeReceived, diagnostics };
 }
 export function previewReduce(state: PreviewState, action: PreviewAction): PreviewState {
   // Late pointer/chat actions must never be retargeted after View as.
@@ -155,20 +180,39 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
   const profile = state.profiles[owner];
   const update = (patch: Partial<ProfileState>): PreviewState => ({ ...state, profiles: { ...state.profiles, [owner]: { ...profile, ...patch } } });
   switch (action.type) {
-    case 'select': return CREW.some(c => c.id === action.crewId) ? { ...state, activeCrewId: action.crewId } : state;
+    case 'select': return CREW.some(c => c.id === action.crewId) ? { ...state, activeCrewId: action.crewId, guidedRequest: null } : state;
     case 'reset': return freshPreview(action.now);
+    case 'seek': {
+      if (!Number.isFinite(action.target) || !Number.isFinite(action.now)) return state;
+      const target = clampMissionTime(action.target);
+      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, guidedRequest: null };
+    }
+    case 'playback/set': return ['explore', 'guided'].includes(action.mode)
+      ? { ...state, playback: action.mode, guidedRequest: null } : state;
+    case 'running/set': {
+      if (action.running === state.running || !Number.isFinite(action.now)) return state;
+      return { ...state, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now, running: action.running };
+    }
+    case 'events/announce': {
+      const received = receivedPersonalEvents(state, owner).map(e => e.id);
+      const ids = [...new Set([...profile.announcedIds, ...action.ids.filter(id => received.includes(id))])];
+      return ids.length === profile.announcedIds.length ? state : update({ announcedIds: ids });
+    }
+    case 'guided/consume': return state.guidedRequest?.eventId === action.eventId && state.guidedRequest.owner === owner
+      ? { ...state, guidedRequest: null } : state;
     case 'tick':
     case 'next': {
       const next = nextPreviewEvent(state);
-      const offsetMs = action.type === 'next' && next
-        ? state.offsetMs + Math.max(0, Date.parse(next.receivedAt) - previewTime(state, action.now)) : state.offsetMs;
-      let result = offsetMs === state.offsetMs ? state : { ...state, offsetMs };
-      const time = previewTime(result, action.now);
-      for (const event of DAY_EVENTS) {
-        if (result.processedIds.includes(event.id) || Date.parse(event.receivedAt) > time || Date.parse(event.occurredAt) > time) continue;
-        if ('sampleId' in event) result = ingestLab(result, [event], time);
-        else if ('sessionId' in event) result = ingestExercise(result, [event], time);
-        else result = { ...result, wakeReceived: true, processedIds: [...result.processedIds, event.id] };
+      const current = previewTime(state, action.now);
+      const time = action.type === 'next' && next ? Math.max(current, Date.parse(next.receivedAt)) : current;
+      let result = action.type === 'next' && next && time > current
+        ? { ...state, sessionStartMs: action.now, offsetMs: time - START } : state;
+      result = ingestDue(result, time);
+      const start = EXERCISE_EVENTS[0];
+      if (state.playback === 'guided' && owner === OWNER && !state.processedIds.includes(start.id)
+        && result.processedIds.includes(start.id) && !profile.guidedOpenedIds.includes(start.id)) {
+        result = { ...result, guidedRequest: { owner, eventId: start.id },
+          profiles: { ...result.profiles, [owner]: { ...result.profiles[owner], guidedOpenedIds: [...profile.guidedOpenedIds, start.id] } } };
       }
       return result;
     }
@@ -190,8 +234,11 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
     case 'ask': {
       const text = action.text.trim();
       if (!text) return state;
-      const reply = previewReply(state, owner, text);
-      return update({ draft: '', turns: [...profile.turns, { text, lang: action.lang, reply }] });
+      const time = previewTime(state, action.now ?? state.sessionStartMs);
+      const projected = { ...state, ...projectDomain(time) };
+      const reply = previewReply(projected, owner, text);
+      const answer = action.now === undefined ? {} : { answer: scriptedAnswer(projected, owner, time, reply, action.lang), input: action.input ?? 'text' as const };
+      return update({ draft: action.input === 'simulated_voice' ? profile.draft : '', turns: [...profile.turns, { text, lang: action.lang, reply, ...answer }] });
     }
   }
 }
@@ -206,39 +253,48 @@ function validProfile(p: unknown): p is ProfileState {
   const s = p as ProfileState;
   return typeof s.seen === 'boolean' && typeof s.draft === 'string' && Array.isArray(s.turns)
     && s.turns.every(t => t && typeof t.text === 'string' && ['en', 'es'].includes(t.lang)
-      && ['sleep', 'exercise', 'laboratory', 'fallback'].includes(t.reply));
+      && ['sleep', 'exercise', 'laboratory', 'agenda', 'fallback'].includes(t.reply)
+      && (t.input === undefined || ['text', 'simulated_voice'].includes(t.input))
+      && (t.answer === undefined || (typeof t.answer.body === 'string' && Number.isFinite(t.answer.at)
+        && (t.answer.detail === undefined || ['agenda', 'exercise', 'laboratory', 'sleep'].includes(t.answer.detail)))));
 }
 export function restorePreview(raw: string | null, now: number): PreviewState {
   try {
     const s = JSON.parse(raw ?? 'null');
-    if (s && [1, 2, 3, 4].includes(s.version) && Number.isFinite(s.sessionStartMs) && s.sessionStartMs <= now
-      && Number.isFinite(s.offsetMs) && s.offsetMs >= 0 && typeof s.wakeReceived === 'boolean') {
-      const fresh = freshPreview(s.sessionStartMs);
-      if (s.version === 1 && validProfile(s.profiles?.[OWNER])) {
-        return { ...fresh, offsetMs: s.offsetMs, wakeReceived: s.wakeReceived,
-          processedIds: [...fresh.processedIds, ...(s.wakeReceived ? [WAKE_EVENT.id] : [])],
-          profiles: { ...fresh.profiles, [OWNER]: { ...fresh.profiles[OWNER], ...s.profiles[OWNER], position: null } } };
-      }
-      if (CREW.some(c => c.id === s.activeCrewId)
-        && CREW.every(c => validProfile(s.profiles?.[c.id]) && validPosition(s.profiles[c.id].position))) {
-        if (s.version === 2) return { ...fresh, offsetMs: s.offsetMs, wakeReceived: s.wakeReceived, activeCrewId: s.activeCrewId,
-          processedIds: [...fresh.processedIds, ...(s.wakeReceived ? [WAKE_EVENT.id] : [])],
-          profiles: Object.fromEntries(CREW.map(c => [c.id, { ...fresh.profiles[c.id], ...s.profiles[c.id] }])) as Record<CrewId, ProfileState> };
-        if (Array.isArray(s.processedIds) && s.processedIds.every((id: unknown) => typeof id === 'string')
-          && Array.isArray(s.exercise) && validExercise(s.exercise) && Array.isArray(s.diagnostics)
-          && CREW.every(c => Array.isArray(s.profiles[c.id].exerciseSeenIds)
-            && s.profiles[c.id].exerciseSeenIds.every((id: unknown) => typeof id === 'string')
-            && (s.profiles[c.id].highlightedSessionId === null || typeof s.profiles[c.id].highlightedSessionId === 'string'))) {
-          if (s.version === 3) return { ...s, version: 4, laboratory: initialLab(), processedIds: [...new Set([...s.processedIds, LAB_HISTORY.id])],
-            profiles: Object.fromEntries(CREW.map(c => [c.id, { ...s.profiles[c.id], labSeenIds: [], highlightedSampleId: null }])) as Record<CrewId, ProfileState> };
-          if (Array.isArray(s.laboratory) && validLab(s.laboratory) && CREW.every(c => Array.isArray(s.profiles[c.id].labSeenIds)
-            && s.profiles[c.id].labSeenIds.every((id: unknown) => typeof id === 'string')
-            && (s.profiles[c.id].highlightedSampleId === null || typeof s.profiles[c.id].highlightedSampleId === 'string'))) return s as PreviewState;
-        }
-      }
+    if (!s || ![1, 2, 3, 4, 5].includes(s.version) || !Number.isFinite(s.sessionStartMs) || s.sessionStartMs > now
+      || !Number.isFinite(s.offsetMs) || s.offsetMs < 0 || typeof s.wakeReceived !== 'boolean') return freshPreview(now);
+    const fresh = freshPreview(s.sessionStartMs);
+    const owner = s.version === 1 ? OWNER : s.activeCrewId;
+    const owners = s.version === 1 ? [CREW[0]] : CREW;
+    if (!CREW.some(c => c.id === owner) || !owners.every(c => validProfile(s.profiles?.[c.id])
+      && (s.version === 1 || validPosition(s.profiles[c.id].position)))) return freshPreview(now);
+    const stringIds = (v: unknown): v is string[] => Array.isArray(v) && v.every(id => typeof id === 'string');
+    if (s.version >= 3 && (!stringIds(s.processedIds) || !Array.isArray(s.exercise) || !validExercise(s.exercise)
+      || !Array.isArray(s.diagnostics) || !owners.every(c => stringIds(s.profiles[c.id].exerciseSeenIds)
+        && (s.profiles[c.id].highlightedSessionId === null || typeof s.profiles[c.id].highlightedSessionId === 'string')))) return freshPreview(now);
+    if (s.version >= 4 && (!Array.isArray(s.laboratory) || !validLab(s.laboratory)
+      || !owners.every(c => stringIds(s.profiles[c.id].labSeenIds)
+        && (s.profiles[c.id].highlightedSampleId === null || typeof s.profiles[c.id].highlightedSampleId === 'string')))) return freshPreview(now);
+    if (s.version === 5 && (!['explore', 'guided'].includes(s.playback) || typeof s.running !== 'boolean'
+      || !owners.every(c => stringIds(s.profiles[c.id].announcedIds) && stringIds(s.profiles[c.id].guidedOpenedIds)))) return freshPreview(now);
+    const profiles = { ...fresh.profiles };
+    for (const c of owners) {
+      const old = s.profiles[c.id];
+      profiles[c.id] = { ...profiles[c.id], seen: old.seen, draft: old.draft, turns: old.turns,
+        position: s.version === 1 ? null : old.position,
+        exerciseSeenIds: s.version >= 3 ? [...new Set<string>(old.exerciseSeenIds)] : [],
+        highlightedSessionId: s.version >= 3 ? old.highlightedSessionId : null,
+        labSeenIds: s.version >= 4 ? [...new Set<string>(old.labSeenIds)] : [],
+        highlightedSampleId: s.version >= 4 ? old.highlightedSampleId : null,
+        announcedIds: s.version === 5 ? [...new Set<string>(old.announcedIds)] : [],
+        guidedOpenedIds: s.version === 5 ? [...new Set<string>(old.guidedOpenedIds)] : [],
+      };
     }
-  } catch { /* Corrupt/unavailable storage starts only this preview afresh. */ }
-  return freshPreview(now);
+    const restored: PreviewState = { ...fresh, profiles, activeCrewId: owner, offsetMs: s.offsetMs,
+      playback: s.version === 5 ? s.playback : 'explore', running: s.version === 5 ? s.running : true };
+    // Never trust a stored receipt whose timestamp is beyond the restored clock.
+    return { ...restored, ...projectDomain(previewTime(restored, now)) };
+  } catch { return freshPreview(now); }
 }
 function validExercise(sessions: ExerciseSession[]): boolean {
   // Snapshots can only restore this version's immutable fixture records.
