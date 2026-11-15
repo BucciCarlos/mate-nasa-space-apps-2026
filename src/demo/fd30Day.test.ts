@@ -80,7 +80,7 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
       expect(PLAN_FD30.find(b => b.id === old.id)).toMatchObject({ ...old, movable: false });
     }
     expect(SCHEDULE_START).toBe(DAY_START); expect(SCHEDULE_END).toBe(DAY_END);
-    expect(groundAgendaLanes().map(l => l.blocks.map(b => b.id))).toEqual(CREW.map(c => planFor(c.id).map(b => b.id)));
+    expect(groundAgendaLanes().map(l => l.blocks.map(b => b.id))).toEqual(CREW.map(c => planFor(c.id).filter(b => b.kind !== 'muscle-assessment').map(b => b.id)));
     for (const c of CREW) {
       const blocks = planFor(c.id), rest = blocks.at(-1)!;
       expect(rest).toMatchObject({ continuesAfterDay: true, kind: 'sleep' });

@@ -1,6 +1,8 @@
-# CAT05 — Catálogo FD30
+# CAT05/CAT08 — Catálogo FD30
 
-Una grilla con las 13 fichas, sin agrupación por disponibilidad. Título y bajada EN/ES en catalogText.ts; descripciones breves de consulta en catalogSummaries.ts; registro y destinos existentes en catalogModules.ts. El componente no lee datos personales ni amplía permisos. Conserva tokens heredados de THEME01 y estilos propios .mcat. Los detalles técnicos de cada ficha contienen fuentes y requisitos pendientes; nunca un enlace a una función inexistente.
+**CAT08:** una grilla con 14 fichas (las 13 anteriores más «Radiación ambiental de la EEI»). «Más detalles» pasó a un diálogo (`CatalogModal.tsx`, contenido en `catalogModalData.ts` y textos en `catalogModalText.ts`). Con `data` del host el diálogo lee, solo lectura y al abrirse, el perfil activo en A bordo o la proyección operativa permitida del rol activo en Tierra; sin `data` muestra solo contexto. Specs: 01 §5.2.2, 03 §8.16, 04 §11.13, 05 §10.20. Prueba de navegador: `catalogModal.browser.mjs`.
+
+Una grilla con las fichas, sin agrupación por disponibilidad. Título y bajada EN/ES en catalogText.ts; descripciones breves de consulta en catalogSummaries.ts; registro y destinos existentes en catalogModules.ts. El componente no lee datos personales ni amplía permisos. Conserva tokens heredados de THEME01 y estilos propios .mcat. Los detalles técnicos de cada ficha contienen fuentes y requisitos pendientes; nunca un enlace a una función inexistente.
 
 A bordo: Ejercicio, muestras propias, evidencia pública Inspiration4 y Dinámica de tripulación. Tierra (ambos roles): evidencia pública y Dinámica de tripulación, sin enlaces al historial privado. Los destinos de evidencia y muestras se mantienen distintos; no se duplica el acceso general a Fuentes.
 

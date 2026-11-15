@@ -40,7 +40,7 @@ function Arrow() {
 
 
 type Fd30Page = Extract<Route, { view: 'fd30' }>['page'];
-export function Fd30Preview({ page }: { page: Fd30Page }) {
+export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab?: 'radiation' }) {
   const { dispatch: appDispatch } = useApp();
   const locale = useLocale();
   const messages = useT();
@@ -119,7 +119,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [profile.turns.length, chatOpen]);
   useEffect(() => {
     const selected = showing && (page === 'laboratory' ? profile.highlightedSampleId : page === 'exercise' ? profile.highlightedSessionId : null);
-    const heading = document.getElementById(page === 'catalog' ? 'mcat-h' : selected ? page === 'laboratory' ? labHeadingId(selected) : 'fd-exercise-session-h' : 'fd-view-h');
+    const heading = document.getElementById(page === 'catalog' || page === 'ground-catalog' ? 'fd-view-h' : selected ? page === 'laboratory' ? labHeadingId(selected) : 'fd-exercise-session-h' : 'fd-view-h');
     heading?.focus();
     if (selected) heading?.scrollIntoView({ block: 'center' });
     else document.getElementById('fd-main')?.scrollTo(0, 0);
@@ -258,14 +258,14 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
             {!onGround && <OpsNavigation owner={owner} page={page} />}
             {page === 'crew-dynamics' || page === 'ground-crew-dynamics' ? <CrewDynamics state={state} viewer={onGround ? { perspective: 'ground', role: groundRole } : { perspective: 'onboard', owner }} />
               : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} />
-              : page === 'ground-catalog' ? <div className="fd-ground-catalog"><ModuleCatalog perspective="ground" role={groundRole} /></div>
-              : page === 'ground-evidence' ? <EvidenceSuite perspective="ground" />
+              : page === 'ground-catalog' ? <div className="fd-ground-catalog"><ModuleCatalog perspective="ground" role={groundRole} headingLevel={1} data={{ state, owner, time: missionTime }} /></div>
+              : page === 'ground-evidence' ? <EvidenceSuite key={evidenceTab ?? 'labs'} perspective="ground" initialTab={evidenceTab} />
               : opsPage ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate({ view: 'fd30', page: 'today' })} /> : page === 'today' ? <TodaySummary state={state} owner={owner} time={missionTime} ops={journal.state} onOpenSleep={openSleep} onOpenExercise={openExercise} onOpenLaboratory={openTodayLab} />
               : page === 'agenda' ? <Fd30PersonalAgenda state={state} owner={owner} time={missionTime} /> : page === 'laboratory' ? <><LaboratoryDetail state={state} owner={owner} highlight={showing} time={missionTime} /><p className="fd-evidence-hint"><a href="#/onboard/personal/evidence">{t.labInspirationLink}</a></p></> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} target={exerciseTarget?.owner === owner ? { fd: exerciseTarget.fd, focus: exerciseTarget.focus } : null} /> : page === 'catalog' ? <>
-              <ModuleCatalog perspective="onboard" />
+              <ModuleCatalog perspective="onboard" headingLevel={1} data={{ state, owner, time: missionTime }} />
             </> : page === 'evidence' ? <>
               <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.evidence}</h1></div>
-              <EvidenceSuite perspective="onboard" />
+              <EvidenceSuite key={evidenceTab ?? 'labs'} perspective="onboard" initialTab={evidenceTab} />
             </> : <SleepDetail state={state} owner={owner} time={missionTime} targetFd={sleepTarget?.owner === owner ? sleepTarget.fd : null} />}
             {!onGround && !opsPage && page !== 'crew-dynamics' && page !== 'catalog' && page !== 'agenda' && page !== 'sleep' && page !== 'evidence' && page !== 'ground-evidence' && <section className="fd-provenance" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h">{t.provenance}</h2><div><article><h3>{t.planLane}</h3><p>{page === 'laboratory' ? t.labPlanBody : page === 'exercise' ? t.exercisePlanLimit : t.planSource}</p></article><article><h3>{t.deviceLane}</h3><p>{page === 'laboratory' ? t.labAdapter : page === 'exercise' ? t.exerciseAdapter : t.deviceSource}</p></article><article><h3>{t.evidenceLane}</h3><p>{t.evidenceBody}</p></article></div><p className="fd-research"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer">{t.research}<span aria-hidden="true"> ↗</span></a><span>{t.researchBody}</span></p></section>}
             {!onGround && !!state.diagnostics.length && <details className="fd-report-details"><summary>{t.diagnostics}</summary>{state.diagnostics.map(d => <p key={d.eventId}>{d.eventId} · {d.sourceId} · {d.status === 'rejected' ? t.rejected : t.unassigned}</p>)}</details>}

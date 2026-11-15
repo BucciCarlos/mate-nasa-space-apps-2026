@@ -1,4 +1,4 @@
-// Single registry of the 13 health/operations concept cards (01 §5.2). No values, thresholds or diagnoses.
+// Single registry of the 14 health/operations cards (01 §5.2): 13 concept cards plus the ISS ambient radiation evidence card. No values, thresholds or diagnoses.
 // Risk names are those mapped in the spec; their NASA pages are reached through the registered index `nasa-hrp-risks`.
 import type { CatalogModule, Capability, Text } from './catalogTypes';
 
@@ -353,6 +353,32 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       id: 'medical-device', status: 'concept', verified: false,
       label: t('Connected medical device', 'Dispositivo médico conectado'),
       note: t('Not connected. Device capabilities are pending verification.', 'Sin conexión. Las capacidades del dispositivo están pendientes de verificación.'),
+    }],
+  },
+  {
+    id: 'MOD-RAD', specTier: 'concept', surfaces: ['onboard', 'ground'],
+    title: t('ISS ambient radiation', 'Radiación ambiental de la EEI'),
+    solves: t('Would show what an area radiation monitor inside the ISS measured, as historical evidence, and explain why that is not anyone’s dose.',
+      'Mostraría qué midió un monitor de radiación de área dentro de la EEI, como evidencia histórica, y explicaría por qué eso no es la dosis de nadie.'),
+    onboard: t('Historical evidence from an area monitor: a public NASA series with its period, unit and gaps. It is not your dose and not a live reading.',
+      'Evidencia histórica de un monitor de área: una serie pública de la NASA con su período, unidad y huecos. No es tu dosis ni una lectura en vivo.'),
+    ground: {
+      operational: t('The same public series. It is not a crew member’s dose and not FD30 data.', 'La misma serie pública. No es la dosis de un tripulante ni datos de FD30.'),
+      medical: t('The same public series. No personal dose or fraction of any limit is calculated.', 'La misma serie pública. No se calcula dosis personal ni fracción de ningún límite.'),
+    },
+    backing: { kind: 'risk', sourceId: 'nasa-hrp-risks', risks: [t('Radiation-Induced Cancers', 'Cánceres inducidos por radiación (Radiation-Induced Cancers)')] },
+    dataNeeds: [
+      t('A personal dosimeter or a verified model, with its own consent and access rules', 'Un dosímetro personal o un modelo verificado, con sus propias reglas de consentimiento y acceso'),
+      t('The location of the area monitor, decoded from the source', 'La ubicación del monitor de área, decodificada desde la fuente'),
+    ],
+    notBuilt: t('No personal dose, live reading or comparison with any limit is built or calculated.',
+      'No hay dosis personal, lectura en vivo ni comparación con ningún límite, ni se calculan.'),
+    capabilities: [{
+      id: 'tepc-evidence', status: 'evidence', verified: true,
+      label: t('ISS area monitor (TEPC) · public series', 'Monitor de área de la EEI (TEPC) · serie pública'),
+      note: t('Public CDAWeb series, one window of 2014. Historical evidence of an area monitor, not a personal dose and not FD30 data. Opens the Radiation tab.',
+        'Serie pública de CDAWeb, una ventana de 2014. Evidencia histórica de un monitor de área, no una dosis personal ni datos de FD30. Abre la pestaña de Radiación.'),
+      href: { onboard: '#/onboard/personal/evidence/radiation', ground: '#/demo/fd30/ground/evidence/radiation' },
     }],
   },
 ];

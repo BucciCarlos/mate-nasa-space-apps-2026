@@ -153,6 +153,7 @@ export const es: Messages = {
     meal: 'Comida',
     personal: 'Tiempo personal',
     conference: 'Conferencia',
+    'muscle-assessment': 'Evaluación muscular',
   },
   onboard: {
     title: 'A Bordo',

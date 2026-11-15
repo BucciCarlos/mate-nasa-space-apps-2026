@@ -9,7 +9,8 @@ import type { OpsState } from './opsState';
 export interface OperationalBlock { id: string; kind: ScheduleBlock['kind']; title: Bilingual; start: string; end: string; equipment: Bilingual | null; continuesAfterDay?: boolean }
 const personalTitle: Bilingual = { en: 'Planned personal activity', es: 'Actividad personal planificada' };
 export function operationalPlan(owner: CrewId): OperationalBlock[] {
-  return planFor(owner).map(b => ({ id: b.id, kind: b.kind, start: b.start, end: b.end,
+  // Muscle assessments are personal plan entries: Ground never receives them (02 §12.10 allowlist).
+  return planFor(owner).filter(b => b.kind !== 'muscle-assessment').map(b => ({ id: b.id, kind: b.kind, start: b.start, end: b.end,
     ...(b.continuesAfterDay ? { continuesAfterDay: true } : {}),
     title: { ...(LAB_PLAN_IDS.includes(b.id) ? personalTitle : b.title) }, equipment: b.equipmentId ? { ...EQUIPMENT[b.equipmentId] } : null }));
 }

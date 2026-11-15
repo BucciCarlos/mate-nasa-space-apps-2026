@@ -34,6 +34,10 @@ export const PLAN_FD30: Fd30Block[] = [
   { ...slot('shared:maintenance', 'iss:crew-lf', 'task', '14:00', '16:00', { en: 'Station maintenance', es: 'Mantenimiento de la estación' }), crewIds: ['iss:crew-lf', 'iss:crew-ti'] },
   slot('lf:payload', 'iss:crew-lf', 'task', '16:00', '17:30', { en: 'Payload operations follow-up', es: 'Operaciones de carga útil (seguimiento)' }),
   slot('ti:planning', 'iss:crew-ti', 'task', '16:00', '17:00', { en: 'Operational planning review', es: 'Revisión de planificación operativa' }),
+  // Scheduled assessment window only: no result, no training ID, not a post-exercise measurement, not an FD30 study record.
+  slot('lf:muscle-assessment', 'iss:crew-lf', 'muscle-assessment', '13:15', '13:45', { en: 'Muscle assessment scheduled', es: 'Evaluación muscular programada' }),
+  slot('ti:muscle-assessment', 'iss:crew-ti', 'muscle-assessment', '11:30', '12:00', { en: 'Muscle assessment scheduled', es: 'Evaluación muscular programada' }),
+  slot('mo:muscle-assessment', 'iss:crew-mo', 'muscle-assessment', '17:00', '17:30', { en: 'Muscle assessment scheduled', es: 'Evaluación muscular programada' }),
   ...evening,
   slot('mo:planned-exercise', 'iss:crew-mo', 'exercise', '13:00', '14:00', { en: 'Ergometer reservation', es: 'Reserva de ergómetro' }, 'demo-ergometer'),
 ].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));

@@ -18,7 +18,7 @@ export interface CrewMember {
   roleTitle: Bilingual;
 }
 
-export type BlockKind = 'sleep' | 'pre_sleep' | 'post_sleep' | 'task' | 'exercise' | 'meal' | 'personal' | 'conference';
+export type BlockKind = 'sleep' | 'pre_sleep' | 'post_sleep' | 'task' | 'exercise' | 'meal' | 'personal' | 'conference' | 'muscle-assessment';
 export interface ScheduleBlock extends Interval {
   id: string;
   missionId: MissionId;
@@ -93,7 +93,7 @@ export const INTENT_PRIORITY: IntentId[] = [
 export type OnboardPage = 'today' | 'agenda' | 'observations';
 export type GroundPage = 'agenda' | 'link' | 'crew' | 'log' | 'catalog' | 'evidence';
 export type Route =
-  | { view: 'fd30'; page: 'today' | 'sleep' | 'exercise' | 'laboratory' | 'catalog' | 'agenda' | 'evidence' | 'ground' | 'ground-evidence' | 'ground-agenda' | 'ground-catalog' | 'crew-dynamics' | 'ground-crew-dynamics' | 'crew' | 'wellbeing' | 'requests' }
+  | { view: 'fd30'; page: 'today' | 'sleep' | 'exercise' | 'laboratory' | 'catalog' | 'agenda' | 'evidence' | 'ground' | 'ground-evidence' | 'ground-agenda' | 'ground-catalog' | 'crew-dynamics' | 'ground-crew-dynamics' | 'crew' | 'wellbeing' | 'requests'; /** CAT08: Sources & evidence opens directly on this tab. */ tab?: 'radiation' }
   | { view: 'onboard'; page: OnboardPage }
   | { view: 'ground'; missionId: MissionId; page: GroundPage }
   | { view: 'settings' }

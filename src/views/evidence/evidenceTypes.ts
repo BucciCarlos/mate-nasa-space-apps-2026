@@ -102,6 +102,8 @@ export interface EvidenceSuiteProps {
   sources?: readonly EvidenceSource[];
   /** Controlled tab (optional). Without it the suite keeps its own. */
   tab?: EvidenceTab;
+  /** Tab the suite opens on when it keeps its own (CAT08: direct link to Radiation). */
+  initialTab?: EvidenceTab;
   onTabChange?: (tab: EvidenceTab) => void;
   /** On board only: shown in the "no sleep records for {name}" line. The suite reads no profile data itself. */
   profileName?: string;

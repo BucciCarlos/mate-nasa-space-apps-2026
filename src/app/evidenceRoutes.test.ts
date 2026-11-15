@@ -1,3 +1,4 @@
+import { publicHash } from './publicRoutes';
 import { describe, expect, it } from 'vitest';
 import { parseRoute, toHash } from './routes';
 
@@ -13,12 +14,25 @@ describe('Evidence routes (MATE-EVD01)', () => {
     expect(toHash({ view: 'ground', missionId: 'iss', page: 'evidence' })).toBe('#/ground/iss/evidence');
     expect(toHash({ view: 'fd30', page: 'evidence' })).toBe('#/onboard/personal/evidence');
   });
+  it('opens Radiation directly: both perspectives, and the plain routes keep their meaning (CAT08)', () => {
+    expect(parseRoute('#/onboard/personal/evidence/radiation')).toEqual({ view: 'fd30', page: 'evidence', tab: 'radiation' });
+    expect(parseRoute('#/demo/fd30/ground/evidence/radiation')).toEqual({ view: 'fd30', page: 'ground-evidence', tab: 'radiation' });
+    expect(toHash({ view: 'fd30', page: 'evidence', tab: 'radiation' })).toBe('#/onboard/personal/evidence/radiation');
+    expect(toHash({ view: 'fd30', page: 'ground-evidence', tab: 'radiation' })).toBe('#/demo/fd30/ground/evidence/radiation');
+    expect(parseRoute('#/onboard/personal/evidence')).toEqual({ view: 'fd30', page: 'evidence' });
+    expect(parseRoute('#/demo/fd30/ground/evidence')).toEqual({ view: 'fd30', page: 'ground-evidence' });
+    expect(parseRoute('#/onboard/personal/evidence/other')).toBeNull();
+    expect(publicHash('#/onboard/personal/evidence/radiation')).toBe('#/onboard/personal/evidence/radiation');
+  });
   it('does not put Evidence on board in M1', () => {
     expect(parseRoute('#/onboard/evidence')).toBeNull();
   });
   it('mounts the suite without role or profile, so the content is the same for both perspectives', () => {
     expect(raw['./App.tsx']).toContain('<EvidenceSuite perspective="ground" />');
-    expect(raw['../demo/Fd30Preview.tsx']).toContain('<EvidenceSuite perspective="onboard" />');
+    // CAT08: the only extra prop is the initial tab (direct link to Radiation); still no role, profile or data.
+    const mounts = raw['../demo/Fd30Preview.tsx'].match(/<EvidenceSuite [^>]*\/>/g) ?? [];
+    expect(mounts).toHaveLength(2);
+    for (const mount of mounts) { expect(mount).toContain('initialTab={evidenceTab}'); expect(mount).not.toMatch(/role=|profileName|data=|state=/); }
     expect(raw['./Shell.tsx']).toMatch(/GROUND_PAGES: GroundPage\[\] = \[[^\]]*'evidence'/);
   });
   it('keeps Sources & evidence as a secondary access in Ground and in FD30, same routes', () => {

@@ -1,0 +1,64 @@
+/* CAT08: catalog detail dialog. Centered on desktop, bottom sheet with its own scroll on mobile. Tokens come from the FD30 theme (light/dark). */
+.mcat-detail-btn { align-self: flex-start; margin-top: 4px; min-height: 40px; padding: 8px 16px; border: 1px solid var(--rule-strong, var(--line)); border-radius: 999px; background: var(--bg-2, var(--surface)); color: var(--ink, var(--fg)); font: inherit; font-size: 13px; font-weight: 650; cursor: pointer; }
+.mcat-detail-btn:hover { background: var(--tint, var(--bg-3)); }
+.mcat-detail-btn:focus-visible { outline: 3px solid var(--focus-ring, var(--focus)); outline-offset: 3px; }
+.mcat-card:has(.mcat-detail-btn) { display: flex; flex-direction: column; }
+
+.mcat-modal { box-sizing: border-box; width: min(720px, calc(100vw - 32px)); max-height: 85vh; max-height: 85dvh; margin: auto; padding: 0; border: 1px solid var(--rule-strong, var(--line)); border-radius: 18px; background: var(--bg-2, var(--surface)); color: var(--ink, var(--fg)); box-shadow: 0 18px 60px color-mix(in srgb, var(--shadow-color, #000) 35%, transparent); overflow: hidden; }
+.mcat-modal::backdrop { background: color-mix(in srgb, var(--shadow-color, #000) 55%, transparent); }
+.mcat-modal-body { display: flex; flex-direction: column; max-height: inherit; }
+.mcat-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 8px 12px 22px; border-bottom: 1px solid var(--rule, var(--line)); background: var(--bg-2, var(--surface)); }
+.mcat-modal-head h2 { margin: 0; font: 400 24px/1.2 Georgia, 'Times New Roman', serif; }
+.mcat-modal-head h2:focus { outline: none; }
+.mcat-modal-close { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.mcat-modal-close:hover { background: var(--tint, var(--bg-3)); }
+.mcat-modal-close:focus-visible { outline: 3px solid var(--focus-ring, var(--focus)); outline-offset: -3px; }
+.mcat-modal-scroll { overflow-y: auto; overscroll-behavior: contain; padding: 16px 22px 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.mcat-modal-scroll > * { min-width: 0; }
+.mcat-first { margin: 0; font-size: 16px; line-height: 1.45; }
+.mcat-eyebrow { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted, var(--fg-2)); }
+.mcat-scope { margin: 0; font-size: 12px; color: var(--muted, var(--fg-2)); }
+.mcat-sec { padding-top: 12px; border-top: 1px solid var(--rule, var(--line)); }
+.mcat-sec h3 { margin: 0 0 8px; font-size: 13px; font-weight: 650; }
+.mcat-sec p { margin: 0 0 8px; font-size: 14px; line-height: 1.5; }
+.mcat-sec ul { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+.mcat-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink, var(--fg)); background: var(--tint, var(--bg-3)); border: 1px solid var(--rule-strong, var(--line)); }
+.mcat-tag-fd30 { background: var(--tint-strong, var(--bg-3)); }
+.mcat-tag-evidence { background: var(--tint-warm, var(--bg-3)); }
+.mcat-tag-context { background: transparent; border-style: dashed; }
+.mcat-sectitle { font-weight: 600; color: var(--muted, var(--fg-2)); }
+.mcat-source, .mcat-action { margin: 0; font-size: 12px; color: var(--muted, var(--fg-2)); }
+.mcat-source a { color: var(--link, var(--accent)); }
+.mcat-action .btn { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 18px; border-radius: 999px; font-weight: 650; text-decoration: none; background: var(--action, var(--accent)); color: var(--on-action, var(--accent-fg)); }
+
+.mcat-fig { margin: 8px 0 4px; }
+.mcat-fig figcaption { margin-top: 4px; font-size: 12px; color: var(--muted, var(--fg-2)); }
+.mcat-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.mcat-col { display: grid; grid-template-rows: 72px auto; justify-items: center; gap: 4px; }
+.mcat-track { display: flex; align-items: flex-end; justify-content: center; width: 100%; height: 72px; border-bottom: 1px solid var(--rule, var(--line)); }
+.mcat-bar { display: block; width: 100%; max-width: 36px; border-radius: 6px 6px 2px 2px; background: var(--mod-exercise-soft, var(--mod-exercise)); }
+.mcat-col-now .mcat-bar { background: var(--mod-exercise, var(--accent)); }
+.mcat-gapdot { display: block; width: 9px; height: 9px; margin-bottom: 5px; border: 1.5px solid var(--rule-strong, var(--line)); border-radius: 50%; }
+.mcat-colabel { font-size: 12px; color: var(--muted, var(--fg-2)); font-variant-numeric: tabular-nums; }
+.mcat-col-now .mcat-colabel { color: var(--ink, var(--fg)); font-weight: 700; }
+.mcat-rad svg, .mcat-fig svg { display: block; width: 100%; max-width: 480px; height: auto; }
+.mcat-grid { stroke: var(--rule, var(--line)); stroke-width: 1; }
+.mcat-axis { fill: var(--muted, var(--fg-2)); font-size: 8px; }
+.mcat-axisline { stroke: var(--rule-strong, var(--line)); stroke-width: 1; }
+.mcat-line { stroke: var(--mod-lab, var(--accent)); stroke-width: 1.5; }
+.mcat-dot { fill: var(--mod-lab, var(--accent)); }
+.mcat-gapband { fill: color-mix(in srgb, var(--warn, #8e4631) 18%, transparent); stroke: var(--warn, #8e4631); stroke-width: .5; stroke-dasharray: 3 2; }
+.mcat-tablewrap { overflow-x: auto; max-width: 100%; }
+.mcat-tablewrap table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.mcat-tablewrap th, .mcat-tablewrap td { padding: 6px 8px; border-bottom: 1px solid var(--rule, var(--line)); text-align: left; white-space: nowrap; }
+.mcat-tablewrap thead th { font-size: 11px; color: var(--muted, var(--fg-2)); }
+
+@media (max-width: 760px) {
+  .mcat-modal { width: 100%; max-width: none; margin: auto 0 0; max-height: 92vh; max-height: 92dvh; border-radius: 18px 18px 0 0; border-bottom: 0; }
+  .mcat-modal-head h2 { font-size: 21px; }
+  .mcat-modal-scroll { padding: 14px 16px calc(22px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mcat-modal[open] { animation: mcat-in .16s ease-out; }
+  @keyframes mcat-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}

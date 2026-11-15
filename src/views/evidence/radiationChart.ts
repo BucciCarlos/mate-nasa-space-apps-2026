@@ -17,12 +17,17 @@ export interface RadChart {
   gaps: (TepcGap & { x0: number; x1: number })[];
 }
 
-export function buildRadChart(d: TepcWindow): RadChart {
-  const plot = { l: RCHART.left, r: RCHART.w - RCHART.right, t: RCHART.top, b: RCHART.h - RCHART.bottom };
+/** Geometry options. The default is the full chart; the catalog modal uses a compact one (fewer ticks, smaller margins). */
+export interface RadChartOptions { w: number; h: number; left: number; right: number; top: number; bottom: number; yTickCount: number; maxXTicks: number }
+export const RCHART_COMPACT: RadChartOptions = { w: 360, h: 150, left: 40, right: 8, top: 12, bottom: 24, yTickCount: 3, maxXTicks: 4 };
+const FULL: RadChartOptions = { ...RCHART, yTickCount: 5, maxXTicks: 8 };
+
+export function buildRadChart(d: TepcWindow, o: RadChartOptions = FULL): RadChart {
+  const plot = { l: o.left, r: o.w - o.right, t: o.top, b: o.h - o.bottom };
   const start = Date.parse(d.window.start), end = Date.parse(d.window.end);
   const x = (ms: number) => plot.l + ((ms - start) / (end - start)) * (plot.r - plot.l);
   const summary = tepcSummary(d);
-  const yTicks0 = niceTicks(0, summary.max ?? 1, 5);
+  const yTicks0 = niceTicks(0, summary.max ?? 1, o.yTickCount);
   const top = yTicks0[yTicks0.length - 1];
   const y = (v: number) => plot.b - (v / top) * (plot.b - plot.t);
   const step = d.cadenceMin * MIN;
@@ -40,12 +45,12 @@ export function buildRadChart(d: TepcWindow): RadChart {
   }
 
   const span = end - start;
-  const tickStep = STEPS.find(s => span / s <= 8) ?? STEPS[STEPS.length - 1];
+  const tickStep = STEPS.find(s => span / s <= o.maxXTicks) ?? STEPS[STEPS.length - 1];
   const xTicks: RadChart['xTicks'] = [];
   for (let ms = Math.ceil(start / tickStep) * tickStep; ms <= end; ms += tickStep) xTicks.push({ ms, x: x(ms), midnight: ms % DAY === 0 });
 
   return {
-    w: RCHART.w, h: RCHART.h, plot,
+    w: o.w, h: o.h, plot,
     yTicks: yTicks0.map(v => ({ value: v, y: y(v) })), xTicks, runs,
     gaps: summary.gaps.map(g => ({ ...g, x0: x(g.startMs), x1: x(g.endMs) })),
   };

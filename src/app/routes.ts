@@ -13,6 +13,8 @@ export function parseRoute(hash: string): Route | null {
   if (path === 'demo/fd30/ground/agenda') return { view: 'fd30', page: 'ground-agenda' };
   if (path === 'demo/fd30/ground/catalog') return { view: 'fd30', page: 'ground-catalog' };
   if (path === 'demo/fd30/ground/evidence') return { view: 'fd30', page: 'ground-evidence' };
+  if (path === 'demo/fd30/ground/evidence/radiation') return { view: 'fd30', page: 'ground-evidence', tab: 'radiation' };
+  if (path === 'onboard/personal/evidence/radiation') return { view: 'fd30', page: 'evidence', tab: 'radiation' };
   if (path === 'demo/fd30/ground') return { view: 'fd30', page: 'ground' };
   for (const page of ['sleep', 'exercise', 'laboratory', 'catalog', 'agenda', 'evidence', 'crew', 'wellbeing', 'requests'] as const) {
     if (path === `onboard/personal/${page}`) return { view: 'fd30', page };
@@ -35,7 +37,7 @@ export function toHash(route: Route): string {
   switch (route.view) {
     case 'fd30': if (route.page === 'crew-dynamics') return '#/onboard/personal/m/crew';
       if (route.page === 'ground-crew-dynamics') return '#/demo/fd30/ground/m/crew';
-      return route.page === 'today' ? '#/demo/fd30' : route.page === 'ground' ? '#/demo/fd30/ground' : route.page.startsWith('ground-') ? `#/demo/fd30/ground/${route.page.slice(7)}` : `#/onboard/personal/${route.page}`;
+      return route.page === 'today' ? '#/demo/fd30' : route.page === 'ground' ? '#/demo/fd30/ground' : route.page.startsWith('ground-') ? `#/demo/fd30/ground/${route.page.slice(7)}${route.tab ? `/${route.tab}` : ''}` : `#/onboard/personal/${route.page}${route.page === 'evidence' && route.tab ? `/${route.tab}` : ''}`;
     case 'onboard': return `#/onboard/${route.page}`;
     case 'ground': return `#/ground/${route.missionId}/${route.page}`;
     case 'settings': return '#/settings';

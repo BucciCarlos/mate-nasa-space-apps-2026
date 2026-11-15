@@ -18,11 +18,11 @@ import { Co2View } from './Co2View';
 import { SourcesView } from './SourcesView';
 import './evidence.css';
 
-export function EvidenceSuite({ perspective, data = EVIDENCE_DATA, sources = EVIDENCE_SOURCES, tab: controlled, onTabChange, profileName }: EvidenceSuiteProps) {
+export function EvidenceSuite({ perspective, data = EVIDENCE_DATA, sources = EVIDENCE_SOURCES, tab: controlled, initialTab = 'labs', onTabChange, profileName }: EvidenceSuiteProps) {
   const locale = useLocale();
   const t = EVIDENCE_TEXT[locale];
   const base = useId();
-  const [own, setOwn] = useState<EvidenceTab>('labs');
+  const [own, setOwn] = useState<EvidenceTab>(initialTab);
   const tab = controlled ?? own;
   const list = useRef<HTMLDivElement>(null);
   const select = (next: EvidenceTab) => { if (controlled === undefined) setOwn(next); onTabChange?.(next); };

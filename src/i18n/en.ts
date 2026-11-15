@@ -153,6 +153,7 @@ export const en = {
     meal: 'Meal',
     personal: 'Personal time',
     conference: 'Conference',
+    'muscle-assessment': 'Muscle assessment',
   },
   onboard: {
     title: 'Onboard',

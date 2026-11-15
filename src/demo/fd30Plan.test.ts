@@ -25,4 +25,17 @@ describe('FD30 plan and exclusive equipment reservations', () => {
     expect(validatePlan([{ ...a, equipmentId: 'unknown' }])).toBe(false);
     expect(validatePlan([{ ...a, end: a.start }])).toBe(false);
   });
+  it('schedules one muscle assessment per crew member, without equipment, training link or overlap', () => {
+    for (const c of CREW) {
+      const assessments = planFor(c.id).filter(b => b.kind === 'muscle-assessment');
+      expect(assessments).toHaveLength(1);
+      const [a] = assessments;
+      expect(a.crewIds).toEqual([c.id]);
+      expect(a.equipmentId).toBeUndefined();
+      expect(a.id).not.toMatch(/exercise/);
+      expect(a.title).toEqual({ en: 'Muscle assessment scheduled', es: 'Evaluación muscular programada' });
+      const overlapping = planFor(c.id).filter(b => b.id !== a.id && Date.parse(b.start) < Date.parse(a.end) && Date.parse(a.start) < Date.parse(b.end));
+      expect(overlapping).toEqual([]);
+    }
+  });
 });

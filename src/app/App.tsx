@@ -36,7 +36,7 @@ function Body() {
     if (route.view === 'settings' || route.view === 'notfound') document.getElementById('view-h')?.focus();
   }, [route]);
 
-  if (route.view === 'fd30') return <Fd30Preview page={route.page} />;
+  if (route.view === 'fd30') return <Fd30Preview page={route.page} evidenceTab={route.tab} />;
 
   let content: React.ReactNode;
   switch (route.view) {

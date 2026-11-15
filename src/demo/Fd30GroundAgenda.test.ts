@@ -15,7 +15,8 @@ describe('Public Ground agenda operational boundary', () => {
     const lanes = groundAgendaLanes();
     expect(lanes.map(l => l.crew.name)).toEqual(['Lucía Ferraro', 'Tomás Ibarra', 'Mei Okada']);
     for (const lane of lanes) {
-      expect(lane.blocks.map(b => b.id)).toEqual(planFor(lane.crew.id).map(b => b.id));
+      expect(lane.blocks.map(b => b.id)).toEqual(planFor(lane.crew.id).filter(b => b.kind !== 'muscle-assessment').map(b => b.id));
+      expect(lane.blocks.some(b => b.kind === 'muscle-assessment')).toBe(false);
       expect(lane.blocks.every(b => !b.movable)).toBe(true);
       expect(JSON.stringify(lane.blocks)).not.toMatch(/Blood collection|Toma de sangre|urine collection|Toma secundaria de orina|pulse|heartRate/);
     }
