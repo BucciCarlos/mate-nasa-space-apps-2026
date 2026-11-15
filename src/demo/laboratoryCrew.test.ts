@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { I18nProvider } from '../i18n/I18nProvider';
 import { FD30_CHAT_TEXT } from '../i18n/fd30Chat';
 import { fd30En, fd30Es } from '../i18n/fd30';
-import { DAY_EVENTS, OWNER, freshPreview, latestNews, previewReduce, projectDomain, receivedPersonalEvents } from './fd30';
+import { DAY_EVENTS, dataOwner, OWNER, freshPreview, latestNews, previewReduce, projectDomain, receivedPersonalEvents } from './fd30';
 import type { CrewId } from './fd30';
 import { scriptedAnswer } from './fd30Chat';
 import { PLAN_FD30, planFor, validatePlan } from './fd30Plan';
@@ -22,7 +22,7 @@ const wall = 1000;
 const seek = (s: ReturnType<typeof freshPreview>, hhmm: string) => previewReduce(s, { type: 'seek', target: at(hhmm), now: wall });
 const as = (s: ReturnType<typeof freshPreview>, crew: CrewId) => previewReduce(s, { type: 'select', crewId: crew });
 const at0 = (hhmm: string, crew: CrewId) => as(seek(freshPreview(wall), hhmm), crew);
-const history = (s: ReturnType<typeof freshPreview>, hhmm: string, range: 'last7' | 'all' = 'last7') => laboratoryHistory(s, { perspective: 'onboard', owner: s.activeCrewId }, at(hhmm), range)!;
+const history = (s: ReturnType<typeof freshPreview>, hhmm: string, range: 'last7' | 'all' = 'last7') => laboratoryHistory(s, { perspective: 'onboard', owner: dataOwner(s.activeCrewId) }, at(hhmm), range)!;
 
 /** Expected state per (owner, time): the same four words every surface must agree on. */
 type Stage = 'waiting' | 'collection' | 'analysis' | 'result';

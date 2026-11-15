@@ -1,7 +1,7 @@
 import { LaboratoryHistory } from '../views/history/laboratory/LaboratoryHistory';
 import { useEffect, useRef } from 'react';
 import { useT } from '../i18n/I18nProvider';
-import { OWNER } from './fd30';
+import { OWNER, dataOwner } from './fd30';
 import type { CrewId, PreviewState } from './fd30';
 import { BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, LAB_PLANS, LAB_VERSION, URINE_SAMPLE, labEvents, labIncomplete, labSamples } from './laboratory';
 import type { LabSample, SampleType } from './laboratory';
@@ -69,7 +69,7 @@ export function LaboratoryDetail({ state, owner, highlight = true, time }: { sta
   const samples = labSamples(state, owner);
   const selected = highlight ? state.profiles[owner].highlightedSampleId : null;
   const history = samples.find(s => s.id === HISTORICAL_BLOOD_SAMPLE);
-  if (owner !== state.activeCrewId) return null;
+  if (owner !== dataOwner(state.activeCrewId)) return null;
   if (time !== undefined) return <>
     <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.labTitle}</h1></div>
     <LaboratoryHistory state={state} owner={owner} time={time} renderSample={sample => <Sample sample={sample} sampleType={sample.sampleType} historical={sample.id === HISTORICAL_BLOOD_SAMPLE} highlighted={selected === sample.id} />} />

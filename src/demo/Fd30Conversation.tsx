@@ -2,7 +2,8 @@ import type { RefObject } from 'react';
 import { toHash } from '../app/routes';
 import { useLocale, useT } from '../i18n/I18nProvider';
 import { CHAT_QUESTIONS, FD30_CHAT_TEXT } from '../i18n/fd30Chat';
-import type { CrewId, ProfileState } from './fd30';
+import { JOHN } from './fd30';
+import type { ProfileId, ProfileState } from './fd30';
 import type { ClipPair } from './voice/useDialogueVoice';
 import type { PlayerState } from './voice/dialoguePlayer';
 import { dialogueClips } from './voice/dialogueClips';
@@ -13,7 +14,7 @@ export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, o
   profile: ProfileState; character: string; logRef: RefObject<HTMLDivElement>;
   time?: number;
   /** VOICE06: optional spoken dialogue. Without `owner`/`voice` the chat is text only. */
-  owner?: CrewId; voice?: { state: PlayerState; toggle: (key: string, queryAt: number, clips: ClipPair) => void };
+  owner?: ProfileId; voice?: { state: PlayerState; toggle: (key: string, queryAt: number, clips: ClipPair) => void };
   onAsk: (text: string, input?: 'text' | 'simulated_voice') => void;
   onDraft: (text: string) => void; onOpen: (detail: ChatDetail) => void;
 }) {
@@ -31,7 +32,7 @@ export function Fd30Conversation({ profile, character, logRef, onAsk, onDraft, o
       {profile.turns.filter(turn => (turn.reply !== 'exercise' && turn.reply !== 'laboratory') || !turn.answer || turn.answer.at <= time).map((turn, i) => {
         const text = FD30_CHAT_TEXT[turn.lang];
         const detail = turn.answer?.detail;
-        const clips = owner && voice && turn.answer ? dialogueClips(owner, turn) : null;
+        const clips = owner && owner !== JOHN.id && voice && turn.answer ? dialogueClips(owner, turn) : null;
         const voiceKey = `${owner}:${i}`;
         const mine = !!clips && voice!.state.key === voiceKey;
         const speaking = mine && voice!.state.status === 'playing';

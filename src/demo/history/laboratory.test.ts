@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { CREW, DAY_EVENTS, OWNER, freshPreview, previewReduce } from '../fd30';
+import { CREW, DAY_EVENTS, dataOwner, OWNER, freshPreview, previewReduce } from '../fd30';
 import { BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, LAB_EVENTS } from '../laboratory';
 import { laboratoryHistory } from './laboratory';
 import { LaboratoryDetail } from '../LaboratoryDetail';
@@ -9,7 +9,7 @@ import { I18nProvider } from '../../i18n/I18nProvider';
 import { groundView } from '../../views/fd30-ops/opsSelectors';
 const at = (h: string) => Date.parse(`2027-03-10T${h}:00Z`);
 const seek = (h: string) => previewReduce(freshPreview(1000), { type: 'seek', target: at(h), now: 1000 });
-const query = (s: ReturnType<typeof freshPreview>, h: string, range: 'last7' | 'all' = 'last7') => laboratoryHistory(s, { perspective: 'onboard', owner: s.activeCrewId }, at(h), range)!;
+const query = (s: ReturnType<typeof freshPreview>, h: string, range: 'last7' | 'all' = 'last7') => laboratoryHistory(s, { perspective: 'onboard', owner: dataOwner(s.activeCrewId) }, at(h), range)!;
 describe('HIST03 canonical sample history', () => {
   it('has seven/thirty days without writes or new samples; unknown coverage is not inactivity', () => {
     const s = seek('05:55'), before = JSON.stringify(s);

@@ -1,3 +1,4 @@
+import { dataOwner } from '../fd30';
 import type { CrewId, PreviewState } from '../fd30';
 import type { GroundRole } from '../../state/types';
 import { exerciseSessionView } from '../exerciseSession';
@@ -84,7 +85,7 @@ export function exerciseComparisons(records: readonly ExerciseRecord[]) {
 /** Permission -> occurrence AND reception -> comparison -> window. No writes or new events. */
 export function exerciseHistory(state: PreviewState, viewer: ExerciseViewer, cursor: number, range: ExerciseRange,
   records: readonly ExerciseRecord[] = EXERCISE_RECORDS, coverage: readonly ExercisePlanDay[] = EXERCISE_PLAN) {
-  if (viewer.perspective !== 'onboard' || viewer.owner !== state.activeCrewId || !Number.isFinite(cursor)) return null;
+  if (viewer.perspective !== 'onboard' || viewer.owner !== dataOwner(state.activeCrewId) || !Number.isFinite(cursor)) return null;
   const currentFd = Math.floor((cursor - FLIGHT_DAY_ONE) / 86_400_000) + 1;
   if (currentFd < 1 || currentFd > 30) return null;
   const due = (iso: string) => Date.parse(iso) <= cursor;

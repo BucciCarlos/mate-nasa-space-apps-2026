@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import { toHash } from '../app/routes';
 import { useLocale, useT } from '../i18n/I18nProvider';
 import { SCHEDULE_TEXT } from '../i18n/fd30Schedule';
-import { CREW } from './fd30';
+import { useCrewName } from './viewerName';
 import type { CrewId, PreviewState } from './fd30';
 import { EQUIPMENT, PLAN_SOURCE, PLAN_VERSION, planFor } from './fd30Plan';
 import { SCHEDULE_END, SCHEDULE_START, scheduleBlockView, scheduleX, scheduleClock, scheduleInterval, scheduleContinuation } from './fd30Schedule';
@@ -11,7 +11,7 @@ import '../styles/fd30-schedule.css';
 
 export function Fd30PersonalAgenda({ state, owner, time }: { state: PreviewState; owner: CrewId; time: number }) {
   const locale = useLocale(), messages = useT(), t = SCHEDULE_TEXT[locale];
-  const crew = CREW.find(c => c.id === owner)!;
+  const crew = { name: useCrewName(owner) };
   const blocks = planFor(owner);
   // Local selection/scroll only: no simulation dispatch, clock or record copies here.
   const [selected, setSelected] = useState<string | null>(null);

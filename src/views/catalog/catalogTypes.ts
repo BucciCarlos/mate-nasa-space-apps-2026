@@ -50,6 +50,6 @@ export interface CatalogModule {
  * On board `owner` is the active profile (the dialogs read only that profile through the existing selectors); on Ground the
  * dialogs read only the allowlisted operational projection for the active role. Without it the dialogs show context only.
  */
-export interface CatalogData { state: PreviewState; owner: CrewId; time: number }
+export interface CatalogData { state: PreviewState; owner: CrewId; time: number; /** Name the active profile is shown under (CAP01); defaults to the owner's crew name. */ name?: string }
 /** Perspective and Ground role are supplied by the host view; the catalog grants no access. */
 export type CatalogProps = { perspective: 'onboard'; data?: CatalogData; headingLevel?: 1 | 2 } | { perspective: 'ground'; role: GroundRole; data?: CatalogData; headingLevel?: 1 | 2 };

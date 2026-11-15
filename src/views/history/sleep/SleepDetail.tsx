@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CrewId, PreviewState } from '../../../demo/fd30';
-import { CREW } from '../../../demo/fd30';
+import { useCrewName } from '../../../demo/viewerName';
 import { FLIGHT_DAY_ONE, fdDate, fdLabel, sleepDuration, sleepHistory, sleepSegments } from '../../../demo/history/sleep';
 import type { SleepRange } from '../../../demo/history/sleep';
 import { planFor } from '../../../demo/fd30Plan';
@@ -19,6 +19,7 @@ export function SleepDetail({ state, owner, time, targetFd = null }: { state: Pr
     return { [owner]: { range: targetFd >= currentFd - 6 ? 'last7' : 'all', fd: targetFd } };
   });
   const detail = useRef<HTMLElement>(null);
+  const crewName = useCrewName(owner);
   const preference = views[owner] ?? { range: 'last7' as const, fd: null };
   const view = sleepHistory(state, { perspective: 'onboard', owner }, time, preference.range);
   if (!view) return null;
@@ -35,7 +36,7 @@ export function SleepDetail({ state, owner, time, targetFd = null }: { state: Pr
   const x = (fd: number) => 56 + (fd - view.firstFd + .5) * 620 / view.days.length;
   const y = (minutes: number) => 242 - minutes / 600 * 204;
   return <article className="sleep-history" data-sleep-owner={owner} data-sleep-range={preference.range}>
-    <header className="fd-page-intro"><p className="fd-eyebrow">{CREW.find(c => c.id === owner)!.name}</p><h1 id="fd-view-h" tabIndex={-1}>{t.title}</h1><p>{t.intro}</p><p className="sleep-demo">{t.demo}</p><a href="#/onboard/personal/evidence">{t.origin}</a></header>
+    <header className="fd-page-intro"><p className="fd-eyebrow">{crewName}</p><h1 id="fd-view-h" tabIndex={-1}>{t.title}</h1><p>{t.intro}</p><p className="sleep-demo">{t.demo}</p><a href="#/onboard/personal/evidence">{t.origin}</a></header>
     <div className="sleep-range" role="group" aria-label={t.range}>
       <button type="button" aria-pressed={preference.range === 'last7'} onClick={() => setRange('last7')}>{t.last7}</button>
       <button type="button" aria-pressed={preference.range === 'all'} onClick={() => setRange('all')}>{t.all}</button>

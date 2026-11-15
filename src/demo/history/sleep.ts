@@ -1,3 +1,4 @@
+import { dataOwner } from '../fd30';
 import type { CrewId, PreviewState } from '../fd30';
 import type { GroundRole } from '../../state/types';
 import { SLEEP_SOURCE } from './sleepSource';
@@ -39,7 +40,7 @@ export function medianMinutes(records: readonly SleepRecord[]): number | null {
 /** Permission/owner -> occurrence AND receipt -> view window. No stored copies, actions or clock. */
 export function sleepHistory(state: Pick<PreviewState, 'activeCrewId' | 'processedIds'>, viewer: SleepViewer, cursor: number, range: SleepRange,
   records: readonly SleepRecord[] = SLEEP_RECORDS) {
-  if (viewer.perspective !== 'onboard' || viewer.owner !== state.activeCrewId || !Number.isFinite(cursor)) return null;
+  if (viewer.perspective !== 'onboard' || viewer.owner !== dataOwner(state.activeCrewId) || !Number.isFinite(cursor)) return null;
   const currentFd = Math.floor((cursor - FLIGHT_DAY_ONE) / DAY) + 1;
   if (currentFd < 1 || currentFd > 30) return null;
   const available = records.filter(r => r.owner === viewer.owner && Date.parse(r.occurredAt) <= cursor && Date.parse(r.receivedAt) <= cursor

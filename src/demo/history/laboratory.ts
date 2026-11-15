@@ -1,3 +1,4 @@
+import { dataOwner } from '../fd30';
 import type { CrewId, PreviewState } from '../fd30';
 import type { GroundRole } from '../../state/types';
 import { labEvents, labPlanSlots, labStatus } from '../laboratory';
@@ -8,7 +9,7 @@ export type LaboratoryRange = 'last7' | 'all';
 export type LaboratoryViewer = { perspective: 'onboard'; owner: CrewId } | { perspective: 'ground'; role: GroundRole };
 /** Query over existing canonical workflow receipts. No fixture arrivals, values or stored copies. */
 export function laboratoryHistory(state: PreviewState, viewer: LaboratoryViewer, cursor: number, range: LaboratoryRange) {
-  if (viewer.perspective !== 'onboard' || viewer.owner !== state.activeCrewId || !Number.isFinite(cursor)) return null;
+  if (viewer.perspective !== 'onboard' || viewer.owner !== dataOwner(state.activeCrewId) || !Number.isFinite(cursor)) return null;
   const currentFd = Math.floor((cursor - FLIGHT_DAY_ONE) / 86400000) + 1;
   if (currentFd < 1 || currentFd > 30) return null;
   const firstFd = range === 'all' ? 1 : Math.max(1, currentFd - 6);

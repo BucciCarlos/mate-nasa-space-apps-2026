@@ -1,0 +1,32 @@
+/* Orbit companion motion. Pieces and pivots are in each design's own pixel space (see orbitData.ts). Everything that moves is behind
+   prefers-reduced-motion: with reduced motion the figure is still, expressions still change, and the greeting is a static happy face. */
+.orbit { overflow: visible; color: #243d3e; }
+.orbit-tilt, .orbit-float, .orbit-piece { transform-box: view-box; }
+.orbit-eyes-blink { opacity: 0; }
+.orbit-interaction .orbit-tilt { transform: rotate(-4deg); }
+.orbit-news .orbit-tilt { transform: translateY(calc(var(--orbit-amp) * -1)); }
+.orbit-lira.is-greeting .orbit-tip-right, .orbit-pip.is-greeting .orbit-arm-right { transform: rotate(-10deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .orbit-float { animation: orbit-float 4.6s ease-in-out infinite; animation-delay: var(--orbit-delay); }
+  .orbit-tilt { transition: transform .18s ease; }
+  .fd-character:hover .orbit-tilt { transform: rotate(-3deg); }
+  .orbit-eyes-rest, .orbit-eyes-blink { animation-duration: 5.2s; animation-iteration-count: infinite; animation-delay: var(--orbit-delay); }
+  .orbit-eyes-rest { animation-name: orbit-eyes-rest; }
+  .orbit-eyes-blink { animation-name: orbit-eyes-blink; }
+  .orbit-news .orbit-tilt { animation: orbit-hop .7s ease-out 1; }
+  .orbit-lira .orbit-tip-left, .orbit-lira .orbit-tip-right { animation: orbit-tip 3.8s ease-in-out infinite; animation-delay: var(--orbit-delay); }
+  .orbit-lira .orbit-tip-left { animation-direction: reverse; }
+  .orbit-lira.is-greeting .orbit-tip-right { animation: orbit-wave 1.4s ease-in-out 1; }
+  .orbit-pip .orbit-antenna { animation: orbit-antenna 3s ease-in-out infinite; animation-delay: var(--orbit-delay); }
+  .orbit-pip .orbit-arm-left, .orbit-pip .orbit-arm-right { animation: orbit-arm 4.2s ease-in-out infinite; animation-delay: var(--orbit-delay); }
+  .orbit-pip.is-greeting .orbit-arm-right { animation: orbit-wave 1.4s ease-in-out 1; }
+  .is-greeting .orbit-tilt { animation: orbit-hop .7s ease-out 1; }
+  @keyframes orbit-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(calc(var(--orbit-amp) * -1)) rotate(.7deg); } }
+  @keyframes orbit-eyes-rest { 0%, 93%, 98%, 100% { opacity: 1; } 94%, 97% { opacity: 0; } }
+  @keyframes orbit-eyes-blink { 0%, 93%, 98%, 100% { opacity: 0; } 94%, 97% { opacity: 1; } }
+  @keyframes orbit-hop { 0% { transform: translateY(0); } 40% { transform: translateY(calc(var(--orbit-amp) * -2.4)) rotate(-4deg); } 100% { transform: translateY(calc(var(--orbit-amp) * -1)); } }
+  @keyframes orbit-tip { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(3deg); } }
+  @keyframes orbit-wave { 0%, 100% { transform: rotate(-14deg); } 25%, 75% { transform: rotate(-24deg); } 50% { transform: rotate(-8deg); } }
+  @keyframes orbit-antenna { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+  @keyframes orbit-arm { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(4deg); } }
+}

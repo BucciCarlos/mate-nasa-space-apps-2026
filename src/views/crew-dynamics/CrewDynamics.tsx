@@ -1,4 +1,5 @@
-import { useId, useState } from 'react';
+import { useContext, useId, useState } from 'react';
+import { ViewerNameContext } from '../../demo/viewerName';
 import { CREW, DAY_END } from '../../demo/fd30';
 import type { CrewId, PreviewState } from '../../demo/fd30';
 import { PLAN_SOURCE, PLAN_VERSION } from '../../demo/fd30Plan';
@@ -18,9 +19,11 @@ export function CrewDynamics({ state, viewer, initialRange = 7 }: {
   const model = crewDynamics(state, viewer, range);
   if (!model) return <p role="status">{t.unavailable}</p>;
   const owner = viewer.perspective === 'onboard' ? viewer.owner : null;
+  const viewerName = useContext(ViewerNameContext);
+  const nameOf = (id: CrewId) => viewerName && viewerName.id === id ? viewerName.name : CREW.find(c => c.id === id)!.name;
   const crew = CREW.filter(c => !mine || !owner || c.id === owner);
   const rows = model.rows.filter(r => crew.some(c => c.id === r.owner));
-  const names = (ids: readonly CrewId[]) => ids.map(id => CREW.find(c => c.id === id)!.name).join(', ');
+  const names = (ids: readonly CrewId[]) => ids.map(id => nameOf(id)).join(', ');
   return <section className="crew-dynamics" aria-labelledby={id}>
     <header><h1 id={id} tabIndex={-1}>{t.title}</h1><p>{t.intro}</p></header>
     <p className="crew-dynamics-note">{t.limit}</p>
@@ -42,7 +45,7 @@ export function CrewDynamics({ state, viewer, initialRange = 7 }: {
         {[t.person, t.plannedMinutes, t.sharedMinutes, t.overlapMinutes, t.withoutMinutes, t.restMinutes].map(label => <th scope="col" key={label}>{label}</th>)}
       </tr></thead><tbody>{crew.map(c => {
         const totals = crewTotals(model.rows, c.id);
-        return <tr key={c.id}><th scope="row">{c.name}</th>{[totals.planned, totals.shared, totals.overlap, totals.withoutOverlap, totals.rest].map((v, i) => <td key={i}>{v.toLocaleString(locale)}</td>)}</tr>;
+        return <tr key={c.id}><th scope="row">{nameOf(c.id)}</th>{[totals.planned, totals.shared, totals.overlap, totals.withoutOverlap, totals.rest].map((v, i) => <td key={i}>{v.toLocaleString(locale)}</td>)}</tr>;
       })}</tbody></table>
     </div><p>{t.totalsNote}</p>
     <div className="crew-dynamics-scroll" tabIndex={0} role="region" aria-label={t.mission} aria-describedby={`${id}-scroll`}>

@@ -1,3 +1,4 @@
+import { dataOwner } from '../../demo/fd30';
 // CAT08: pure content of the 14 detail dialogs. Every section says its class (FD30 data, historical evidence, context).
 // On board it reads only the ACTIVE profile through the existing selectors; on Ground only the allowlisted operational projection
 // (`groundView`) for the active role. No thresholds, alerts, diagnoses or invented figures. Nothing is written or sent.
@@ -46,7 +47,7 @@ const section = (cls: SectionClass, title: string, part: Partial<Pick<ModalSecti
 /** The active profile's data, only when the host passes the ACTIVE owner. Never another profile. */
 function own(c: Ctx): (CatalogData & { owner: CrewId }) | null {
   const { props } = c;
-  return props.perspective === 'onboard' && props.data && props.data.owner === props.data.state.activeCrewId ? props.data : null;
+  return props.perspective === 'onboard' && props.data && props.data.owner === dataOwner(props.data.state.activeCrewId) ? props.data : null;
 }
 /** The operational projection for the ACTIVE Ground role, or null if the role gets none (selector decides). */
 function ground(c: Ctx) {
@@ -110,7 +111,7 @@ export function buildModal(module: CatalogModule, props: CatalogProps, locale: L
   let secondary: ModalContent['secondary'] = null;
   const scope = onboard ? ui.scopeOnboard : props.role === 'mission_operator' ? ui.scopeOperator : ui.scopeMedical;
   const registryLine = onboard ? module.onboard[locale] : props.role === 'mission_operator' ? module.ground?.operational[locale] : module.ground?.medical[locale];
-  const crewName = (id: CrewId) => CREW.find(x => x.id === id)!.name;
+  const crewName = (id: CrewId) => props.perspective === 'onboard' && props.data?.name && props.data.owner === id ? props.data.name : CREW.find(x => x.id === id)!.name;
   const groundBlocks = (kind: string) => view ? view.crew.flatMap(p => p.blocks.filter(b => String(b.kind) === kind).map(b => ({ name: p.name, block: b }))) : [];
   const mediconsent = !onboard && props.role === 'medical_professional' ? section('fd30', ui.classes.fd30, { lines: [ui.noMedicalSummaries] }) : null;
 

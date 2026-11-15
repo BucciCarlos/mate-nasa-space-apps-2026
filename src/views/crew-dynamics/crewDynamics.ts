@@ -1,4 +1,4 @@
-import { CREW, DAY_START, DAY_END } from '../../demo/fd30';
+import { CREW, DAY_START, DAY_END, dataOwner } from '../../demo/fd30';
 import type { CrewId, PreviewState } from '../../demo/fd30';
 import type { GroundRole } from '../../state/types';
 import { groundView, operationalPlan } from '../fd30-ops/opsSelectors';
@@ -56,7 +56,7 @@ export function crewTotals(rows: readonly CrewInterval[], owner: CrewId) {
 }
 export function crewDynamics(state: PreviewState, viewer: CrewViewer, range: CrewRange) {
   if (viewer.perspective === 'onboard') {
-    if (viewer.owner !== state.activeCrewId || !CREW.some(c => c.id === viewer.owner)) return null;
+    if (viewer.owner !== dataOwner(state.activeCrewId) || !CREW.some(c => c.id === viewer.owner)) return null;
   } else if (viewer.perspective !== 'ground' || !groundView(state, viewer.role, DAY_START)) return null;
   return { firstFd: range === 7 ? 24 : 1, lastFd: 30, coveredFd: 30, rows: crewIntervals(crewSlots()) };
 }

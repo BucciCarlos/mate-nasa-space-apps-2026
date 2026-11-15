@@ -5,10 +5,10 @@
 .wb-outline { fill: none; stroke: var(--mod-wellbeing); stroke-width: 1.6; stroke-linejoin: round; }
 .wb-fill { fill: var(--mod-wellbeing); }
 .wb-hearts { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.wb-circle { width: 74px; height: 74px; border: 1.6px solid var(--brand); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
-.wb-circle strong { font-size: 22px; font-weight: 700; }
-.wb-circle small { font-size: 10px; }
-.wb-circle em { font-style: normal; font-size: 9px; text-align: center; max-width: 64px; color: var(--muted); margin-top: 2px; }
+.wb-circle { width: 136px; height: 136px; border: 1.6px solid var(--brand); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.wb-circle strong { font-size: 40px; font-weight: 700; }
+.wb-circle small { font-size: 18px; }
+.wb-circle em { font-style: normal; font-size: 17px; text-align: center; max-width: 118px; color: var(--muted); margin-top: 4px; }
 .wb-note { flex-basis: 100%; font-size: 11px; color: var(--muted); }
 .wb-figure-wrap { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
 .wb-fd { font-size: 11px; color: var(--muted); }

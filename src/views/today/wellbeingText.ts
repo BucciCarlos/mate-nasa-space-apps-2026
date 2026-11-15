@@ -8,7 +8,7 @@ export const WELLBEING_TEXT: Record<Locale, {
   en: {
     figure: 'Wellbeing (sleep and exercise, demonstration)', sleep: 'Sleep score', exercise: 'Exercise: session completed',
     noData: 'Not enough data for the index yet', partsNote: 'Index out of 100. Stress and health are not included.',
-    heartNow: 'Heart rate now', unit: 'bpm', spo2Label: 'SpO2', spo2Unit: '%',
+    heartNow: 'Heart rate', unit: 'bpm', spo2Label: 'SpO2', spo2Unit: '%',
     figureHint: 'Filled in proportion to the wellbeing index.',
   },
   es: {

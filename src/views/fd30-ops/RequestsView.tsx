@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useLocale } from '../../i18n/I18nProvider';
 import { fmtTime } from '../../i18n/format';
 import { CREW } from '../../demo/fd30';
+import { useCrewName } from '../../demo/viewerName';
 import type { CrewId } from '../../demo/fd30';
 import { planFor } from '../../demo/fd30Plan';
 import { COMMANDER } from './opsState';
@@ -14,7 +15,7 @@ export function RequestsView({ owner, draft, preview: suppliedPreview, requests,
   const locale = useLocale(), t = OPS_TEXT[locale];
   const [sent, setSent] = useState(false);
   const preview = suppliedPreview?.owner === owner ? suppliedPreview : null;
-  const sender = CREW.find(c => c.id === owner)!, recipient = CREW.find(c => c.id === COMMANDER)!;
+  const sender = { name: useCrewName(owner) }, recipient = CREW.find(c => c.id === COMMANDER)!;
   const edit = (patch: Partial<OpsProfile['request']>) => { setSent(false); onAction({ type: 'request/draft', owner, ...draft, ...patch }); };
   return <div className="ops ops-requests"><header className="ops-intro"><p className="fd-eyebrow">{t.requests}</p><h1 id="fd-view-h" tabIndex={-1}>{t.requestTitle}</h1><p>{t.requestIntro}</p></header>
     {owner === COMMANDER ? <p>{t.commanderSelf}</p> : <>

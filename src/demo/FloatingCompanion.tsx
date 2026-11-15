@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import type { CrewId, Position } from './fd30';
-import { CrewCharacter } from './CrewCharacter';
-import type { Pose } from './CrewCharacter';
+import type { ProfileId, Position } from './fd30';
+import { Orbit } from './orbit/Orbit';
+import type { OrbitVariant, Pose } from './orbit/Orbit';
 import { fitPosition, fromPreference, toPreference } from './position';
 import type { Box, Point } from './position';
 import { useT } from '../i18n/I18nProvider';
 
-type Character = { id: CrewId; character: string; shape: 'sprout' | 'beacon' | 'sail' };
+type Character = { id: ProfileId; character: string; shape: OrbitVariant };
 interface Props {
   crew: Character; preference: Position | null; pose: Pose; news: boolean; hasSummary: boolean; newsText: string; chatOpen: boolean;
   onPosition: (position: Position | null) => void; onChat: () => void; onSleep?: () => void; onExercise?: () => void; onLaboratory?: () => void; onSummary: () => void;
@@ -146,7 +146,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
           if (delta) setDragPoint(dropAt({ x: point.x + delta[0], y: point.y + delta[1] }));
           if (e.key === 'Enter' || e.key === 'Escape') { if (e.key === 'Enter') commit(point); setDragPoint(null); setMoving(false); }
         }}>
-        <CrewCharacter shape={crew.shape} pose={actualPose} greeting={greeting} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
+        <Orbit variant={crew.shape} pose={actualPose} greeting={greeting} /><span>{crew.character}<small>{chatOpen ? t.interaction : t.chatClosed}</small></span>
       </button>
       <button className="fd-info" ref={infoButton} type="button" aria-expanded={infoOpen} aria-controls={cardOpen ? 'fd-companion-card' : undefined}
         aria-label={news && !infoOpen ? `${t.companionInfo} · ${t.news}` : t.companionInfo} onClick={() => setInfoOpen(open => !open)}>

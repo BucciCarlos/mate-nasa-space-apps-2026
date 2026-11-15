@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 import { useLocale, useT } from '../../i18n/I18nProvider';
 import { fmtClock, fmtDate } from '../../i18n/format';
-import { CREW } from '../../demo/fd30';
+import { useCrewName } from '../../demo/viewerName';
 import type { CrewId, PreviewState } from '../../demo/fd30';
 import { EQUIPMENT, plannedExercise } from '../../demo/fd30Plan';
 import { exerciseSessionView } from '../../demo/exerciseSession';
@@ -59,7 +59,7 @@ function StatusIcon({ kind }: { kind: 'planned' | 'collection' | 'analysis' | 'r
 
 export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExercise, onOpenLaboratory }: Props) {
   const locale = useLocale(), t = TODAY[locale], ft = useT().fd30, st = SLEEP_TEXT[locale], xt = EXERCISE_TEXT[locale], ot = OPS_TEXT[locale];
-  const crew = CREW.find(c => c.id === owner)!;
+  const crewName = useCrewName(owner);
   const nf = new Intl.NumberFormat(locale);
   const go = (open: () => void) => (e: MouseEvent) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return; e.preventDefault(); open(); };
   const day = (fd: number) => fmtDate(Date.parse(fdDate(fd)), locale);
@@ -120,7 +120,7 @@ export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExerc
     <header className="td-head">
       <p className="fd-eyebrow">{t.header}</p>
       <div className="td-name">
-        <h1 id="fd-view-h" tabIndex={-1}>{crew.name}</h1>
+        <h1 id="fd-view-h" tabIndex={-1}>{crewName}</h1>
         <WellbeingFigure index={wbIndex} sleepFd={wbParts.sleepFd} />
         <HeartCircles now={wbNow} spo2={wbSpo2} />
       </div>

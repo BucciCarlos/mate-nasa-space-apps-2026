@@ -8,7 +8,7 @@ import { Fd30GroundAgenda } from './Fd30GroundAgenda';
 import { useApp } from '../state/AppProvider';
 import { sessionStorageOrNull } from '../state/persistence';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { CREW, FD30_KEY, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, latestPersonalEvent, latestNews, nextPreviewEvent, previewReduce, previewTime, restorePreview } from './fd30';
+import { ONBOARD_PROFILES, dataOwner, FD30_KEY, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, latestPersonalEvent, latestNews, nextPreviewEvent, previewReduce, previewTime, restorePreview } from './fd30';
 import { LaboratoryDetail, labHeadingId } from './LaboratoryDetail';
 import { SleepDetail } from '../views/history/sleep/SleepDetail';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -24,9 +24,10 @@ import { EvidenceSuite } from '../views/evidence/EvidenceSuite';
 import { OpsNavigation } from '../views/fd30-ops/OpsNavigation';
 import { OpsPanel } from '../views/fd30-ops/OpsPanel';
 import { OPS_TEXT } from '../views/fd30-ops/opsText';
+import { ViewerNameContext } from './viewerName';
 import { useOpsJournal } from '../views/fd30-ops/useOpsJournal';
 import type { GroundRole, Route } from '../state/types';
-import type { CrewId } from './fd30';
+import type { CrewId, ProfileId } from './fd30';
 import '../styles/fd30.css';
 import '../styles/fd30-imp05.css';
 import '../styles/secondary-nav.css';
@@ -76,9 +77,10 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   const logRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
-  const owner = state.activeCrewId;
-  const crew = CREW.find(c => c.id === owner)!;
-  const profile = state.profiles[owner];
+  const profileId = state.activeCrewId; // who is being viewed (chat, draft, position, name, companion)
+  const owner = dataOwner(profileId); // whose simulated records are shown (John Doe mirrors Lucía; see JOHN)
+  const crew = ONBOARD_PROFILES.find(c => c.id === profileId)!;
+  const profile = state.profiles[profileId];
   const newsEvent = latestNews(state, owner);
   const summaryEvent = latestPersonalEvent(state, owner);
   const news = !!newsEvent;
@@ -131,12 +133,12 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   }, [showing]);
 
   const openPersonal = (module: 'sleep' | 'exercise' | 'laboratory', summary = false) => {
-    if (module === 'sleep') dispatch({ type: 'seen', owner });
+    if (module === 'sleep') dispatch({ type: 'seen', owner: profileId });
     if (module === 'exercise' && summary && summaryEvent && 'sessionId' in summaryEvent) {
-      dispatch({ type: 'exercise/view', owner, sessionId: summaryEvent.sessionId, eventId: summaryEvent.id });
+      dispatch({ type: 'exercise/view', owner: profileId, sessionId: summaryEvent.sessionId, eventId: summaryEvent.id });
     }
     if (module === 'laboratory' && summary && summaryEvent && 'sampleId' in summaryEvent) {
-      dispatch({ type: 'laboratory/view', owner, sampleId: summaryEvent.sampleId, eventId: summaryEvent.id });
+      dispatch({ type: 'laboratory/view', owner: profileId, sampleId: summaryEvent.sampleId, eventId: summaryEvent.id });
     }
     setShowing(true);
     setAnnouncement(module === 'laboratory' ? summary ? t.labSummaryOpened : t.labOpened : module === 'sleep' ? t.opened : summary ? t.exerciseSummaryOpened : t.exerciseOpened);
@@ -146,7 +148,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   // Today's lab card: open the module on the sample it shows. Same view action as the news summary; the clock is untouched.
   const openTodayLab = (sampleId?: string, eventId?: string) => {
     if (!sampleId || !eventId) return openPersonal('laboratory');
-    dispatch({ type: 'laboratory/view', owner, sampleId, eventId });
+    dispatch({ type: 'laboratory/view', owner: profileId, sampleId, eventId });
     setShowing(true); setAnnouncement(t.labOpened);
     navigate({ view: 'fd30', page: 'laboratory' });
   };
@@ -157,7 +159,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   useEffect(() => { if (page !== 'sleep') setSleepTarget(null); }, [page]);
   const [exerciseTarget, setExerciseTarget] = useState<{ owner: CrewId; fd: number; focus: 'session' | 'comparison' } | null>(null);
   useEffect(() => { if (page !== 'exercise') setExerciseTarget(null); }, [page]);
-  const voice = useDialogueVoice({ chatOpen: chatOpen && !onGround, owner, onGround, page, cursor: missionTime, onEnded: (key, target) => {
+  const voice = useDialogueVoice({ chatOpen: chatOpen && !onGround, owner: profileId, onGround, page, cursor: missionTime, onEnded: (key, target) => {
     const current = stateRef.current;
     if (current.playback !== 'guided' || guidedVoiceOpened.current.has(key)) return;
     if (target.sampleId) {
@@ -169,12 +171,12 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
       // Exercise: Lucía's completed FD30 session reuses the existing exercise/view path; Tomás/Mei open their exact FD (and the comparison section for Tomás).
       const ex = target.exercise, session = current.exercise.find(s => s.id === ex.sessionId && s.crewId === current.activeCrewId);
       guidedVoiceOpened.current.add(key);
-      if (session?.finish) { dispatch({ type: 'exercise/view', owner: current.activeCrewId, sessionId: session.id, eventId: session.finish.id }); setShowing(true); }
-      setExerciseTarget({ owner: current.activeCrewId, fd: ex.fd, focus: ex.focus });
+      if (session?.finish) { dispatch({ type: 'exercise/view', owner: dataOwner(current.activeCrewId), sessionId: session.id, eventId: session.finish.id }); setShowing(true); }
+      setExerciseTarget({ owner: dataOwner(current.activeCrewId), fd: ex.fd, focus: ex.focus });
       openPersonal('exercise');
     } else if (target.sleepFd) {
       guidedVoiceOpened.current.add(key);
-      setSleepTarget({ owner: current.activeCrewId, fd: target.sleepFd });
+      setSleepTarget({ owner: dataOwner(current.activeCrewId), fd: target.sleepFd });
       openPersonal('sleep');
     }
   } });
@@ -187,7 +189,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
     const events = receivedPersonalEvents({ ...state, ...projectDomain(at) }, owner);
     const count = events.filter(e => !profile.announcedIds.includes(e.id)).length;
     dispatch({ type: 'seek', now: n, target: at });
-    if (!onGround) dispatch({ type: 'events/announce', owner, ids: events.map(e => e.id) });
+    if (!onGround) dispatch({ type: 'events/announce', owner: profileId, ids: events.map(e => e.id) });
     setNow(n); setShowing(false);
     setAnnouncement(onGround ? '' : t.timeSummary(new Date(at).toISOString().slice(11, 16), count));
   };
@@ -195,19 +197,19 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
     if (onGround) return;
     const events = receivedPersonalEvents(state, owner).filter(e => !profile.announcedIds.includes(e.id));
     if (!events.length) return;
-    dispatch({ type: 'events/announce', owner, ids: events.map(e => e.id) });
+    dispatch({ type: 'events/announce', owner: profileId, ids: events.map(e => e.id) });
     const unread = events.filter(e => 'sampleId' in e ? !profile.labSeenIds.includes(e.id)
       : 'sessionId' in e ? !profile.exerciseSeenIds.includes(e.id) : !profile.seen);
     if (unread.length) setAnnouncement(t.timeSummary(time, unread.length));
   }, [state.processedIds, owner, profile.announcedIds, onGround]);
   useEffect(() => {
     const request = state.guidedRequest;
-    if (!request || request.owner !== owner || guidedHandled.current === request.eventId) return;
+    if (!request || request.owner !== profileId || guidedHandled.current === request.eventId) return;
     guidedHandled.current = request.eventId;
-    dispatch({ type: 'guided/consume', owner, eventId: request.eventId });
+    dispatch({ type: 'guided/consume', owner: profileId, eventId: request.eventId });
     if (onGround) return;
     if (document.activeElement?.id === 'fd-ask' && profile.draft.trim()) return;
-    dispatch({ type: 'exercise/view', owner, sessionId: EXERCISE_SESSION, eventId: request.eventId });
+    dispatch({ type: 'exercise/view', owner: profileId, sessionId: EXERCISE_SESSION, eventId: request.eventId });
     setShowing(true); setAnnouncement(t.guidedOpened);
     navigate({ view: 'fd30', page: 'exercise' });
     if (page === 'exercise') document.getElementById('fd-exercise-session-h')?.focus();
@@ -223,6 +225,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   };
 
   return (
+    <ViewerNameContext.Provider value={onGround ? null : { id: owner, name: crew.name }}>
     <div className={`fd30${chatOpen && !onGround ? ' fd-chat-open' : ''}${onGround ? ' fd30-ground' : ''}`} data-surface={onGround ? 'ground' : 'onboard'}>
       <a className="skip" href="#fd-main" onClick={e => { e.preventDefault(); document.getElementById('fd-main')?.focus(); }}>{messages.a11y.skipToContent}</a>
       <header className="fd-header">
@@ -246,7 +249,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
           <button className="fd-perspective-switch" type="button" onClick={() => navigate({ view: 'fd30', page: onGround ? lastOnboardPage.current : 'ground' })}>{onGround ? p.switchToOnboard : p.switchToGround}</button>
           <a className="fd-secondary-link" href={onGround ? '#/demo/fd30/ground/evidence' : '#/onboard/personal/evidence'} aria-current={page === 'evidence' || page === 'ground-evidence' ? 'page' : undefined}>{t.evidence}</a>
         </div>
-        {!onGround && <label className="fd-view-as"><span>{t.viewAs}</span><select aria-label={t.viewAs} value={owner} onChange={e => { setChatOpen(false); setShowing(false); setAnnouncement(''); dispatch({ type: 'select', crewId: e.target.value as CrewId }); }}>{CREW.map(c => <option key={c.id} value={c.id}>{c.name} · {c.character}</option>)}</select></label>}
+        {!onGround && <label className="fd-view-as"><span>{t.viewAs}</span><select aria-label={t.viewAs} value={profileId} onChange={e => { setChatOpen(false); setShowing(false); setAnnouncement(''); dispatch({ type: 'select', crewId: e.target.value as ProfileId }); }}>{ONBOARD_PROFILES.map(c => <option key={c.id} value={c.id}>{c.name} · {c.character}</option>)}</select></label>}
         <button className="fd-next" type="button" disabled={!nextEvent} onClick={() => { const n = Date.now(); setNow(n); dispatch({ type: 'next', now: n }); }}>{!nextEvent ? t.end : t.next}<span>{!onGround && nextEvent && nextLabel}</span>{nextEvent && <Arrow />}</button>
         <button className="fd-reset" type="button" onClick={reset}>{t.restart}</button>
         <Fd30Timebar state={state} time={missionTime} dispatch={dispatch} onSeek={seek} />
@@ -258,11 +261,11 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
             {!onGround && <OpsNavigation owner={owner} page={page} />}
             {page === 'crew-dynamics' || page === 'ground-crew-dynamics' ? <CrewDynamics state={state} viewer={onGround ? { perspective: 'ground', role: groundRole } : { perspective: 'onboard', owner }} />
               : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} />
-              : page === 'ground-catalog' ? <div className="fd-ground-catalog"><ModuleCatalog perspective="ground" role={groundRole} headingLevel={1} data={{ state, owner, time: missionTime }} /></div>
+              : page === 'ground-catalog' ? <div className="fd-ground-catalog"><ModuleCatalog perspective="ground" role={groundRole} headingLevel={1} data={{ state, owner, time: missionTime, name: crew.name }} /></div>
               : page === 'ground-evidence' ? <EvidenceSuite key={evidenceTab ?? 'labs'} perspective="ground" initialTab={evidenceTab} />
               : opsPage ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate({ view: 'fd30', page: 'today' })} /> : page === 'today' ? <TodaySummary state={state} owner={owner} time={missionTime} ops={journal.state} onOpenSleep={openSleep} onOpenExercise={openExercise} onOpenLaboratory={openTodayLab} />
               : page === 'agenda' ? <Fd30PersonalAgenda state={state} owner={owner} time={missionTime} /> : page === 'laboratory' ? <><LaboratoryDetail state={state} owner={owner} highlight={showing} time={missionTime} /><p className="fd-evidence-hint"><a href="#/onboard/personal/evidence">{t.labInspirationLink}</a></p></> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} target={exerciseTarget?.owner === owner ? { fd: exerciseTarget.fd, focus: exerciseTarget.focus } : null} /> : page === 'catalog' ? <>
-              <ModuleCatalog perspective="onboard" headingLevel={1} data={{ state, owner, time: missionTime }} />
+              <ModuleCatalog perspective="onboard" headingLevel={1} data={{ state, owner, time: missionTime, name: crew.name }} />
             </> : page === 'evidence' ? <>
               <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.evidence}</h1></div>
               <EvidenceSuite key={evidenceTab ?? 'labs'} perspective="onboard" initialTab={evidenceTab} />
@@ -275,16 +278,17 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
         {chatOpen && !onGround && <aside className="fd-dock" aria-label={t.characterDescription}>
           <section id="fd-chat-panel" className="fd-chat" aria-labelledby="fd-chat-h">
             <header><div><h2 id="fd-chat-h">{crew.character}</h2><small>{t.private}</small></div><button ref={closeRef} type="button" aria-label={t.closeChat} onClick={closeChat}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3L13 13M3 13L13 3" stroke="currentColor" strokeWidth="1.5" /></svg></button></header>
-            <Fd30Conversation profile={profile} character={crew.character} logRef={logRef} time={missionTime} owner={owner} voice={voice}
-              onAsk={(text, input = 'text') => dispatch({ type: 'ask', owner, text, lang: locale, now: Date.now(), input })}
-              onDraft={text => dispatch({ type: 'draft', owner, text })}
+            <Fd30Conversation profile={profile} character={crew.character} logRef={logRef} time={missionTime} owner={profileId} voice={voice}
+              onAsk={(text, input = 'text') => dispatch({ type: 'ask', owner: profileId, text, lang: locale, now: Date.now(), input })}
+              onDraft={text => dispatch({ type: 'draft', owner: profileId, text })}
               onOpen={detail => { if (detail === 'agenda') { navigate({ view: 'fd30', page: 'agenda' }); } else openPersonal(detail); }} />
           </section>
         </aside>}
-        {!onGround && <FloatingCompanion key={owner} crew={crew} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
-          onPosition={position => dispatch({ type: 'position', owner, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />}
+        {!onGround && <FloatingCompanion key={profileId} crew={crew} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
+          onPosition={position => dispatch({ type: 'position', owner: profileId, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />}
       </div>
       {!onGround && <div className="sr-only" role="status">{announcement}</div>}
     </div>
+    </ViewerNameContext.Provider>
   );
 }

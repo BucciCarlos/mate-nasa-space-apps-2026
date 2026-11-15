@@ -220,7 +220,7 @@ Today is the main FD30 day view: current profile + common mission clock, a domin
 
 Written chat starts **closed** on initial load/reload and after a profile switch. **Authorized IMP02 amendment to SPEC03:** the original character floats above the view; lower-right is the initial position only. Drag with mouse/finger to another visible position outside essential controls. It retains viewport position through scroll and Today/Sleep navigation. Each profile remembers its own normalized preference; viewport/chat/keyboard constraints may temporarily project the effective position without overwriting that preference (02 §12.5.1). Essential navigation, jury controls, form/actions and chat controls remain reachable even when content scrolls under the character. This replaces the mandatory reserved lower-right gutter/footer, while preserving the current visual hierarchy.
 
-A tap/click opens written chat, while dragging and releasing never opens it. The final approved IMP02 cut removes the visible Position / Posición button and its menu, without another floating control **on the companion**. UX02 authorizes one separate floating control in the demo, the Demo mode button (§8.13); it is never part of the companion and never replaces it. Tab focuses the character; M enables arrows (8 px), Shift+arrows (32 px), Enter to confirm and Escape to cancel. Home resets this companion only. Translated instructions are in the info card (and shown while movement mode is active) and are exposed as an accessible description; movement, confirm/cancel and reset never open chat. Enter/Space outside movement mode still opens chat. The info card switches sides and stays clamped inside the usable viewport near all edges, on desktop and mobile; no clipped text or controls. View as in Demo mode switches Lucía/Sprout, Tomás/Beacon and Mei/Sail without restarting FD30, carrying over private records or reusing conversations. The previously selected profile's unsent text is preserved privately; the next profile starts with chat/movement controls closed.
+A tap/click opens written chat, while dragging and releasing never opens it. The final approved IMP02 cut removes the visible Position / Posición button and its menu, without another floating control **on the companion**. UX02 authorizes one separate floating control in the demo, the Demo mode button (§8.13); it is never part of the companion and never replaces it. Tab focuses the character; M enables arrows (8 px), Shift+arrows (32 px), Enter to confirm and Escape to cancel. Home resets this companion only. Translated instructions are in the info card (and shown while movement mode is active) and are exposed as an accessible description; movement, confirm/cancel and reset never open chat. Enter/Space outside movement mode still opens chat. The info card switches sides and stays clamped inside the usable viewport near all edges, on desktop and mobile; no clipped text or controls. View as in Demo mode switches Lucía/Lira, Tomás/Flop and Mei/Pip without restarting FD30, carrying over private records or reusing conversations. The previously selected profile's unsent text is preserved privately; the next profile starts with chat/movement controls closed.
 
 The chat's placement is independent of the character: desktop lateral column reallocating main content, mobile bottom region with its own scroll. Main content stays reachable, the character stays visible, and temporary adjustment around chat/keyboard does not overwrite its saved preference. Close chat and Escape restore focus to the character and retain that owner's conversation/draft. Events signal news where the character was left, without autonomous movement, chat opening, navigation or focus theft. Reduced motion changes pose/text immediately.
 
@@ -239,7 +239,7 @@ Demo controls are visually separate from astronaut tasks, titled Demo mode — n
 
 Use original, compact, non-human characters with silhouettes readable in monochrome at about 64 px; no agency marks or real-person likenesses. The reference to ChatGPT pets is the **interaction of a persistent character with a user-opened chat** only: do not copy character designs, sprites, names, poses or app assets. Prefer a small layered inline SVG/CSS implementation; no animation library, remote image service or generated sprite sheet is required.
 
-M1.1 silhouette specification, stable per profile (original design choices, not clinical personas): Lucía → Sprout, an upright seed-shaped body with two asymmetrical leaf fins; Tomás → Beacon, a squat trapezoid body with a forked crest; Mei → Sail, an elongated curved body with a large offset sail fin. These proper names stay untranslated. Each is identifiable without its name or color; none is an orb with an initial. Their personalities must not imply specialist advice or emotional assessment. Name/accent customization can remain M3; default distinct identities are M1.1 MUST.
+Orbit companion, stable per profile: each profile has its own Orbit design supplied by the product owner, and the designs are not altered by the app: Lucía → Lira (a star), Tomás → Flop (a ringed planet), Mei → Pip (an alien). Luna (a moon) is the original Orbit and the default when no profile Orbit applies. The names stay untranslated. Planet and star have no added limbs: Flop moves only its face and whole body, Lira uses its own side points to wave, Pip waves its arms and antenna. Each is identifiable by silhouette and colour; none is an orb with an initial. Their personalities must not imply specialist advice or emotional assessment. Name/accent customization can remain M3; default distinct identities are M1.1 MUST.
 
 | State | Static cue, always present | Optional motion |
 |---|---|---|
@@ -264,7 +264,7 @@ With reduced motion, replace movement by immediate pose/text changes; never supp
 | Agenda simulada | Reporte simulado | Evidencia de otra misión |
 | [Check-in opcional / Optional check-in → Observaciones]       |
 |                                       +--------------------+ |
-| Floating initial position, movable    | [Sprout silhouette] | |
+| Floating initial position, movable    | [Lira star] | |
 |                                       | Training completed | |
 |                                       | Chat closed/cerrado| |
 |                                       | [View my summary]  | |
@@ -292,14 +292,14 @@ Desktop ≥1024 px: keep the current summary hierarchy and visual design; the ch
 | Solicitudes compartidas / Shared operational requests         |
 | sender → Tomás · exact voluntarily shared message             |
 |                                       +--------------------+ |
-| No teammate-private data here         | [Beacon silhouette]| |
+| No teammate-private data here         | [Flop planet]| |
 |                                       | Idle / En reposo   | |
 |                                       | Chat closed/cerrado| |
 |                                       | [My summary]       | |
 +---------------------------------------+--------------------+-+
 ```
 
-Desktop uses aligned team lanes and a separate voluntary-request list, with the same floating per-profile character and independent chat layout as Today. Mobile stacks operational cards and requests; an explicitly opened bottom chat does not cover controls. Both languages retain the hierarchy. Beacon's summary/chat always belongs to **Tomás**, never the teammate whose lane is selected. No expand-control leads into a teammate's measured sleep, metrics, samples, check-in, capsule, notes or chat. Requests show only their authorized immutable message and sender/recipient. Request preview retains Message / Mensaje, named Recipient / Destinatario and Share with Commander / Compartir con Comandante, separate from medical sharing. Neither the check-in nor the optional capsule broadens Commander or Ground visibility.
+Desktop uses aligned team lanes and a separate voluntary-request list, with the same floating per-profile character and independent chat layout as Today. Mobile stacks operational cards and requests; an explicitly opened bottom chat does not cover controls. Both languages retain the hierarchy. Flop's summary/chat always belongs to **Tomás**, never the teammate whose lane is selected. No expand-control leads into a teammate's measured sleep, metrics, samples, check-in, capsule, notes or chat. Requests show only their authorized immutable message and sender/recipient. Request preview retains Message / Mensaje, named Recipient / Destinatario and Share with Commander / Compartir con Comandante, separate from medical sharing. Neither the check-in nor the optional capsule broadens Commander or Ground visibility.
 
 ### 8.5 Reference strings for the day (EN / ES)
 

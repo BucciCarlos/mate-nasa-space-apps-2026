@@ -1,4 +1,5 @@
 import type { PreviewState } from '../../demo/fd30';
+import { dataOwner } from '../../demo/fd30';
 import type { GroundRole } from '../../state/types';
 import { CommanderView } from './CommanderView';
 import { GroundOverview } from './GroundOverview';
@@ -14,7 +15,7 @@ export function OpsPanel({ page, session, time, journal, onAction, role, onRole,
   page: OpsPage; session: PreviewState; time: number; journal: OpsState;
   onAction: (action: OpsAction) => void; role: GroundRole; onRole: (role: GroundRole) => void; onSkip: () => void;
 }) {
-  const owner = session.activeCrewId, profile = journal.profiles[owner];
+  const owner = dataOwner(session.activeCrewId), profile = journal.profiles[owner];
   if (page === 'ground') return <GroundOverview data={groundView(session, role, time)} onRole={onRole} />;
   if (page === 'crew') return <CommanderView data={commanderView(journal, owner, time)} />;
   if (page === 'wellbeing') return <WellbeingView key={owner} owner={owner} draft={profile.wellbeing} entries={ownCheckins(journal, owner, time)} onAction={onAction} onSkip={onSkip} />;
