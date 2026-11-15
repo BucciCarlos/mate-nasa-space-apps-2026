@@ -12,12 +12,6 @@ export function useSources(): Source[] | null {
   return data ?? null;
 }
 
-const TAG_CLS: Record<string, string> = {
-  verified: 'text-green border-green',
-  partial: 'text-amber border-amber',
-  pending: 'text-amber border-amber',
-};
-
 /** Source popover: title, publisher, URL, access date, what it supports (03 §5). */
 export function SourceCard({ sourceId, onClose, autoFocus = false }: { sourceId: string; onClose?: () => void; autoFocus?: boolean }) {
   const t = useT();
@@ -29,26 +23,25 @@ export function SourceCard({ sourceId, onClose, autoFocus = false }: { sourceId:
     if (autoFocus) ref.current?.focus();
   }, [autoFocus, sourceId]);
   if (!s) return null;
-  const isNasa = s.kind === 'nasa_resource';
-  const badgeLabel = isNasa ? t.provenance.nasaResource : t.provenance.partnerResource;
+  const badgeLabel = s.kind === 'nasa_resource' ? t.provenance.nasaResource : t.provenance.partnerResource;
   return (
-    <aside className="border border-accent rounded-md px-3 py-3 my-2 bg-bg2 focus:outline-none" ref={ref} tabIndex={-1} aria-label={t.a11y.sourcePopover}>
-      <div className="flex gap-2 items-center flex-wrap">
-        <span className={`inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.04em] px-2 py-px rounded-full border ${isNasa ? 'border-accent text-accent' : 'border-accent text-accent'}`}><span aria-hidden="true">◆</span> {badgeLabel}</span>
-        {s.challengeResource && <span className="text-[11px] px-2 py-px rounded-full border border-line text-fg2">{t.provenance.challengeResource}</span>}
-        <span className={`text-[11px] px-2 py-px rounded-full border border-line text-fg2 ${TAG_CLS[s.status] ?? ''}`}>{t.provenance.status[s.status]}</span>
-        {onClose && <button type="button" className="inline-flex items-center gap-1 px-2 py-1 text-fs0 rounded text-accent bg-transparent hover:underline" onClick={onClose}>{t.common.close}</button>}
+    <aside className="source-card" ref={ref} tabIndex={-1} aria-label={t.a11y.sourcePopover}>
+      <div className="source-head">
+        <span className={`badge badge-${s.kind === 'nasa_resource' ? 'nasaResource' : 'partnerResource'}`}><span aria-hidden="true">◆</span> {badgeLabel}</span>
+        {s.challengeResource && <span className="tag">{t.provenance.challengeResource}</span>}
+        <span className={`tag tag-${s.status}`}>{t.provenance.status[s.status]}</span>
+        {onClose && <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>{t.common.close}</button>}
       </div>
-      <h3 className="my-2" lang="en">{s.title}</h3>
-      <dl>
-        <dt className="text-fs0 text-fg2 mt-2">{t.provenance.publisher}</dt><dd lang="en">{s.publisher}</dd>
-        <dt className="text-fs0 text-fg2 mt-2">{t.provenance.url}</dt>
+      <h3 className="source-title" lang="en">{s.title}</h3>
+      <dl className="source-meta">
+        <dt>{t.provenance.publisher}</dt><dd lang="en">{s.publisher}</dd>
+        <dt>{t.provenance.url}</dt>
         <dd>
-          <a href={s.url} target="_blank" rel="noopener noreferrer" className="break-all text-accent">{s.url}</a>
-          <span className="text-fg2"> ({t.provenance.openExternal}; {t.provenance.accessedAt({ date: s.accessedAt })})</span>
+          <a href={s.url} target="_blank" rel="noopener noreferrer">{s.url}</a>
+          <span className="muted"> ({t.provenance.openExternal}; {t.provenance.accessedAt({ date: s.accessedAt })})</span>
         </dd>
-        <dt className="text-fs0 text-fg2 mt-2">{t.provenance.supports}</dt><dd>{s.supports[locale]}</dd>
-        <dt className="text-fs0 text-fg2 mt-2">{t.provenance.reuse}</dt><dd>{s.reuse[locale]}</dd>
+        <dt>{t.provenance.supports}</dt><dd>{s.supports[locale]}</dd>
+        <dt>{t.provenance.reuse}</dt><dd>{s.reuse[locale]}</dd>
       </dl>
     </aside>
   );

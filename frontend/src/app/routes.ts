@@ -9,7 +9,7 @@ export function routePath(route: Route): string {
   switch (route.view) {
     case 'onboard': return `/onboard/${route.page}`;
     case 'ground': return `/ground/${route.missionId}/${route.page}`;
-    case 'fd30': return route.page === 'today' ? '/demo/fd30' : `/onboard/personal/${route.page}`;
+    case 'fd30': return route.page === 'sleep' ? '/onboard/personal/sleep' : '/demo/fd30';
     case 'settings': return '/settings';
     case 'notfound': return '/not-found';
   }
@@ -21,7 +21,7 @@ export function parsePath(pathname: string): Route {
   const segs = pathname.split('/').filter(Boolean);
   if (segs.length === 0) return { view: 'onboard', page: 'today' };
   if (segs[0] === 'demo' && segs[1] === 'fd30' && segs.length === 2) return { view: 'fd30', page: 'today' };
-  if (segs[0] === 'onboard' && segs[1] === 'personal' && segs.length === 3 && (['sleep', 'exercise', 'laboratory'] as const).includes(segs[2] as 'sleep')) return { view: 'fd30', page: segs[2] as 'sleep' | 'exercise' | 'laboratory' };
+  if (segs[0] === 'onboard' && segs[1] === 'personal' && segs[2] === 'sleep' && segs.length === 3) return { view: 'fd30', page: 'sleep' };
   if (segs[0] === 'onboard') {
     const page = (segs[1] ?? 'today') as OnboardPage;
     return segs.length <= 2 && ONBOARD_PAGES.includes(page) ? { view: 'onboard', page } : { view: 'notfound' };

@@ -17,7 +17,11 @@ import { OnboardObservations } from './views/onboard/OnboardObservations';
 import { OnboardToday } from './views/onboard/OnboardToday';
 import { Settings } from './views/Settings';
 import { Fd30Preview } from './demo/Fd30Preview';
-import './styles/index.css';
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/ground.css';
+import './styles/onboard.css';
+import './styles/fd30.css';
 
 // BrowserRouter: the backend serves the SPA with a catch-all fallback to
 // index.html for any non-API route, so refresh/deep-link works on clean URLs.
@@ -93,13 +97,9 @@ const router = createBrowserRouter([
     children: [{ index: true, element: <Fd30Preview page="today" /> }],
   },
   {
-    path: '/onboard/personal',
+    path: '/onboard/personal/sleep',
     element: <Fd30Layout />,
-    children: [
-      { path: 'sleep', element: <Fd30Preview page="sleep" /> },
-      { path: 'exercise', element: <Fd30Preview page="exercise" /> },
-      { path: 'laboratory', element: <Fd30Preview page="laboratory" /> },
-    ],
+    children: [{ index: true, element: <Fd30Preview page="sleep" /> }],
   },
   {
     path: '/',

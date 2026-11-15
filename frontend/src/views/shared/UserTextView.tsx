@@ -9,8 +9,8 @@ export function UserTextView({ text, className }: { text: UserText; className?: 
   const langName = text.lang === 'en' ? t.common.english : t.common.spanish;
   return (
     <span className={className}>
-      <q lang={text.lang} className="italic">{text.text}</q>
-      {other && <span className="text-[11px] text-fg2"> {t.common.writtenIn({ language: langName })}</span>}
+      <q lang={text.lang} className="user-text">{text.text}</q>
+      {other && <span className="tag tag-lang"> {t.common.writtenIn({ language: langName })}</span>}
     </span>
   );
 }

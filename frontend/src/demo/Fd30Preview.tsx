@@ -3,12 +3,10 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../state/AppProvider';
 import { localeSet } from '../state/mateSlice';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { CREW, HISTORY, OWNER, REST, WAKE_EVENT, EXERCISE_SESSION, exerciseSessions, latestPersonalEvent, latestNews, nextPreviewEvent, previewReply, historyFor, previewReduce, previewTime, restorePreview } from './fd30';
-import { LaboratoryDetail, labHeadingId } from './LaboratoryDetail';
-import { BLOOD_SAMPLE, labSamples, labStatus } from './laboratory';
-import { ExerciseDetail } from './ExerciseDetail';
+import { CREW, HISTORY, OWNER, REST, WAKE_EVENT, historyFor, previewReduce, previewTime, restorePreview } from './fd30';
 import { FloatingCompanion } from './FloatingCompanion';
 import type { CrewId } from './fd30';
+import '../styles/fd30.css';
 
 function Arrow() {
   return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12H20M14 6L20 12L14 18" fill="none" stroke="currentColor" strokeWidth="1.6" /></svg>;
@@ -16,7 +14,7 @@ function Arrow() {
 
 function Daybreak() {
   return (
-    <svg className="w-full max-w-[245px] justify-self-end" viewBox="0 0 320 340" aria-hidden="true">
+    <svg className="fd-daybreak" viewBox="0 0 320 340" aria-hidden="true">
       <defs><linearGradient id="fd-sky" x2="0" y2="1"><stop stopColor="#1c363b" /><stop offset="1" stopColor="#536e6d" /></linearGradient><linearGradient id="fd-earth" x2="0" y2="1"><stop stopColor="#f2ca9b" /><stop offset=".08" stopColor="#c1cebc" /><stop offset="1" stopColor="#819f98" /></linearGradient></defs>
       <rect width="320" height="340" rx="155" fill="url(#fd-sky)" />
       <g fill="#f8edd8"><circle cx="72" cy="83" r="1.8" /><circle cx="235" cy="114" r="1.3" /><circle cx="175" cy="40" r="1" /><circle cx="122" cy="130" r="1" /><path d="M220 55V66M215 60.5H225" stroke="#f8edd8" /></g>
@@ -28,9 +26,7 @@ function Daybreak() {
   );
 }
 
-const PAGE_PATHS = { today: '/demo/fd30', sleep: '/onboard/personal/sleep', exercise: '/onboard/personal/exercise', laboratory: '/onboard/personal/laboratory' } as const;
-
-export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | 'laboratory' }) {
+export function Fd30Preview({ page }: { page: 'today' | 'sleep' }) {
   const appDispatch = useAppDispatch();
   const navigate = useNavigate();
   const locale = useLocale();
@@ -51,23 +47,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   const profile = state.profiles[owner];
   const history = historyFor(owner);
   const received = state.wakeReceived && owner === OWNER;
-  const newsEvent = latestNews(state, owner);
-  const summaryEvent = latestPersonalEvent(state, owner);
-  const news = !!newsEvent;
-  const exercise = exerciseSessions(state, owner).find(s => s.id === EXERCISE_SESSION);
-  const exerciseStatus = exercise?.finish ? t.exerciseCompleted : exercise?.start ? t.exerciseInProgress : owner === OWNER ? t.exercisePlanned : t.noRecord;
-  const blood = labSamples(state, owner).find(s => s.id === BLOOD_SAMPLE);
-  const bloodStatus = labStatus(blood);
-  const labLabels = { planned: t.labPlan, collection: t.labTaken, analysis: t.labAnalyzing, result: t.labResult };
-  const latestIsLab = !!summaryEvent && 'sampleId' in summaryEvent;
-  const latestLabLabel = summaryEvent?.kind === 'lab.result_available' ? t.labResult : summaryEvent?.kind === 'lab.analysis_started' ? t.labAnalyzing : t.labTaken;
-  const nextEvent = nextPreviewEvent(state);
-  const nextLabel = nextEvent && 'sampleId' in nextEvent
-    ? nextEvent.sampleType === 'blood' ? nextEvent.kind === 'lab.sample_taken' ? t.labNextBloodTaken : nextEvent.kind === 'lab.analysis_started' ? t.labNextBloodAnalysis : t.labNextBloodResult
-      : nextEvent.kind === 'lab.sample_taken' ? t.labNextUrineTaken : nextEvent.kind === 'lab.analysis_started' ? t.labNextUrineAnalysis : t.labNextUrineResult
-    : nextEvent?.kind === 'exercise.started' ? t.nextExerciseStart : nextEvent?.kind === 'exercise.finished' ? t.nextExerciseFinish : t.nextTime;
-  const labNewsText = newsEvent && 'sampleId' in newsEvent ? `${newsEvent.sampleType === 'blood' ? t.labBlood : t.labUrine} · ${newsEvent.kind === 'lab.result_available' ? t.labResult : newsEvent.kind === 'lab.analysis_started' ? t.labAnalyzing : t.labTaken}` : '';
-  const newsText = labNewsText || (newsEvent?.kind === 'exercise.finished' ? t.exerciseCompleted : newsEvent?.kind === 'exercise.started' ? `${t.exerciseStart} · ${newsEvent.occurredAt.slice(11, 16)} · ${t.clock}` : t.newsText);
+  const news = received && !profile.seen;
   const pose = chatOpen || showing ? 'interaction' : news ? 'news' : 'idle';
   const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' }).format(previewTime(state, now));
 
@@ -89,11 +69,8 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   }, [chatOpen]);
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight }); }, [profile.turns.length, chatOpen]);
   useEffect(() => {
-    const selected = showing && (page === 'laboratory' ? profile.highlightedSampleId : page === 'exercise' ? profile.highlightedSessionId : null);
-    const heading = document.getElementById(selected ? page === 'laboratory' ? labHeadingId(selected) : 'fd-exercise-session-h' : 'fd-view-h');
-    heading?.focus();
-    if (selected) heading?.scrollIntoView({ block: 'center' });
-    else document.getElementById('fd-main')?.scrollTo(0, 0);
+    document.getElementById('fd-view-h')?.focus();
+    document.getElementById('fd-main')?.scrollTo(0, 0);
   }, [page]);
   useEffect(() => {
     if (!showing) return;
@@ -101,106 +78,81 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
     return () => window.clearTimeout(timer);
   }, [showing]);
 
-  const openPersonal = (module: 'sleep' | 'exercise' | 'laboratory', summary = false) => {
-    if (module === 'sleep') dispatch({ type: 'seen', owner });
-    if (module === 'exercise' && summary && summaryEvent && 'sessionId' in summaryEvent) {
-      dispatch({ type: 'exercise/view', owner, sessionId: summaryEvent.sessionId, eventId: summaryEvent.id });
-    }
-    if (module === 'laboratory' && summary && summaryEvent && 'sampleId' in summaryEvent) {
-      dispatch({ type: 'laboratory/view', owner, sampleId: summaryEvent.sampleId, eventId: summaryEvent.id });
-    }
+  const openSleep = () => {
+    dispatch({ type: 'seen', owner });
     setShowing(true);
-    setAnnouncement(module === 'laboratory' ? summary ? t.labSummaryOpened : t.labOpened : module === 'sleep' ? t.opened : summary ? t.exerciseSummaryOpened : t.exerciseOpened);
-    navigate(PAGE_PATHS[module]);
-    if (page === module) document.getElementById(summary && module === 'laboratory' && summaryEvent && 'sampleId' in summaryEvent ? labHeadingId(summaryEvent.sampleId) : summary && module === 'exercise' ? 'fd-exercise-session-h' : 'fd-view-h')?.focus();
+    setAnnouncement(t.opened);
+    navigate('/onboard/personal/sleep');
+    if (page === 'sleep') document.getElementById('fd-view-h')?.focus();
   };
-  const openSleep = () => openPersonal('sleep');
-  const openExercise = () => openPersonal('exercise');
-  const openLaboratory = () => openPersonal('laboratory');
-  const openSummary = () => openPersonal(summaryEvent && 'sampleId' in summaryEvent ? 'laboratory' : summaryEvent && 'sessionId' in summaryEvent ? 'exercise' : 'sleep', true);
   const closeChat = () => { setChatOpen(false); characterRef.current?.focus(); };
   const reset = () => {
     if (!window.confirm(t.confirm)) return;
     const nowMs = Date.now();
     dispatch({ type: 'reset', now: nowMs }); setNow(nowMs);
     setChatOpen(false); setShowing(false); setAnnouncement('');
-    navigate(PAGE_PATHS.today);
+    navigate('/demo/fd30');
   };
-  const personalLink = (module: 'sleep' | 'exercise' | 'laboratory', label: string, className = 'fd-link') => <Link className={className} to={PAGE_PATHS[module]} onClick={e => { e.preventDefault(); openPersonal(module); }}>{label}<Arrow /></Link>;
-  const sleepLink = (label: string, className = 'fd-link') => personalLink('sleep', label, className);
-  const fdLink = 'inline-flex items-center gap-3 font-semibold text-fs1 no-underline underline underline-offset-[5px]';
-  const fdPrimary = 'inline-flex items-center gap-5 no-underline px-4 py-3 rounded-md bg-fd-ink text-white text-fs1 font-semibold my-[18px] mb-3 cursor-pointer hover:bg-[#395857]';
+  const sleepLink = (label: string, className = 'fd-link') => <Link className={className} to="/onboard/personal/sleep" onClick={e => { e.preventDefault(); openSleep(); }}>{label}<Arrow /></Link>;
 
   return (
-    <div className={`h-screen h-dvh bg-fd-paper text-fd-ink overflow-hidden grid grid-rows-[auto_auto_minmax(0,1fr)] ${chatOpen ? 'fd-chat-open' : ''}`} data-surface="onboard">
-      <a className="sr-only focus:not-sr-only" href="#fd-main">{messages.a11y.skipToContent}</a>
-      <header className="flex flex-wrap items-center gap-x-[34px] gap-y-2 px-9 pt-5 border-b border-fd-rule relative z-[60]">
-        <Link className="flex gap-3.5 items-baseline no-underline text-xl font-extrabold tracking-[.12em] whitespace-nowrap pb-5" to={PAGE_PATHS.today}>{messages.common.appName}<span className="text-xs font-medium tracking-[.02em] text-fd-quiet">{t.onboard}</span></Link>
-        <nav className="flex flex-wrap gap-x-[26px] gap-y-1 self-stretch" aria-label={messages.a11y.missionNav}>
-          <NavLink to={PAGE_PATHS.today} aria-current="page" className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.today}</NavLink>
-          <NavLink to={PAGE_PATHS.sleep} aria-current="page" onClick={e => { e.preventDefault(); openSleep(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.sleep}</NavLink>
-          <NavLink to={PAGE_PATHS.exercise} aria-current="page" onClick={e => { e.preventDefault(); openExercise(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.exercise}</NavLink>
-          <NavLink to={PAGE_PATHS.laboratory} aria-current="page" onClick={e => { e.preventDefault(); openLaboratory(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.laboratory}</NavLink>
+    <div className={`fd30${chatOpen ? ' fd-chat-open' : ''}`} data-surface="onboard">
+      <a className="skip" href="#fd-main">{messages.a11y.skipToContent}</a>
+      <header className="fd-header">
+        <Link className="fd-brand" to="/demo/fd30">{messages.common.appName}<span>{t.onboard}</span></Link>
+        <nav className="fd-nav" aria-label={messages.a11y.missionNav}>
+          <NavLink to="/demo/fd30" aria-current="page">{t.today}</NavLink>
+          <NavLink to="/onboard/personal/sleep" aria-current="page" onClick={e => { e.preventDefault(); openSleep(); }}>{t.sleep}</NavLink>
         </nav>
-        <div className="ml-auto flex gap-2.5 pb-5 items-center"><span className="text-[29px] text-[#746b4e]" aria-hidden="true">✳</span><span><strong className="block text-fs2 font-semibold">{crew.name}</strong><small className="block text-fd-quiet text-xs">{t.crew}</small></span></div>
-        <div className="flex gap-1 pb-5" role="group" aria-label={messages.common.language}>
-          {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch(localeSet(lang))} className={`p-1.5 rounded text-xs border-0 cursor-pointer ${locale === lang ? 'bg-fd-ink text-white' : 'bg-transparent text-fd-quiet'}`}>{lang.toUpperCase()}</button>)}
+        <div className="fd-identity"><span className="fd-profile-mark" aria-hidden="true">✳</span><span><strong>{crew.name}</strong><small>{t.crew}</small></span></div>
+        <div className="fd-languages" role="group" aria-label={messages.common.language}>
+          {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch(localeSet(lang))}>{lang.toUpperCase()}</button>)}
         </div>
       </header>
-      <section className="flex flex-wrap items-center gap-x-5 gap-y-2.5 px-9 py-2.5 bg-[#ece9df] border-b border-[#dfddd2] text-[13px] relative z-[60]" aria-label={t.demo}>
-        <div className="flex flex-col gap-0.5"><strong className="text-[12px] tracking-[.08em] uppercase">{t.demo}</strong><span className="text-fd-quiet">{t.demoHint}</span></div>
-        <label className="flex flex-col gap-[3px] text-[12px]"><span>{t.viewAs}</span><select aria-label={t.viewAs} value={owner} onChange={e => { setChatOpen(false); setShowing(false); setAnnouncement(''); dispatch({ type: 'select', crewId: e.target.value as CrewId }); }} className="bg-fd-card text-fd-ink border border-[#c5cabe] rounded px-[7px] py-[5px] max-w-[230px] text-fs1">{CREW.map(c => <option key={c.id} value={c.id}>{c.name} · {c.character}</option>)}</select></label>
-        <button className="flex flex-wrap items-center gap-y-1.5 gap-x-3 text-fd-ink bg-fd-card px-3 py-2 border border-[#c5cabe] rounded-[5px] text-[13px] font-semibold cursor-pointer disabled:bg-transparent disabled:border-transparent disabled:text-fd-quiet disabled:cursor-default" type="button" disabled={!nextEvent} onClick={() => { const n = Date.now(); setNow(n); dispatch({ type: 'next', now: n }); }}>{!nextEvent ? t.end : t.next}<span className="text-[12px] font-normal">{nextEvent && nextLabel}</span>{nextEvent && <Arrow />}</button>
-        <button className="border-0 px-0 py-2 bg-none text-fd-quiet text-[12px] underline underline-offset-[3px] cursor-pointer" type="button" onClick={reset}>{t.restart}</button>
-        <Link className="ml-auto no-underline text-[12px]" to="/ground/iss/agenda">{t.m1}<span aria-hidden="true"> ↗</span></Link>
+      <section className="fd-demo" aria-label={t.demo}>
+        <div><strong>{t.demo}</strong><span>{t.demoHint}</span></div>
+        <label className="fd-view-as"><span>{t.viewAs}</span><select aria-label={t.viewAs} value={owner} onChange={e => { setChatOpen(false); setShowing(false); setAnnouncement(''); dispatch({ type: 'select', crewId: e.target.value as CrewId }); }}>{CREW.map(c => <option key={c.id} value={c.id}>{c.name} · {c.character}</option>)}</select></label>
+        <button className="fd-next" type="button" disabled={state.wakeReceived} onClick={() => { const n = Date.now(); setNow(n); dispatch({ type: 'next', now: n }); }}>{state.wakeReceived ? t.end : t.next}<span>{!state.wakeReceived && t.nextTime}</span>{!state.wakeReceived && <Arrow />}</button>
+        <button className="fd-reset" type="button" onClick={reset}>{t.restart}</button>
+        <Link className="fd-m1" to="/ground/iss/agenda">{t.m1}<span aria-hidden="true"> ↗</span></Link>
       </section>
-      <div className={`grid grid-cols-[minmax(0,1fr)] ${chatOpen ? 'lg:grid-cols-[minmax(0,1fr)_350px]' : ''} min-h-0 max-w-[1600px] w-full mx-auto h-full`}>
-        <main className="min-w-0 min-h-0 overflow-auto" id="fd-main" tabIndex={-1}>
-          <div className="max-w-[1100px] mx-auto px-9 py-6">
-            <div className="flex justify-between items-center gap-4 text-fd-quiet text-[11px] tracking-[.02em]"><span>{t.mission} <span className="mx-[9px] text-[#97a18e]" aria-hidden="true">/</span> {t.date}</span><time title={t.clock} className="text-fd-ink tabular-nums text-base whitespace-nowrap">{time} <small className="text-[10px] ml-1.5 text-fd-quiet">{t.clock}</small></time></div>
-            {page === 'today' || page === 'laboratory' ? <p className="text-fs0 text-fd-quiet border-l-2 border-[#a36846] pl-3 leading-[1.7]">{t.labScope}</p> : null}
+      <div className="fd-workspace">
+        <main className="fd-main" id="fd-main" tabIndex={-1}>
+          <div className="fd-page">
+            <div className="fd-dayline"><span>{t.mission} <span aria-hidden="true">/</span> {t.date}</span><time title={t.clock}>{time} <small>{t.clock}</small></time></div>
             {page === 'today' ? <>
-              <div className="mt-[34px] mb-7"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.personal}</p><h1 id="fd-view-h" tabIndex={-1} className="font-serif text-[clamp(32px,5vw,46px)] font-normal tracking-[-.035em] leading-[1.12] my-2 mb-3">{t.day}</h1></div>
-              <section className={`grid grid-cols-1 md:grid-cols-[1fr_28%] gap-[26px] items-center ${received ? 'bg-fd-cream' : 'bg-fd-sage'} p-[30px] pb-[26px] rounded-[4px_64px_4px_4px] min-h-[310px] ${chatOpen ? 'lg:grid-cols-[1fr] lg:min-h-0' : ''}`} aria-labelledby="fd-moment-h">
-                <div className="max-w-[470px]">
-                  <p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]"><span className={`inline-block w-1.5 h-1.5 border border-current rounded-full mr-[7px] mb-px ${received ? 'bg-fd-rust border-fd-rust' : ''}`} />{t.now} · {latestIsLab || exercise || received ? t.receivedBadge : t.beforeBadge}</p>
-                  <h2 id="fd-moment-h" className="font-serif font-normal text-[36px] leading-[1.12] tracking-[-.03em] my-[18px]">{latestIsLab ? latestLabLabel : exercise ? exerciseStatus : received ? t.morning : t.before}</h2>
-                  <p className="text-[#455d57] max-w-[400px] text-[15px] leading-[1.7]">{latestIsLab ? t.labFuture : exercise ? exercise.finish ? t.exerciseCalculation : t.exercisePendingDuration : received ? t.afterBody : t.beforeBody}</p>
-                  {latestIsLab || exercise ? <Link className={fdPrimary} to={PAGE_PATHS[latestIsLab ? 'laboratory' : 'exercise']} onClick={e => { e.preventDefault(); openSummary(); }}>{t.summary}<Arrow /></Link> : sleepLink(received ? t.summary : t.openSleep, fdPrimary)}
-                  <p className="text-[12px] text-fd-quiet">{t.simulated} · {latestIsLab ? summaryEvent.sourceId : exercise ? 'demo-exercise' : received ? WAKE_EVENT.sourceId : REST.sourceId}</p>
-                </div>
+              <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal}</p><h1 id="fd-view-h" tabIndex={-1}>{t.day}</h1></div>
+              <section className={`fd-moment${received ? ' fd-awake' : ''}`} aria-labelledby="fd-moment-h">
+                <div className="fd-moment-copy"><p className="fd-eyebrow"><span className="fd-status-dot" />{t.now} · {received ? t.receivedBadge : t.beforeBadge}</p><h2 id="fd-moment-h">{received ? t.morning : t.before}</h2><p>{received ? t.afterBody : t.beforeBody}</p>{sleepLink(received ? t.summary : t.openSleep, 'fd-primary')}<p className="fd-source-inline">{t.simulated} · {received ? WAKE_EVENT.sourceId : REST.sourceId}</p></div>
                 <Daybreak />
               </section>
-              <section className="grid grid-cols-1 md:grid-cols-2 gap-7 py-7 border-b border-fd-rule" aria-label={t.sleep}>
-                <div><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.planned}</p><strong className="block text-[30px] font-[450] tabular-nums tracking-[-.04em] my-2.5 mb-1.5">{t.planTime}</strong><p className="text-fd-quiet text-fs1">{t.planDates} · {t.planDuration}</p><small className="text-fd-quiet text-fs0">{t.planLane}</small></div>
-                <div className="md:border-l md:pl-7 md:border-fd-rule border-t md:border-t-0 pt-5 md:pt-0"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.recorded}</p><strong className="block font-serif font-normal text-[26px] my-3 mb-[9px]">{t.noRecord}</strong><p className="text-fd-quiet text-fs1">{received ? t.received : t.waiting}</p>{sleepLink(t.openSleep, `${fdLink} mt-[5px]`)}</div>
+              <section className="fd-sleep-strip" aria-label={t.sleep}>
+                <div><p className="fd-eyebrow">{t.planned}</p><strong className="fd-plan-time">{t.planTime}</strong><p>{t.planDates} · {t.planDuration}</p><small>{t.planLane}</small></div>
+                <div><p className="fd-eyebrow">{t.recorded}</p><strong className="fd-no-record">{t.noRecord}</strong><p>{received ? t.received : t.waiting}</p>{sleepLink(t.openSleep)}</div>
               </section>
-              <section className="border-b border-fd-rule py-6" aria-labelledby="fd-exercise-card-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.exercise}</p><h2 id="fd-exercise-card-h" className="font-serif text-[30px] font-normal my-2.5">{exerciseStatus}</h2><p className="text-fs1 text-fd-quiet">{owner === OWNER ? t.exercisePlan : t.exerciseEmpty}</p><strong className="block text-fs1 text-fd-quiet">{t.exerciseMetrics}</strong><p className="text-fs1 text-fd-quiet">{t.simulated} · {exercise ? 'demo-exercise' : owner === OWNER ? 'demo-plan' : t.noRecord}</p>{personalLink('exercise', t.openExercise)}</section>
-              <section className="border-b border-fd-rule py-6" aria-labelledby="fd-lab-card-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.laboratory} · {t.labBlood}</p><h2 id="fd-lab-card-h" className="font-serif text-[30px] font-normal my-2.5">{owner === OWNER ? labLabels[bloodStatus] : t.labEmpty}</h2><strong className="block text-fs1 text-fd-quiet leading-[1.65]">{t.labNoValues}</strong><p className="text-fs1 text-fd-quiet leading-[1.65]">{t.labFuture}</p>{personalLink('laboratory', t.openLaboratory)}</section>
-              <section className="py-7 pb-[22px]"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.nextAction}</p><h2 className="font-serif font-normal text-[29px] my-2">{t.review}</h2><p className="text-fd-quiet text-[15px]">{t.reviewBody}</p>{sleepLink(t.openSleep, `${fdLink} mt-3`)}</section>
-              <section className="flex items-baseline flex-wrap gap-y-2 gap-x-5 border-t border-fd-rule py-5"><h2 className="text-fs2 font-semibold m-0">{t.observations}</h2><p className="text-fs1 text-fd-quiet m-0">{t.noObservations}</p></section>
-            </> : page === 'laboratory' ? <LaboratoryDetail state={state} owner={owner} /> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} /> : <>
-              <div className="mt-[34px] mb-7"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.personal} / {t.sleep}</p><h1 id="fd-view-h" tabIndex={-1} className="font-serif text-[clamp(32px,5vw,46px)] font-normal tracking-[-.035em] leading-[1.12] my-2 mb-3">{t.sleepTitle}</h1><p className="text-fd-quiet text-fs1">{t.sleepIntro}</p></div>
-              <section className="bg-fd-sage p-[26px] rounded-[4px_40px_4px_4px]" aria-labelledby="fd-plan-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.planLane}</p><h2 id="fd-plan-h" className="text-lg font-[550] my-3">{t.planned}</h2><strong className="block font-serif text-[clamp(30px,4.5vw,40px)] font-normal tabular-nums tracking-[-.05em]">{t.planTime}</strong><p className="text-fd-quiet text-fs1">{t.planDates} <span aria-hidden="true">·</span> {t.planDuration}</p><div className="bg-fd-line h-1 relative mx-1 my-[23px]" aria-hidden="true"><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px]" /><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px] right-0" /></div><p className="text-fd-quiet text-fs1">{t.calculated}</p><small className="block text-fd-quiet text-[12px] overflow-wrap-anywhere">{REST.sourceId} · {`iss:fd30:${owner.slice(-2)}:planned-rest`}</small></section>
-              <section className="py-7" aria-labelledby="fd-record-h"><div className="flex flex-wrap items-center gap-3"><h2 id="fd-record-h" className="m-0 text-lg font-[550]">{t.recorded}</h2><span className="text-[12px] px-[7px] py-[3px] border border-[#c4cabb] rounded">{t.simulated}</span></div><p className="block font-serif font-normal text-[clamp(28px,4.5vw,38px)] my-3">{t.noRecord}</p><p className="text-fd-quiet text-[15px] max-w-[620px]">{t.noRecordBody}</p><div className="flex gap-3.5 py-[17px] mt-5 border-t border-fd-rule text-fs1"><span className="text-[20px] text-fd-rust" aria-hidden="true">{received ? '↳' : '—'}</span><div><strong className="font-[550]">{received ? t.received : t.waiting}</strong><p className="text-fd-quiet mt-1.5">{t.reportLimit}</p></div></div>
-                {received && <details className="text-fs1 border-t border-fd-rule pt-3.5"><summary className="cursor-pointer font-[550]">{t.details}</summary><dl className="grid grid-cols-1 sm:grid-cols-[150px_1fr] gap-2 gap-x-4 mb-0"><dt>{t.instrument}</dt><dd className="m-0 overflow-wrap-anywhere">{t.deviceSource}</dd><dt>{t.variable}</dt><dd className="m-0 overflow-wrap-anywhere">{t.variableValue}</dd><dt>{t.nature}</dt><dd className="m-0 overflow-wrap-anywhere">{t.natureValue}</dd><dt>{t.availability}</dt><dd className="m-0 overflow-wrap-anywhere">{t.availabilityValue}</dd><dt>{t.attribution}</dt><dd className="m-0 overflow-wrap-anywhere">{t.attributionValue}</dd><dt>{t.source}</dt><dd className="m-0 overflow-wrap-anywhere">{WAKE_EVENT.sourceId} · {WAKE_EVENT.id} · {WAKE_EVENT.episodeId}</dd><dt>{t.timing}</dt><dd className="m-0 overflow-wrap-anywhere">{WAKE_EVENT.occurredAt} / {WAKE_EVENT.receivedAt}</dd><dt>{t.version}</dt><dd className="m-0 overflow-wrap-anywhere">{HISTORY.version}</dd></dl></details>}
+              <section className="fd-next-step"><p className="fd-eyebrow">{t.nextAction}</p><h2>{t.review}</h2><p>{t.reviewBody}</p>{sleepLink(t.openSleep)}</section>
+              <section className="fd-personal-context"><h2>{t.observations}</h2><p>{t.noObservations}</p></section>
+            </> : <>
+              <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal} / {t.sleep}</p><h1 id="fd-view-h" tabIndex={-1}>{t.sleepTitle}</h1><p>{t.sleepIntro}</p></div>
+              <section className="fd-rest-plan" aria-labelledby="fd-plan-h"><p className="fd-eyebrow">{t.planLane}</p><h2 id="fd-plan-h">{t.planned}</h2><strong className="fd-large-time">{t.planTime}</strong><p>{t.planDates} <span aria-hidden="true">·</span> {t.planDuration}</p><div className="fd-rest-line" aria-hidden="true"><span /><span /></div><p>{t.calculated}</p><small>{REST.sourceId} · {`iss:fd30:${owner.slice(-2)}:planned-rest`}</small></section>
+              <section className="fd-record" aria-labelledby="fd-record-h"><div className="fd-record-heading"><h2 id="fd-record-h">{t.recorded}</h2><span className="fd-tag">{t.simulated}</span></div><p className="fd-no-record">{t.noRecord}</p><p>{t.noRecordBody}</p><div className="fd-report-status"><span aria-hidden="true">{received ? '↳' : '—'}</span><div><strong>{received ? t.received : t.waiting}</strong><p>{t.reportLimit}</p></div></div>
+                {received && <details className="fd-report-details"><summary>{t.details}</summary><dl><dt>{t.instrument}</dt><dd>{t.deviceSource}</dd><dt>{t.variable}</dt><dd>{t.variableValue}</dd><dt>{t.nature}</dt><dd>{t.natureValue}</dd><dt>{t.availability}</dt><dd>{t.availabilityValue}</dd><dt>{t.attribution}</dt><dd>{t.attributionValue}</dd><dt>{t.source}</dt><dd>{WAKE_EVENT.sourceId} · {WAKE_EVENT.id} · {WAKE_EVENT.episodeId}</dd><dt>{t.timing}</dt><dd>{WAKE_EVENT.occurredAt} / {WAKE_EVENT.receivedAt}</dd><dt>{t.version}</dt><dd>{HISTORY.version}</dd></dl></details>}
               </section>
-              <section className="border-t border-fd-rule py-6"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.history}</p><h2 className="text-xl font-medium">{t.historyTitle}</h2><p className="text-fd-quiet text-[15px]">{t.historyBody}</p><strong className="text-fs1 font-[550]">{t.recorded} · {t.noRecord}</strong><small className="block text-fd-quiet text-[12px] overflow-wrap-anywhere mt-2">{t.historySource} · {HISTORY.sourceId} · {history.id} · {HISTORY.version}</small><small className="block text-fd-quiet text-[12px] overflow-wrap-anywhere mt-2">{crew.name} · {owner} · {history.date}</small></section>
+              <section className="fd-history"><p className="fd-eyebrow">{t.history}</p><h2>{t.historyTitle}</h2><p>{t.historyBody}</p><strong>{t.recorded} · {t.noRecord}</strong><small>{t.historySource} · {HISTORY.sourceId} · {history.id} · {HISTORY.version}</small><small>{crew.name} · {owner} · {history.date}</small></section>
             </>}
-            <section className="border-t border-fd-rule pt-5 mt-3.5" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h" className="text-fs2 font-semibold m-0">{t.provenance}</h2><div className="grid grid-cols-1 md:grid-cols-3 gap-[22px] py-3 pb-[18px]"><article className="border-l-2 border-[#c4cebd] pl-3"><h3 className="text-fs1 leading-[1.6] font-semibold my-1.5">{t.planLane}</h3><p className="text-fs1 leading-[1.65] text-fd-quiet">{page === 'laboratory' ? t.labPlanBody : page === 'exercise' ? t.exercisePlanLimit : t.planSource}</p></article><article className="border-l-2 border-[#c9ad94] pl-3"><h3 className="text-fs1 leading-[1.6] font-semibold my-1.5">{t.deviceLane}</h3><p className="text-fs1 leading-[1.65] text-fd-quiet">{page === 'laboratory' ? t.labAdapter : page === 'exercise' ? t.exerciseAdapter : t.deviceSource}</p></article><article className="border-l-2 border-[#a8b9c4] pl-3"><h3 className="text-fs1 leading-[1.6] font-semibold my-1.5">{t.evidenceLane}</h3><p className="text-fs1 leading-[1.65] text-fd-quiet">{t.evidenceBody}</p></article></div><p className="flex flex-col gap-1.5 pt-3 border-t border-fd-rule"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer" className="text-fd-ink underline underline-offset-[3px]">{t.research}<span aria-hidden="true"> ↗</span></a><span className="text-fs1 text-fd-quiet">{t.researchBody}</span></p></section>
-            {!!state.diagnostics.length && <details className="text-xs border-t border-fd-rule pt-3.5"><summary className="cursor-pointer font-[550]">{t.diagnostics}</summary>{state.diagnostics.map(d => <p key={d.eventId}>{d.eventId} · {d.sourceId} · {d.status === 'rejected' ? t.rejected : t.unassigned}</p>)}</details>}
-            <footer className="text-fd-quiet text-[10px] pt-6">{t.scope} <span aria-hidden="true">·</span> {crew.name}</footer>
+            <section className="fd-provenance" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h">{t.provenance}</h2><div><article><h3>{t.planLane}</h3><p>{t.planSource}</p></article><article><h3>{t.deviceLane}</h3><p>{t.deviceSource}</p></article><article><h3>{t.evidenceLane}</h3><p>{t.evidenceBody}</p></article></div><p className="fd-research"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer">{t.research}<span aria-hidden="true"> ↗</span></a><span>{t.researchBody}</span></p></section>
+            <footer className="fd-foot">{t.scope} <span aria-hidden="true">·</span> {crew.name}</footer>
           </div>
         </main>
-        {chatOpen && <aside className="p-5 pb-6 pl-1.5 flex-col justify-end min-h-0 min-w-0 lg:p-4 lg:pl-0" aria-label={t.characterDescription}>
-          <section id="fd-chat-panel" className="flex flex-1 flex-col min-h-0 bg-[#fffdf8] border border-[#d5dacd] rounded-[10px] overflow-hidden relative z-50" aria-labelledby="fd-chat-h">
-            <header className="flex justify-between gap-3 items-center p-4 border-b border-fd-rule"><div><h2 id="fd-chat-h" className="text-base m-0 font-semibold">{t.chatTitle} · {crew.character}</h2><small className="text-[10px] text-fd-quiet">{t.private}</small></div><button ref={closeRef} type="button" aria-label={t.closeChat} onClick={closeChat} className="bg-none border border-fd-rule rounded px-2.5 min-h-9 text-fd-ink text-2xl cursor-pointer"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3L13 13M3 13L13 3" stroke="currentColor" strokeWidth="1.5" /></svg></button></header>
-            <div className="overflow-auto min-h-0 flex-1 p-4 text-sm leading-[1.6] overflow-wrap-anywhere" ref={logRef} role="log" aria-label={messages.a11y.conversation}><p className="text-fd-quiet">{t.intro}</p>{profile.turns.map((turn, i) => <div className="pt-3" key={i}><p className="bg-[#e8eddf] rounded-[7px] px-2.5 py-2.5" lang={turn.lang}><small className="block text-[10px] font-semibold mb-[5px]">{t.you}</small>{turn.text}</p><p className="px-2.5 py-2.5"><small className="block text-[10px] font-semibold mb-[5px]">{crew.character}</small>{turn.reply === 'laboratory' ? t.labChatReply : turn.reply === 'exercise' ? t.exerciseChatReply : turn.reply === 'sleep' ? t.chatReply : t.fallback}</p></div>)}</div>
-            <div className="p-3 border-t border-fd-rule">{sleepLink(t.openSleep, `${fdLink} mr-3`)}{personalLink('exercise', t.openExercise, `${fdLink} mr-3`)}{personalLink('laboratory', t.openLaboratory, `${fdLink} mr-3`)}<form className="flex gap-1.5 mt-3" onSubmit={e => { e.preventDefault(); const text = profile.draft; dispatch({ type: 'ask', owner, text, lang: locale }); const reply = previewReply(state, owner, text); if (reply === 'laboratory') { if (/summary|resumen/i.test(text) && latestIsLab) openSummary(); else openLaboratory(); } else if (reply === 'exercise') { if (/summary|resumen/i.test(text) && summaryEvent && 'sessionId' in summaryEvent) openSummary(); else openExercise(); } else if (reply === 'sleep') openSleep(); }}><label className="sr-only" htmlFor="fd-ask">{t.ask}</label><input id="fd-ask" value={profile.draft} placeholder={t.ask} onChange={e => dispatch({ type: 'draft', owner, text: e.target.value })} className="w-full min-w-0 border border-[#b6c3b2] bg-[#fffdf8] rounded-[5px] p-2.5 text-fd-ink text-sm" /><button type="submit" disabled={!profile.draft.trim()} aria-label={t.send} className="border-0 bg-fd-ink text-white rounded-[5px] min-w-10 cursor-pointer disabled:opacity-40"><Arrow /></button></form></div>
+        {chatOpen && <aside className="fd-dock" aria-label={t.characterDescription}>
+          <section id="fd-chat-panel" className="fd-chat" aria-labelledby="fd-chat-h">
+            <header><div><h2 id="fd-chat-h">{t.chatTitle} · {crew.character}</h2><small>{t.private}</small></div><button ref={closeRef} type="button" aria-label={t.closeChat} onClick={closeChat}><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3L13 13M3 13L13 3" stroke="currentColor" strokeWidth="1.5" /></svg></button></header>
+            <div className="fd-chat-log" ref={logRef} role="log" aria-label={messages.a11y.conversation}><p className="fd-chat-intro">{t.intro}</p>{profile.turns.map((turn, i) => <div className="fd-chat-pair" key={i}><p className="fd-chat-user" lang={turn.lang}><small>{t.you}</small>{turn.text}</p><p><small>{crew.character}</small>{turn.reply === 'sleep' ? t.chatReply : t.fallback}</p></div>)}</div>
+            <div className="fd-chat-tools">{sleepLink(t.openSleep)}<form onSubmit={e => { e.preventDefault(); const text = profile.draft; dispatch({ type: 'ask', owner, text, lang: locale }); if (/sleep|rest|summary|sueño|dormi|descanso|resumen/i.test(text)) openSleep(); }}><label className="sr-only" htmlFor="fd-ask">{t.ask}</label><input id="fd-ask" value={profile.draft} placeholder={t.ask} onChange={e => dispatch({ type: 'draft', owner, text: e.target.value })} /><button type="submit" disabled={!profile.draft.trim()} aria-label={t.send}><Arrow /></button></form></div>
           </section>
         </aside>}
-        <FloatingCompanion key={owner} crew={crew} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
-          onPosition={position => dispatch({ type: 'position', owner, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />
+        <FloatingCompanion key={owner} crew={crew} preference={profile.position} pose={pose} news={news} chatOpen={chatOpen}
+          onPosition={position => dispatch({ type: 'position', owner, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} characterRef={characterRef} />
       </div>
       <div className="sr-only" role="status">{announcement}</div>
     </div>

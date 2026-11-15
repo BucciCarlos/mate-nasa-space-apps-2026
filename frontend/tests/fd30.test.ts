@@ -29,27 +29,24 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
     const advanced = previewReduce(s, { type: 'next', now: 61_000 });
     expect(previewTime(advanced, 61_000)).toBe(WAKE);
     expect(previewTime(advanced, 71_000)).toBe(WAKE + 10_000);
-    // The next event after wake is the 09:15 blood sample, so one more next skips to it.
-    const further = previewReduce(advanced, { type: 'next', now: 71_000 });
-    expect(further).not.toBe(advanced);
-    expect(further.processedIds).toContain('iss:sample-lf-b1:lab.sample_taken');
+    expect(previewReduce(advanced, { type: 'next', now: 71_000 })).toBe(advanced);
     expect(previewReduce(advanced, { type: 'seen', owner: OWNER }).profiles[OWNER].seen).toBe(true);
   });
-  it('keeps conversation, draft and receipt in memory, with language of original input', () => {
+  it('retains conversation, draft and receipt over reload, with language of original input', () => {
     let s = previewReduce(freshPreview(1000), { type: 'next', now: 2000 });
     s = previewReduce(s, { type: 'ask', owner: OWNER, text: 'Ver mi resumen', lang: 'es' });
     s = previewReduce(s, { type: 'draft', owner: OWNER, text: 'my unfinished question' });
-    expect(s.profiles[OWNER].turns[0]).toEqual({ text: 'Ver mi resumen', lang: 'es', reply: 'sleep' });
-    expect(s.profiles[OWNER].draft).toBe('my unfinished question');
-    expect(previewReduce(s, { type: 'tick', now: 5000 })).toBe(s);
+    const loaded = restorePreview(JSON.stringify(s), 5000);
+    expect(loaded).toEqual(s);
+    expect(loaded.profiles[OWNER].turns[0]).toEqual({ text: 'Ver mi resumen', lang: 'es', reply: 'sleep' });
+    expect(previewReduce(loaded, { type: 'tick', now: 5000 })).toBe(loaded);
   });
-  it('resets only the cut; the preview is in-memory and always starts fresh', () => {
+  it('resets only the cut and rejects invalid snapshots without consuming an M1 snapshot', () => {
     const m1 = createInitialState(1000, undefined, 'es');
-    expect(previewReduce(freshPreview(1000), { type: 'reset', now: 2000 })).toEqual(freshPreview(2000));
-    // No sessionStorage: restorePreview ignores any raw snapshot and starts fresh.
-    for (const raw of ['invalid', JSON.stringify(m1), JSON.stringify(freshPreview(1000))]) {
+    for (const raw of ['invalid', JSON.stringify(m1), JSON.stringify({ ...freshPreview(1000), offsetMs: -1 }), JSON.stringify({ ...freshPreview(1000), profiles: {} })]) {
       expect(restorePreview(raw, 2000)).toEqual(freshPreview(2000));
     }
+    expect(previewReduce(freshPreview(1000), { type: 'reset', now: 2000 })).toEqual(freshPreview(2000));
     expect(m1.missions.iss.clockStart).toBe('2027-03-09T14:00:00Z');
   });
   it('uses the canonical personal route, retaining all published M1 route meanings', () => {
@@ -58,11 +55,8 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
       expect(parsePath(routePath(route))).toEqual(route);
     }
     expect(routePath({ view: 'fd30', page: 'sleep' })).toBe('/onboard/personal/sleep');
-    expect(routePath({ view: 'fd30', page: 'exercise' })).toBe('/onboard/personal/exercise');
-    expect(routePath({ view: 'fd30', page: 'laboratory' })).toBe('/onboard/personal/laboratory');
     expect(parsePath('/onboard/today')).toEqual({ view: 'onboard', page: 'today' });
-    expect(parsePath('/onboard/personal/exercise')).toEqual({ view: 'fd30', page: 'exercise' });
-    expect(parsePath('/onboard/personal/laboratory')).toEqual({ view: 'fd30', page: 'laboratory' });
+    expect(parsePath('/onboard/personal/exercise')).toEqual({ view: 'notfound' });
   });
 });
 
@@ -88,11 +82,18 @@ describe('Floating companions — private preferences and safe positions', () =>
     expect(s.offsetMs).toBe(offset);
     expect(s.profiles['iss:crew-ti'].position).toEqual({ x: .7, y: .1 });
   });
-  it('starts fresh from any raw snapshot (in-memory preview, no sessionStorage)', () => {
+  it('migrates the original preview snapshot without losing its clock, receipt, chat or draft', () => {
     const legacy = { version: 1, sessionStartMs: 1000, offsetMs: 300000, wakeReceived: true,
       profiles: { [OWNER]: { seen: true, draft: 'unfinished', turns: [{ text: 'resumen', lang: 'es', reply: 'sleep' }] } } };
-    expect(restorePreview(JSON.stringify(legacy), 2000)).toEqual(freshPreview(2000));
-    expect(restorePreview(JSON.stringify(freshPreview(1000)), 3000)).toEqual(freshPreview(3000));
+    const s = restorePreview(JSON.stringify(legacy), 2000);
+    expect(s.version).toBe(2);
+    expect(s.sessionStartMs).toBe(1000);
+    expect(s.offsetMs).toBe(300000);
+    expect(s.wakeReceived).toBe(true);
+    expect(s.profiles[OWNER].draft).toBe('unfinished');
+    expect(s.profiles[OWNER].turns).toEqual(legacy.profiles[OWNER].turns);
+    expect(s.profiles['iss:crew-ti'].turns).toEqual([]);
+    expect(restorePreview(JSON.stringify(s), 3000)).toEqual(s);
     expect(new Set(CREW.map(c => c.shape)).size).toBe(3);
   });
   it('fits a drop outside essential controls, bounds all edges and preserves normalized preference', () => {
@@ -109,9 +110,10 @@ describe('Floating companions — private preferences and safe positions', () =>
     expect(fromPreference(preference, bounds, size).x).toBeCloseTo(point.x);
     expect(fromPreference(null, bounds, size)).toEqual({ x: 294, y: 690 });
   });
-  it('rejects malformed coordinates in live state', () => {
+  it('rejects malformed coordinates and invalid owners on restore', () => {
     const s = freshPreview(1000);
-    expect(previewReduce(s, { type: 'position', owner: OWNER, position: { x: 2, y: 0 } })).toBe(s);
-    expect(previewReduce(s, { type: 'position', owner: OWNER, position: { x: 0.5, y: 0.5 } }).profiles[OWNER].position).toEqual({ x: 0.5, y: 0.5 });
+    const bad = { ...s, profiles: { ...s.profiles, [OWNER]: { ...s.profiles[OWNER], position: { x: 2, y: 0 } } } };
+    expect(restorePreview(JSON.stringify(bad), 2000)).toEqual(freshPreview(2000));
+    expect(restorePreview(JSON.stringify({ ...s, activeCrewId: 'unknown' }), 2000)).toEqual(freshPreview(2000));
   });
 });

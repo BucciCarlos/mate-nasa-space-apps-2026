@@ -9,9 +9,9 @@ export function GroundLog({ missionId, role }: { missionId: MissionId; role: Gro
   const t = useT();
   const entries = selectGroundLog(state, missionId, role);
   return (
-    <section className="border border-line rounded-md bg-bg2 p-4" aria-labelledby="log-h">
+    <section className="panel" aria-labelledby="log-h">
       <h1 id="log-h">{t.ground.logTitle}</h1>
-      <p className="text-fg2 text-fs0 mt-1 mb-3">{t.ground.roleNote}</p>
+      <p className="muted">{t.ground.roleNote}</p>
       <LogList entries={entries} missionId={missionId} />
     </section>
   );

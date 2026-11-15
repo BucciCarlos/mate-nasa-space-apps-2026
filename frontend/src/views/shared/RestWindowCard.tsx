@@ -8,22 +8,22 @@ import { Badge } from './Badge';
 export function RestWindowCard({ rest, name, emphasis = false }: { rest: RestWindowChange | null; name?: string; emphasis?: boolean }) {
   const t = useT();
   const locale = useLocale();
-  if (!rest) return <p className="font-semibold">{t.agenda.restUnchanged}</p>;
+  if (!rest) return <p className="rest-line">{t.agenda.restUnchanged}</p>;
   const before = fmtDuration(durationMinutes(rest.before));
   const after = fmtDuration(durationMinutes(rest.after));
   const delta = fmtDelta(rest.deltaMinutes);
   const unchanged = rest.deltaMinutes === 0;
   return (
-    <div className={`border border-line rounded-md px-3 py-3 my-2 bg-bg3${emphasis ? ' bg-bg2 shadow-lg' : ''}${unchanged ? '' : ' border-l-4 border-l-amber'}`}>
-      {name && <div className="font-bold mb-1">{name}</div>}
-      <p className="font-semibold">{unchanged ? t.agenda.restUnchanged : t.agenda.restChange({ before, after, delta })}</p>
-      <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-3 items-center my-2">
-        <div className="flex flex-col"><span className="text-[11px] uppercase tracking-[0.06em] text-fg2">{t.agenda.before}</span><span className="font-mono text-fs2">{fmtInterval(rest.before, locale)}</span><span className="text-fg2 font-mono">{before}</span></div>
-        <div className="text-fs3 text-fg2" aria-hidden="true">→</div>
-        <div className="flex flex-col"><span className="text-[11px] uppercase tracking-[0.06em] text-fg2">{t.agenda.after}</span><span className="font-mono text-fs2">{fmtInterval(rest.after, locale)}</span><span className="text-fg2 font-mono">{after}</span></div>
-        {!unchanged && <div className="font-mono text-fs3 font-bold text-amber px-3 py-1 border-2 border-amber rounded-md bg-amber-bg">{delta}</div>}
+    <div className={`rest-card${emphasis ? ' is-emphasis' : ''}${unchanged ? '' : ' is-changed'}`}>
+      {name && <div className="rest-name">{name}</div>}
+      <p className="rest-line">{unchanged ? t.agenda.restUnchanged : t.agenda.restChange({ before, after, delta })}</p>
+      <div className="rest-compare">
+        <div className="rest-col"><span className="rest-label">{t.agenda.before}</span><span className="rest-val">{fmtInterval(rest.before, locale)}</span><span className="rest-dur">{before}</span></div>
+        <div className="rest-arrow" aria-hidden="true">→</div>
+        <div className="rest-col"><span className="rest-label">{t.agenda.after}</span><span className="rest-val">{fmtInterval(rest.after, locale)}</span><span className="rest-dur">{after}</span></div>
+        {!unchanged && <div className="rest-delta">{delta}</div>}
       </div>
-      <p className="text-fg2 text-fs0">{t.agenda.plannedNotMeasured} <Badge kind="calculated" /></p>
+      <p className="muted small">{t.agenda.plannedNotMeasured} <Badge kind="calculated" /></p>
     </div>
   );
 }
