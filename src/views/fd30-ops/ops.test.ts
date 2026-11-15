@@ -144,12 +144,13 @@ describe('OPS01 role projections, planned progress and rewind', () => {
 
 describe('OPS01 bilingual rendering and absence states', () => {
   for (const locale of ['en', 'es'] as const) {
-    it(`renders three fictional portraits and only operational content in ${locale}`, () => {
+    it(`renders three clickable portraits and only operational content in ${locale}`, () => {
       for (const role of ['mission_operator', 'medical_professional'] as const) {
-        const out = html(createElement(GroundOverview, { data: groundView(freshPreview(0), role, time), onRole: () => {} }), locale);
-        expect(out.match(/data-ops-card=/g)).toHaveLength(3); expect(out.match(/class="ops-portrait"/g)).toHaveLength(3);
+        const out = html(createElement(GroundOverview, { data: groundView(freshPreview(0), role, time), time, onRole: () => {} }), locale);
+        expect(out.match(/data-ops-card=/g)).toHaveLength(3); expect(out.match(/data-gnd-lane=/g)).toHaveLength(3);
+        expect(out.match(/class="ops-portrait"/g)).toHaveLength(3);
         expect(out).not.toMatch(/pulse_bpm|PRIVATE_|data-session|data-sample|Inspiration4|C001/);
-        expect(out).toContain(locale === 'es' ? 'bloque planificado' : 'planned block');
+        expect(out).toContain(locale === 'es' ? 'no confirma asistencia' : 'does not confirm attendance');
       }
     });
     it(`denies noncommander content and keeps private notes out of the request preview in ${locale}`, () => {

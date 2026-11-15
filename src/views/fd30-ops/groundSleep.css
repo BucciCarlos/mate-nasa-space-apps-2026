@@ -1,0 +1,15 @@
+.gss { margin: 24px 0; padding: 18px 20px; border: 1px solid var(--rule); background: var(--surface); }
+.gss h3 { font-size: 16px; margin: 0 0 4px; }
+.gss-scope, .gss-coverage, .gss-source { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 4px 0 10px; }
+.gss svg { width: 100%; max-width: 560px; height: auto; display: block; }
+.gss-bar { fill: var(--brand); }
+.gss-empty { fill: none; stroke: var(--rule-strong); stroke-dasharray: 3 3; }
+.gss-value { font-size: 11px; font-variant-numeric: tabular-nums; fill: var(--ink); }
+.gss-fd { font-size: 11px; fill: var(--muted); }
+.gss-table { overflow-x: auto; }
+.gss-table table { border-collapse: collapse; font-size: 12px; min-width: 460px; }
+.gss-table th, .gss-table td { text-align: left; padding: 4px 12px 4px 0; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--rule); }
+.gss-table code { font-size: 11px; }
+.gss .gss-table table { width: auto; min-width: 460px; }
+.gss .gss-table table thead th { background: none; padding: 4px 16px 4px 0; font-size: 11px; font-weight: 600; color: var(--muted); }
+.gss .gss-table table th, .gss .gss-table table td { padding: 3px 16px 3px 0; height: auto; line-height: 1.3; }

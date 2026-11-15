@@ -1,0 +1,115 @@
+/* GND02: scoped to Ground tracking; theme tokens and the shared clock remain authoritative. */
+.gnd { --gnd-lane-name: 125px; }
+.gnd .gnd-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 24px 0; }
+.gnd .gnd-heading h1 { font-size: clamp(28px, 2.8vw, 39px); margin: 6px 0 8px; }
+.gnd .gnd-heading p { margin: 0; color: var(--quiet); font-size: 13px; }
+.gnd .gnd-heading .fd-eyebrow { font-size: 10px; }
+.gnd .gnd-controls { display: flex; align-items: end; gap: 12px; flex-shrink: 0; }
+.gnd .ops-role { margin: 0; flex-direction: column; align-items: start; gap: 5px; font-size: 11px; }
+.gnd .gnd-controls > button { background: var(--action); color: var(--on-action); border-color: var(--action); }
+.gnd .gnd-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }
+.gnd .gnd-layout.has-orbit { grid-template-columns: minmax(0, 1fr) 320px; }
+.gnd .gnd-content { min-width: 0; }
+.gnd .gnd-crew-card { display: flex; flex-direction: column; align-items: center; width: 100%; min-width: 0; padding: 22px 18px; border-radius: 5px 28px 5px 5px; background: var(--surface); text-align: center; }
+.gnd .gnd-crew-card:hover { border-color: var(--action); }
+.gnd .gnd-crew-card .ops-portrait { width: 128px; margin-bottom: 10px; }
+.gnd .gnd-crew-name { font: 400 26px/1.3 Georgia, serif; }
+.gnd .gnd-card-caption { color: var(--quiet); font-size: 10px; margin: 4px 0 18px; }
+.gnd .gnd-crew-card > strong { font-size: 14px; font-weight: 550; margin-bottom: 6px; }
+.gnd .gnd-card-action { color: var(--link); font-size: 12px; margin-top: 14px; }
+.gnd .gnd-card-reservation { display: block; border-top: 1px solid var(--rule); width: 100%; margin-top: 12px; padding-top: 12px; font-size: 12px; }
+.gnd .gnd-card-reservation strong { font-size: 12px; font-weight: 550; }
+.gnd[data-person] .gnd-heading { margin: 10px 0 14px; }
+.gnd[data-person] .gnd-heading h1 { font-size: 30px; }
+.gnd[data-person] .gnd-person { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-bottom: 10px; }
+.gnd[data-person] .gnd-person-heading { margin: 0; }
+.gnd table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.gnd thead { background: var(--tint); }
+.gnd th, .gnd td { padding: 16px 14px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.gnd thead th { font-size: 11px; color: var(--quiet); font-weight: 550; }
+.gnd tbody tr:last-child > * { border-bottom: 0; }
+.gnd tbody th { width: 18%; }
+.gnd tbody th button { display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; text-align: left; color: var(--link); font-weight: 650; line-height: 1.6; }
+.gnd tbody th button:hover { text-decoration: underline; background: none; }
+.gnd td strong { display: block; font-size: 13px; font-weight: 550; }
+.gnd time { display: block; font: 12px/1.6 var(--font); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gnd td > time { margin-top: 3px; color: var(--quiet); }
+.gnd .gnd-tag { display: inline-block; color: var(--quiet); font-size: 10px; font-weight: 450; margin: 6px 8px 0 0; }
+.gnd .gnd-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 22px 0 14px; }
+.gnd h2 { font-size: 18px; font-weight: 600; margin: 0; }
+.gnd h3 { font-size: 12px; font-weight: 550; margin: 0 0 8px; }
+.gnd .gnd-note { font-size: 12px; line-height: 1.6; color: var(--quiet); margin: 12px 0; }
+.gnd .gnd-plan-key { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--quiet); }
+.gnd .gnd-plan-key::before { content: ''; display: block; width: 24px; height: 12px; border: 1px dashed var(--mod-crew); background: repeating-linear-gradient(135deg, transparent 0 4px, var(--tint-strong) 4px 6px); }
+.gnd .gnd-timeline-scroll { overflow-x: auto; padding: 0 10px 8px 0; }
+.gnd .gnd-timeline { min-width: 550px; }
+.gnd .gnd-axis, .gnd .gnd-plan-lane { display: grid; grid-template-columns: var(--gnd-lane-name) minmax(0, 1fr); }
+.gnd .gnd-axis { height: 46px; color: var(--quiet); font-size: 10px; align-items: end; padding-bottom: 6px; }
+.gnd .gnd-axis > div { position: relative; height: 28px; }
+.gnd .gnd-axis time { position: absolute; bottom: 0; font-size: 10px; transform: translateX(-50%); }
+.gnd .gnd-axis time:first-child { transform: none; }
+.gnd .gnd-axis time:nth-child(5) { transform: translateX(-100%); }
+.gnd .gnd-cursor-label { position: absolute; top: -6px; transform: translateX(-50%); font-size: 10px; font-weight: 650; color: var(--on-action); background: var(--action); padding: 2px 5px; border-radius: 3px; }
+.gnd .gnd-plan-lane { align-items: center; border-top: 1px solid var(--rule); }
+.gnd .gnd-plan-lane > strong { font-size: 12px; font-weight: 550; padding-right: 12px; }
+.gnd .gnd-plan-track { height: 60px; position: relative; background: repeating-linear-gradient(to right, var(--rule) 0 1px, transparent 1px 25%); }
+/* Override the shared main's relative positioning for these timeline buttons only. */
+.fd30 .gnd .gnd-plan-track .gnd-plan-block { position: absolute; top: 12px; height: 36px; min-width: 2px; overflow: hidden; border: 1px dashed var(--mod-crew); border-radius: 3px; padding: 3px 4px; z-index: 1; text-align: left; background: repeating-linear-gradient(135deg, var(--tint) 0 5px, var(--tint-strong) 5px 7px); color: var(--ink); }
+.gnd .gnd-plan-block span { display: block; overflow: hidden; white-space: nowrap; font-size: 10px; }
+.gnd .gnd-plan-block[data-kind="sleep"] { opacity: .7; }
+.fd30 .gnd .gnd-plan-track .gnd-plan-block.is-selected { outline: 2px solid var(--action); outline-offset: 2px; z-index: 2; }
+.gnd .gnd-plan-cursor { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--action); z-index: 3; pointer-events: none; }
+.gnd .gnd-block-detail { background: var(--tint); border: 1px solid var(--rule); border-radius: 4px; padding: 12px 16px; }
+.gnd .gnd-block-detail h3 { font-size: 13px; margin: 0 0 5px; }
+.gnd .gnd-block-detail p { display: flex; flex-wrap: wrap; gap: 12px; margin: 0; font-size: 12px; color: var(--quiet); }
+.gnd code { font: 10px/1.6 var(--mono); overflow-wrap: anywhere; }
+.gnd .gnd-provenance { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: var(--quiet); margin: 16px 0 0; flex-wrap: wrap; }
+.gnd .gnd-person-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
+.gnd .gnd-person-heading h2 { font-size: 27px; }
+.gnd .gnd-person-heading span { font-size: 11px; color: var(--quiet); }
+.gnd .gnd-back { font-size: 12px; padding: 6px 10px; }
+.gnd .gnd-person-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
+.gnd .gnd-person-summary > div { padding: 16px; }
+.gnd .gnd-person-summary > div + div { border-left: 1px solid var(--rule); }
+.gnd .gnd-person-summary h3 { color: var(--quiet); font-size: 11px; }
+.gnd .gnd-person-summary strong { display: block; font-size: 14px; font-weight: 550; line-height: 1.5; }
+.gnd .gnd-person-summary time { margin-top: 6px; color: var(--quiet); }
+.gnd .gnd-medical { margin: 16px 0; padding: 12px 16px; }
+.gnd .gnd-medical h3 { margin-bottom: 6px; font-size: 13px; }
+.gnd .gnd-medical strong, .gnd .gnd-medical p { font-size: 12px; }
+.gnd .gnd-medical p { margin: 6px 0 0; }
+.gnd .gnd-agenda { margin-top: 22px; }
+.gnd .gnd-agenda ul { list-style: none; padding: 0; }
+.gnd .gnd-agenda li { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.gnd .gnd-agenda button { padding: 0; border: 0; background: none; text-align: left; color: var(--link); font-size: 12px; }
+.gnd .gnd-agenda li > span { font-size: 11px; color: var(--quiet); }
+.gnd .gnd-agenda time, .gnd .gnd-person-summary time { white-space: normal; }
+.gnd .gnd-orbit { position: sticky; top: 12px; border: 1px solid var(--rule-strong); background: var(--surface); border-radius: 6px; padding: 18px; }
+.gnd .gnd-orbit header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.gnd .gnd-orbit header button { padding: 3px 9px; font-size: 20px; }
+.gnd .gnd-predefined { color: var(--link); font-size: 11px; font-weight: 600; margin: 12px 0; }
+.gnd .gnd-orbit-context { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 11px; line-height: 1.6; margin: 16px 0; }
+.gnd .gnd-orbit-context dt { color: var(--quiet); }
+.gnd .gnd-orbit-context dd { margin: 0; text-align: right; }
+.gnd .gnd-query-buttons { display: grid; gap: 8px; }
+.gnd .gnd-query-buttons button { text-align: left; font-size: 12px; line-height: 1.5; padding: 10px; }
+.gnd .gnd-query-buttons button[aria-pressed="true"] { border-color: var(--action); background: var(--tint); color: var(--link); }
+.gnd .gnd-orbit-answer { font-size: 12px; line-height: 1.6; }
+.gnd .gnd-orbit-answer > p { margin: 16px 0 8px; }
+.gnd .gnd-orbit-answer ul { list-style: none; padding: 0; margin: 0; }
+.gnd .gnd-orbit-answer li { padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.gnd .gnd-orbit-answer li > strong, .gnd .gnd-orbit-answer li > span:not(.gnd-tag) { display: block; }
+.gnd .gnd-reference { display: block; width: 100%; text-align: left; border: 0; padding: 4px 0; color: var(--link); background: none; }
+.gnd .gnd-reference span, .gnd .gnd-reference code { display: block; }
+.gnd .gnd-reference span { font-size: 11px; }
+@media (max-width: 1100px) {
+  .gnd .gnd-heading { align-items: start; flex-wrap: wrap; }
+  .gnd .gnd-layout.has-orbit { grid-template-columns: minmax(0, 1fr); }
+  .gnd .gnd-orbit { position: static; grid-row: 1; }
+}
+@media (max-width: 650px) {
+  .gnd .gnd-controls { flex-wrap: wrap; }
+  .gnd .gnd-person-summary { grid-template-columns: minmax(0, 1fr); }
+  .gnd .gnd-person-summary > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+  .gnd .gnd-heading h1 { max-width: none; font-size: 30px; }
+}

@@ -330,3 +330,8 @@
 .fd-info:hover, .fd-info[aria-expanded="true"] { color: var(--ink); border-color: var(--ink); }
 .fd-info:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
 .fd-info-badge { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; border-radius: 50%; background: var(--rust); color: var(--on-action); font: 700 11px/16px var(--font); text-align: center; border: 1px solid var(--surface); }
+
+/* ALR01: automatic notice bubble beside the companion. Same family as the info card; two text actions (open detail, close). */
+.fd-auto-notice > p { margin: 0 0 8px; }
+.fd-auto-notice .fd-notice-actions { display: flex; flex-direction: column; gap: 6px; }
+.fd-auto-notice .fd-notice-actions .fd-link { margin-top: 0; font-size: 12px; text-align: left; }

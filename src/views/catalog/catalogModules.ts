@@ -95,8 +95,8 @@ export const CATALOG_MODULES: readonly CatalogModule[] = [
       t('Menu or supply data from a verified source', 'Datos de menú o suministros de una fuente verificada'),
       t('Person and time association', 'Asociación con persona y hora'),
     ],
-    notBuilt: t('No intake or hydration source is defined. The prototype prescribes no diet.',
-      'No hay fuente de ingesta ni de hidratación definida. El prototipo no prescribe dietas.'),
+    notBuilt: t('No real intake source exists. Home counts only simulated water intakes, with no volume or hydration status. The prototype prescribes no diet.',
+      'No hay una fuente real de ingesta. Inicio solo cuenta tomas de agua simuladas, sin volumen ni estado de hidratación. El prototipo no prescribe dietas.'),
     capabilities: [SOURCE_PENDING],
   },
   {

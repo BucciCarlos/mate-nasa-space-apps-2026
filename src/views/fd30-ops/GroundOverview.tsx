@@ -1,45 +1,87 @@
-import { scheduleInterval as fmtInterval, scheduleContinuation } from '../../demo/fd30Day';
-import { SCHEDULE_TEXT } from '../../i18n/fd30Schedule';
 import { useEffect, useRef, useState } from 'react';
+import { scheduleClock, scheduleInterval, scheduleContinuation } from '../../demo/fd30Day';
+import { PLAN_SOURCE, PLAN_VERSION } from '../../demo/fd30Plan';
+import { SCHEDULE_TEXT } from '../../i18n/fd30Schedule';
 import { useLocale } from '../../i18n/I18nProvider';
-
 import type { CrewId } from '../../demo/fd30';
 import type { GroundRole } from '../../state/types';
-import { CrewPortrait } from './CrewPortrait';
-import type { OperationalCrew, groundView } from './opsSelectors';
+import type { OperationalBlock, OperationalCrew, groundView } from './opsSelectors';
 import { OPS_TEXT } from './opsText';
+import { GROUND_TRACKING_TEXT } from './groundTrackingText';
+import { nextOperationalBlock } from './groundTracking';
+import { GroundPlanTimeline } from './GroundPlanTimeline';
+import { GroundOrbit } from './GroundOrbit';
+import { CrewPortrait } from './CrewPortrait';
+import { GroundMedicalDashboard } from './GroundMedicalDashboard';
+import type { GroundMedicalPerson } from './groundMedical';
 import './ops.css';
+import './groundTracking.css';
 
-function PlanSummary({ person }: { person: OperationalCrew }) {
-  const locale = useLocale(), t = OPS_TEXT[locale];
-  return <div className="ops-plan-summary">
-    <p className="ops-label">{t.activity}</p><strong>{person.current?.title[locale] ?? t.noActivity}</strong>
-    {person.current && <p className="ops-time">{fmtInterval(person.current)} {scheduleContinuation(person.current, SCHEDULE_TEXT[locale])} · {t.planned}</p>}
-    {person.progress !== null ? <div className="ops-progress"><label htmlFor={`ops-progress-${person.id}`}>{t.planProgress}<span>{person.progress}%</span></label><progress id={`ops-progress-${person.id}`} max={100} value={person.progress} /><p>{t.progressLimit}</p></div> : <p className="ops-muted">{t.noProgress}</p>}
-    <div className="ops-reservation"><p className="ops-label">{t.reservation}</p>{person.reservation ? <><strong>{person.reservation.equipment![locale]}</strong><p className="ops-time">{fmtInterval(person.reservation)} · {t.planned}</p></> : <p>{t.noReservation}</p>}</div>
-  </div>;
-}
-
-export function GroundOverview({ data, onRole }: { data: ReturnType<typeof groundView>; onRole: (role: GroundRole) => void }) {
-  const locale = useLocale(), t = OPS_TEXT[locale];
+export function GroundOverview({ data, time, onRole, medical = null }: { data: ReturnType<typeof groundView>; time: number; onRole: (role: GroundRole) => void; medical?: GroundMedicalPerson[] | null }) {
+  const locale = useLocale(), t = GROUND_TRACKING_TEXT[locale], o = OPS_TEXT[locale];
   const [selected, select] = useState<CrewId | null>(null);
+  const [orbitOpen, setOrbitOpen] = useState(false);
+  const [reference, setReference] = useState<OperationalBlock | null>(null);
   const detailHeading = useRef<HTMLHeadingElement>(null);
+  const referenceHeading = useRef<HTMLHeadingElement>(null);
+  const crewButton = useRef<HTMLButtonElement>(null);
+  const orbitButton = useRef<HTMLButtonElement>(null);
+  const pendingCrewFocus = useRef(false);
+  const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (selected) { detailHeading.current?.focus(); detailHeading.current?.scrollIntoView({ block: 'center' }); }
-  }, [selected]);
+    if (selected) detailHeading.current?.focus({ preventScroll: true });
+    else if (pendingCrewFocus.current) { crewButton.current?.focus({ preventScroll: true }); pendingCrewFocus.current = false; }
+    root.current?.closest('.fd-main')?.scrollTo({ top: 0 });
+  }, [selected, data?.role]);
+  const choose = (id: CrewId | null) => { pendingCrewFocus.current = id === null; select(id); setReference(null); };
+  const inspect = (block: OperationalBlock) => { setReference(block); };
+  useEffect(() => { if (reference) referenceHeading.current?.focus(); }, [reference]);
+  const closeOrbit = () => { setOrbitOpen(false); orbitButton.current?.focus(); };
   if (!data) return null;
-  const person = data.crew.find(c => c.id === selected);
-  return <div className="ops ops-ground" data-ops-ground-role={data.role}>
-    <header className="ops-intro"><p className="fd-eyebrow">{t.ground}</p><h1 id="fd-view-h" tabIndex={-1}>{t.groundTitle}</h1><p>{t.groundIntro}</p><label className="ops-role">{t.role}<select value={data.role} onChange={e => onRole(e.target.value as GroundRole)}><option value="mission_operator">{t.operator}</option><option value="medical_professional">{t.medical}</option></select></label></header>
-    {person ? <section className="ops-person-detail" data-ops-detail={person.id}>
-      <button type="button" onClick={() => select(null)}>{t.close}</button><div className="ops-detail-heading"><CrewPortrait owner={person.id} /><div><p className="ops-label">{t.detail}</p><h2 ref={detailHeading} tabIndex={-1}>{person.name}</h2><p className="ops-muted">{t.fictional}</p></div></div>
-      <PlanSummary person={person} />
-      {data.role === 'medical_professional' && <section className="ops-medical-empty"><h3>{t.medicalTitle}</h3><strong>{t.medicalEmpty}</strong><p>{t.medicalLimit}</p></section>}
-      <section className="ops-plan-list"><h3>{t.agenda}</h3><ul>{person.blocks.map(b => <li key={b.id}><time>{fmtInterval(b)} {scheduleContinuation(b, SCHEDULE_TEXT[locale])}</time><strong>{b.title[locale]}</strong><span>{t.planned}</span>{b.equipment && <small>{b.equipment[locale]}</small>}</li>)}</ul></section>
-    </section> : <div className="ops-crew-grid">{data.crew.map(c => <article className="ops-crew-card" key={c.id} data-ops-card={c.id}>
-      <CrewPortrait owner={c.id} /><p className="ops-portrait-caption">{t.fictional}</p><h2>{c.name}</h2><PlanSummary person={c} /><button type="button" aria-label={`${t.open} · ${c.name}`} onClick={() => select(c.id)}>{t.open}</button>
-    </article>)}</div>}
-    <p className="ops-boundary">{data.role === 'medical_professional' ? `${t.medicalEmpty} ${t.medicalLimit}` : t.operationsLimit}</p>
-    <p className="ops-muted">{t.resetLimit}</p>
+  const person = data.crew.find(c => c.id === selected), shown = person ? [person] : data.crew;
+  const next = person ? nextOperationalBlock(person, time) : null;
+  const medicalPerson = data.role === 'medical_professional' && person ? medical?.find(p => p.id === person.id) : null;
+  const interval = (block: OperationalBlock) => `${scheduleInterval(block)} ${scheduleContinuation(block, SCHEDULE_TEXT[locale])}`.trim();
+  const reservation = (c: OperationalCrew) => c.reservation ? <><strong>{c.reservation.equipment![locale]}</strong><time>{interval(c.reservation)}</time></> : <span>{t.noReservation}</span>;
+  return <div className="ops ops-ground gnd" ref={root} data-ops-ground-role={data.role} data-person={person?.id}>
+    <header className="gnd-heading">
+      <div><p className="fd-eyebrow">{o.ground}</p><h1 id="fd-view-h" tabIndex={-1}>{t.title}</h1><p>{t.intro}</p></div>
+      <div className="gnd-controls"><label className="ops-role">{o.role}<select value={data.role} onChange={e => onRole(e.target.value as GroundRole)}><option value="mission_operator">{o.operator}</option><option value="medical_professional">{o.medical}</option></select></label>
+        <button type="button" ref={orbitButton} aria-expanded={orbitOpen} aria-controls="gnd-orbit" onClick={() => orbitOpen ? closeOrbit() : setOrbitOpen(true)}>{t.openOrbit}</button>
+      </div>
+    </header>
+    <div className={`gnd-layout${orbitOpen ? ' has-orbit' : ''}`}>
+      <div className="gnd-content">
+        {person ? <section className="gnd-person" data-ops-detail={person.id}>
+          <button type="button" className="gnd-back" onClick={() => choose(null)}>← {t.back}</button>
+          <div className="gnd-person-heading"><h2 ref={detailHeading} tabIndex={-1}>{person.name}</h2><span>{t.simulation}</span></div>
+        </section> : <div className="ops-crew-grid gnd-crew-cards" aria-label={t.crew}>
+          {data.crew.map((c, index) => <article key={c.id} data-ops-card={c.id}>
+            <button type="button" className="gnd-crew-card" ref={index === 0 ? crewButton : undefined} aria-label={`${t.open} · ${c.name}`} onClick={() => choose(c.id)}>
+              <CrewPortrait owner={c.id} /><span className="gnd-crew-name">{c.name}</span><span className="gnd-card-caption">{o.fictional}</span>
+              <strong>{c.current?.title[locale] ?? t.noActivity}</strong>{c.current && <time>{interval(c.current)}</time>}
+              <span className="gnd-card-reservation">{reservation(c)}</span>
+              <span className="gnd-tag">{t.planned}</span><span className="gnd-card-action">{t.open} →</span>
+            </button>
+          </article>)}
+        </div>}
+        {medicalPerson && <GroundMedicalDashboard data={medicalPerson} />}
+        {person && <section className="gnd-person-summary" data-operational-summary aria-label={t.agenda}>
+          <div><h3>{t.activity}</h3><strong>{person.current?.title[locale] ?? t.noActivity}</strong>{person.current && <time>{interval(person.current)}</time>}<span className="gnd-tag">{t.planned}</span></div>
+          <div><h3>{t.next}</h3><strong>{next?.title[locale] ?? t.noNext}</strong>{next && <time>{interval(next)}</time>}</div>
+          <div><h3>{t.reservation}</h3>{reservation(person)}</div>
+        </section>}
+        <GroundPlanTimeline crew={shown} time={time} selectedId={reference?.id ?? null} onSelect={inspect} />
+        <section className="gnd-block-detail" aria-label={t.block}>
+          <h3 ref={referenceHeading} tabIndex={-1}>{reference?.title[locale] ?? t.block}</h3>
+          {reference ? <><p><time>{interval(reference)}</time><span className="gnd-tag">{t.planned}</span></p><code>{reference.id}</code></> : <p>{t.selectBlock}</p>}
+        </section>
+        {person && <section className="gnd-agenda" aria-label={t.agenda}><h2>{t.agenda}</h2><ul>{person.blocks.map(block => <li key={block.id}>
+          <time>{interval(block)}</time><button type="button" onClick={() => inspect(block)}>{block.title[locale]}</button>{block.equipment && <span>{block.equipment[locale]}</span>}
+        </li>)}</ul></section>}
+        <p className="gnd-provenance">{t.source} · {PLAN_SOURCE} · {PLAN_VERSION}<span>{o.now} · {scheduleClock(time)} {t.axis}</span></p>
+      </div>
+      {orbitOpen && <GroundOrbit crew={data.crew} selected={selected} role={data.role} time={time} onClose={closeOrbit} onReference={inspect} />}
+    </div>
   </div>;
 }

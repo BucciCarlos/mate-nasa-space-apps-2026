@@ -8,7 +8,7 @@ import { Fd30GroundAgenda } from './Fd30GroundAgenda';
 import { useApp } from '../state/AppProvider';
 import { sessionStorageOrNull } from '../state/persistence';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { ONBOARD_PROFILES, dataOwner, FD30_KEY, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, latestPersonalEvent, latestNews, nextPreviewEvent, previewReduce, previewTime, restorePreview } from './fd30';
+import { JOHN, ONBOARD_PROFILES, dataOwner, FD30_KEY, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, latestPersonalEvent, latestNews, nextPreviewEvent, previewReduce, previewTime, restorePreview } from './fd30';
 import { LaboratoryDetail, labHeadingId } from './LaboratoryDetail';
 import { SleepDetail } from '../views/history/sleep/SleepDetail';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -24,6 +24,9 @@ import { EvidenceSuite } from '../views/evidence/EvidenceSuite';
 import { OpsNavigation } from '../views/fd30-ops/OpsNavigation';
 import { OpsPanel } from '../views/fd30-ops/OpsPanel';
 import { OPS_TEXT } from '../views/fd30-ops/opsText';
+import { companionNotices } from './companionNotices';
+import { HYDRATION_TEXT } from '../views/today/hydrationText';
+import type { CompanionNotice } from './companionNotices';
 import { ViewerNameContext } from './viewerName';
 import { useOpsJournal } from '../views/fd30-ops/useOpsJournal';
 import type { GroundRole, Route } from '../state/types';
@@ -92,8 +95,26 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
       : nextEvent.kind === 'lab.sample_taken' ? t.labNextUrineTaken : nextEvent.kind === 'lab.analysis_started' ? t.labNextUrineAnalysis : t.labNextUrineResult
     : nextEvent?.kind === 'exercise.started' ? t.nextExerciseStart : nextEvent?.kind === 'exercise.finished' ? t.nextExerciseFinish : t.nextTime;
   const labNewsText = newsEvent && 'sampleId' in newsEvent ? `${newsEvent.sampleType === 'blood' ? t.labBlood : t.labUrine} · ${newsEvent.kind === 'lab.result_available' ? t.labResult : newsEvent.kind === 'lab.analysis_started' ? t.labAnalyzing : t.labTaken}` : '';
-  const newsText = labNewsText || (newsEvent?.kind === 'exercise.finished' ? t.exerciseCompleted : newsEvent?.kind === 'exercise.started' ? `${t.exerciseStart} · ${newsEvent.occurredAt.slice(11, 16)} · ${t.clock}` : t.newsText);
-  const pose = chatOpen || showing ? 'interaction' : news ? 'news' : 'idle';
+  const newsText = labNewsText || (newsEvent?.kind === 'exercise.finished' ? t.exerciseCompleted : newsEvent?.kind === 'exercise.started' ? `${t.exerciseStart} · ${newsEvent.occurredAt.slice(11, 16)} · ${t.clock}` : profileId === JOHN.id ? t.newsText.replace('Lucía', crew.name) : t.newsText);
+  // ALR01: automatic notices fire only when the simulated clock crosses an event time by normal advance for the active profile.
+  // Loading, seeking, resetting, "Next event" and View as never fire one; seeking back before an event re-arms it.
+  const [notice, setNotice] = useState<CompanionNotice | null>(null);
+  const noticeTrack = useRef({ profile: profileId, time: missionTime, wall: now, fired: new Set<string>() });
+  useEffect(() => {
+    const track = noticeTrack.current;
+    if (track.profile !== profileId) { noticeTrack.current = { profile: profileId, time: missionTime, wall: now, fired: new Set() }; setNotice(null); return; }
+    const list = companionNotices(profileId);
+    for (const id of [...track.fired]) { const n = list.find(x => x.id === id); if (!n || n.at > missionTime) track.fired.delete(id); }
+    const advance = missionTime - track.time, wall = now - track.wall;
+    if (onGround) setNotice(null);
+    else if (advance > 0 && state.running && advance <= wall + 1500) {
+      const due = list.filter(n => n.at > track.time && n.at <= missionTime && !track.fired.has(n.id));
+      due.forEach(n => track.fired.add(n.id));
+      if (due.length) setNotice(due[due.length - 1]);
+    } else if (advance !== 0) setNotice(null);
+    track.time = missionTime; track.wall = now;
+  }, [missionTime, now, profileId, onGround, state.running]);
+  const pose = chatOpen || showing ? 'interaction' : news || notice ? 'news' : 'idle';
   const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' }).format(missionTime);
 
   useEffect(() => {
@@ -183,6 +204,14 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   const openSleep = () => openPersonal('sleep');
   const openExercise = () => openPersonal('exercise');
   const openLaboratory = () => openPersonal('laboratory');
+  const hydrationKind = notice?.kind === 'hydration-reminder' || notice?.kind === 'hydration-confirm';
+  const h = HYDRATION_TEXT[locale];
+  const noticeView = notice ? {
+    text: notice.kind === 'hydration-reminder' ? h.noticeReminder : notice.kind === 'hydration-confirm' ? h.noticeConfirm : notice.kind === 'lab-ready' ? t.noticeLabReady : notice.kind === 'lab-received' ? (notice.sampleType === 'blood' ? t.noticeLabReceivedBlood : t.noticeLabReceivedUrine) : notice.kind === 'exercise' ? t.noticeExercise : t.noticeSleep,
+    actionLabel: hydrationKind ? h.noticeAction : notice.kind === 'exercise' ? t.noticeOpenAgenda : notice.kind === 'sleep' ? t.noticeOpenSleep : t.noticeOpenLab,
+    onClose: () => setNotice(null),
+    onAction: () => { setNotice(null); if (hydrationKind) navigate({ view: 'fd30', page: 'today' }); else if (notice.kind === 'exercise') navigate({ view: 'fd30', page: 'agenda' }); else openPersonal(notice.kind === 'sleep' ? 'sleep' : 'laboratory'); },
+  } : null;
   const openSummary = () => openPersonal(summaryEvent && 'sampleId' in summaryEvent ? 'laboratory' : summaryEvent && 'sessionId' in summaryEvent ? 'exercise' : 'sleep', true);
   const seek = (target: number) => {
     const at = clampMissionTime(target), n = Date.now();
@@ -284,7 +313,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
               onOpen={detail => { if (detail === 'agenda') { navigate({ view: 'fd30', page: 'agenda' }); } else openPersonal(detail); }} />
           </section>
         </aside>}
-        {!onGround && <FloatingCompanion key={profileId} crew={crew} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
+        {!onGround && <FloatingCompanion key={profileId} crew={crew} notice={noticeView} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
           onPosition={position => dispatch({ type: 'position', owner: profileId, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />}
       </div>
       {!onGround && <div className="sr-only" role="status">{announcement}</div>}

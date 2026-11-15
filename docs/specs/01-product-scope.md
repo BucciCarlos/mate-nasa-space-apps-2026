@@ -152,7 +152,7 @@ M1.1 does not require the M2 evidence datasets, full module catalog, body map, t
 ## 7. Out of scope for the prototype (FUTURE)
 
 - Mars profile; real-time deep-space delay modelling; delay-tolerant networking.
-- Live sensors, wearables or device ingestion; camera or microphone capture.
+- Live sensors, wearables or device ingestion; camera or microphone capture. (HYD02 only simulates camera-detected water intakes as labelled scenario records; no camera is accessed.)
 - Runtime LLM or any generative model; free-form medical conversation.
 - Backend, real authentication, real access control, audit-grade logging.
 - PWA or service worker, IndexedDB, cross-window or multi-device synchronization.

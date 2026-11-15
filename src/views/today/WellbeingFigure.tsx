@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import type { ReactNode } from 'react';
 import { useLocale } from '../../i18n/I18nProvider';
 import { WELLBEING_TEXT } from './wellbeingText';
 import { fdLabel } from '../../demo/history/sleep';
@@ -26,13 +27,14 @@ export function WellbeingFigure({ index, sleepFd }: { index: number | null; slee
   </svg>{fd && <small className="wb-fd">{fd}</small>}</span>;
 }
 
-/** Two circles: the current heart rate (resting pattern, or the live session value) and the simulated SpO2 cycle. */
-export function HeartCircles({ now, spo2 }: { now: number; spo2: number }) {
+/** Two circles: the current heart rate (resting pattern, or the live session value) and the simulated SpO2 cycle; extra circles (HYD02) follow. */
+export function HeartCircles({ now, spo2, children }: { now: number; spo2: number; children?: ReactNode }) {
   const t = WELLBEING_TEXT[useLocale()];
   return <div className="wb-hearts" data-heart-now={now}>
     <span className="wb-circle" aria-label={`${t.heartNow}: ${now} ${t.unit}`}><strong>{now}</strong><small>{t.unit}</small><em>{t.heartNow}</em></span>
     <span className="wb-circle wb-circle-session" aria-label={`${t.spo2Label}: ${spo2} ${t.spo2Unit}`} data-spo2={spo2}>
       <strong>{spo2}</strong><small>{t.spo2Unit}</small><em>{t.spo2Label}</em>
     </span>
+    {children}
   </div>;
 }

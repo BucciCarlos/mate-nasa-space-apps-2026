@@ -34,7 +34,7 @@ try {
     await page.locator('.ops-role select').selectOption('medical_professional');
     await page.locator('[data-ops-card="iss:crew-mo"] button').click();
     assert.equal((await saved()).activeCrewId, before.activeCrewId);
-    assert.equal(await page.locator('.ops-medical-empty').count(), 1);
+    assert.equal(await page.locator('[data-ground-medical="iss:crew-mo"]').count(), 1);
     await demo(page, () => page.locator('.fd-demo .fd-secondary-link').click());
     await page.locator('.evd[data-perspective="ground"] [data-chart="labs"]').waitFor();
     await demo(page, () => page.locator('.fd-perspective-switch').click());

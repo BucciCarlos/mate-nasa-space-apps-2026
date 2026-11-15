@@ -92,9 +92,9 @@ export const MODAL_COPY: Record<ModuleId, { first: Text; why: Text }> = {
       'Seguiría con qué frecuencia y cuánto entrenás, junto con el seguimiento de hueso y músculo, porque músculo y hueso cambian sin gravedad. FD30 registra solo sesiones; no fija metas ni mide hueso ni fuerza.'),
   },
   'MOD-NUTR': {
-    first: t('Only planned meals exist today. No intake or hydration is recorded.', 'Hoy solo existen comidas planificadas. No se registra ingesta ni hidratación.'),
-    why: t('It would follow what is eaten and drunk against what was planned, because adequate food and nutrition is a listed spaceflight risk. FD30 has the plan, not the intake.',
-      'Seguiría lo que se come y se bebe frente a lo planificado, porque una alimentación y nutrición adecuadas es un riesgo listado del vuelo espacial. FD30 tiene el plan, no la ingesta.'),
+    first: t('Only planned meals exist today. Meals record no intake; Home counts only simulated water intakes.', 'Hoy solo existen comidas planificadas. Las comidas no registran ingesta; Inicio solo cuenta tomas de agua simuladas.'),
+    why: t('It would follow what is eaten and drunk against what was planned, because adequate food and nutrition is a listed spaceflight risk. FD30 has the plan and a count of simulated water intakes, not the intake itself.',
+      'Seguiría lo que se come y se bebe frente a lo planificado, porque una alimentación y nutrición adecuadas es un riesgo listado del vuelo espacial. FD30 tiene el plan y un conteo de tomas de agua simuladas, no la ingesta.'),
   },
   'MOD-IMMUNE': {
     first: t('Your FD30 sample steps, and below them public evidence from another crew. They are kept apart.', 'Los pasos de tus muestras de FD30 y, debajo, evidencia pública de otra tripulación. Se mantienen separados.'),

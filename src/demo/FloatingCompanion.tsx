@@ -10,12 +10,14 @@ import { useT } from '../i18n/I18nProvider';
 type Character = { id: ProfileId; character: string; shape: OrbitVariant };
 interface Props {
   crew: Character; preference: Position | null; pose: Pose; news: boolean; hasSummary: boolean; newsText: string; chatOpen: boolean;
+  /** ALR01: automatic notice bubble. Shown even with the chat closed; it never opens chat or navigates by itself. */
+  notice?: { text: string; actionLabel: string; onAction: () => void; onClose: () => void } | null;
   onPosition: (position: Position | null) => void; onChat: () => void; onSleep?: () => void; onExercise?: () => void; onLaboratory?: () => void; onSummary: () => void;
   characterRef: React.RefObject<HTMLButtonElement>;
 }
 const asBox = (r: DOMRect): Box => ({ x: r.x, y: r.y, width: r.width, height: r.height });
 
-export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, onPosition, onChat, onSummary, characterRef }: Props) {
+export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, notice, onPosition, onChat, onSummary, characterRef }: Props) {
   const t = useT().fd30;
   const frame = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
@@ -78,7 +80,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     window.visualViewport?.addEventListener('resize', measure);
     window.visualViewport?.addEventListener('scroll', measure);
     return () => { observer.disconnect(); window.removeEventListener('resize', measure); window.removeEventListener('fd-demo-dock', measure); window.removeEventListener('scroll', measure, true); window.visualViewport?.removeEventListener('resize', measure); window.visualViewport?.removeEventListener('scroll', measure); };
-  }, [measure, infoOpen, moving]);
+  }, [measure, infoOpen, moving, !!notice]);
   // Escape closes the card and returns focus to the info button. It yields to move mode (Escape cancels the move) and to
   // the chat when focus is inside it, so one Escape never closes two things.
   useEffect(() => {
@@ -98,6 +100,9 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   const point = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size, geometry.floats);
   const noticePoint = fitPosition({ x: point.x - geometry.notice.width - 12, y: point.y }, geometry.bounds, geometry.notice,
     [...geometry.obstacles, ...geometry.floats, { ...point, ...geometry.size }]);
+  // The automatic notice sits right above the companion (a speech bubble), clear of the companion and the Demo controls only.
+  const alertPoint = fitPosition({ x: point.x + geometry.size.width - geometry.notice.width, y: point.y - geometry.notice.height - 8 }, geometry.bounds, geometry.notice,
+    [...geometry.floats, { ...point, ...geometry.size }]);
   const dropAt = (p: Point) => fitPosition(p, geometry.bounds, geometry.size, [...geometry.obstacles, ...geometry.floats]);
   const commit = (p: Point) => onPosition(toPreference(dropAt(p), geometry.preferenceBounds, geometry.size));
   const release = (e: PointerEvent<HTMLButtonElement>, cancel: boolean) => {
@@ -154,6 +159,13 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
         {news && !infoOpen && <span className="fd-info-badge" aria-hidden="true">!</span>}
       </button>
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{news ? `${t.news}. ${newsText}` : ''}</span>
+      {notice && !cardOpen && <div className="fd-floating-notice fd-auto-notice" ref={bubble} role="status" aria-live="polite" aria-label={t.noticeLabel} data-auto-notice style={{ left: alertPoint.x, top: alertPoint.y, maxHeight: geometry.bounds.height, width: 'max-content', maxWidth: Math.min(220, geometry.bounds.width) }}>
+        <p>{notice.text}</p>
+        <div className="fd-notice-actions">
+          <button className="fd-link fd-summary-action" type="button" onClick={notice.onAction}>{notice.actionLabel}<span aria-hidden="true">→</span></button>
+          <button className="fd-link fd-summary-action" type="button" onClick={notice.onClose}>{t.noticeClose}</button>
+        </div>
+      </div>}
       {cardOpen && <div className="fd-floating-notice" ref={bubble} id="fd-companion-card" role="region" aria-label={t.companionInfo} style={{ left: noticePoint.x, top: noticePoint.y, maxHeight: geometry.bounds.height, width: 'max-content', maxWidth: Math.min(220, geometry.bounds.width) }}>
         {moving ? <>
           <strong>{t.moveCompanion}</strong>

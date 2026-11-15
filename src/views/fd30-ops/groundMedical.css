@@ -1,0 +1,43 @@
+/* Medical-only projection; all colors use the existing FD30 light/dark theme. */
+.gnd .gmd { min-width: 0; margin: 8px 0 22px; }
+.gnd .gmd-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 8px; }
+.gnd .gmd-heading h2 { font-size: 18px; }
+.gnd .gmd-heading p { font-size: 11px; color: var(--quiet); margin: 0; }
+.gnd .gmd-top { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
+.gnd .gmd-vitals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.gnd .gmd-vitals article, .gnd .gmd-sleep, .gnd .gmd-panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; min-width: 0; }
+.gnd .gmd-vitals h3 { font-size: 13px; }
+.gnd .gmd-vitals p { font-size: 11px; line-height: 1.6; color: var(--quiet); margin: 8px 0; }
+.gnd .gmd-vitals .gmd-value { font-size: 42px; line-height: 1.2; font-weight: 600; color: var(--ink); margin: 12px 0; }
+.gnd .gmd-value small { font-size: 13px; font-weight: 400; margin-left: 5px; }
+.gnd .gmd-latest { margin: 0 0 6px; font-size: 12px; }
+.gnd .gmd-empty { color: var(--quiet); font-size: 12px; line-height: 1.5; margin: 5px 0; }
+.gnd .gmd-sleep .gss { border: 0; padding: 0; margin: 6px 0 0; }
+.gnd .gmd-sleep .gss-scope { font-size: 10px; margin: 2px 0; }
+.gnd .gmd-sleep .gss h3 { font-size: 13px; margin: 0; }
+.gnd .gmd-sleep .gss svg { height: 110px; width: 100%; max-width: none; }
+.gnd .gmd-sleep .gss-value { font-size: 14px; }
+.gnd .gmd-sleep .gss-coverage { font-size: 11px; margin: 2px 0 4px; }
+.gnd .gmd-sleep .gss-source { font-size: 10px; margin: 4px 0 0; }
+.gnd .gss-records summary, .gnd .gmd-provenance summary { font-size: 11px; color: var(--link); cursor: pointer; }
+.gnd .gss-records { min-width: 0; max-width: 100%; }
+.gnd .gss-records:not([open]) .gss-table { display: none; }
+.gnd .gss-table { max-width: 100%; }
+.gnd .gmd-records { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 12px; }
+.gnd .gmd-panel h3 { font-size: 14px; margin-bottom: 10px; }
+.gnd .gmd-panel ul { padding: 0; margin: 0; list-style: none; }
+.gnd .gmd-panel li { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 12px; padding: 4px 0; border-top: 1px solid var(--rule); }
+.gnd .gmd-panel li strong { font-weight: 600; }
+.gnd .gmd-panel li time, .gnd .gmd-panel li small { grid-column: 2; font-size: 10px; color: var(--quiet); }
+.gnd .gmd-panel p { font-size: 12px; line-height: 1.5; margin: 5px 0; }
+.gnd .gmd-panel p strong { display: block; font-size: 12px; }
+.gnd .gmd-panel p span { display: block; }
+.gnd .gmd-panel p time { font-size: 11px; display: inline; }
+.gnd .gmd-reservation { padding-top: 8px; border-top: 1px dashed var(--rule); color: var(--quiet); }
+.gnd .gmd-reservation small { display: block; font-size: 10px; }
+.gnd .gmd-reservation span { display: inline !important; margin-left: 8px; }
+.gnd .gmd-provenance { margin-top: 10px; color: var(--quiet); font-size: 11px; overflow-wrap: anywhere; }
+@media (max-width: 750px) {
+  .gnd .gmd-top, .gnd .gmd-records { grid-template-columns: minmax(0, 1fr); }
+  .gnd .gmd-sleep .gss svg { height: auto; }
+}

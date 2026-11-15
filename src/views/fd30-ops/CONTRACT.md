@@ -17,3 +17,11 @@ PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs BROWSER_BIN=/absolute/p
 ```
 
 `FD30_BASE_URL` optionally overrides `http://127.0.0.1:5173/`. The test uses fresh isolated browser contexts and synthetic/local entries only. Pure journal/projection/privacy/rendering regressions run under the existing `npm test`.
+
+## GND02 correction / medical projection for the three operational crew
+
+The corrected Ground overview restores the three clickable portrait cards from `e41c5e3`. Each card/image opens one local person detail in the existing route; returning preserves role and the shared mission cursor. Medicine shows the health dashboard before operational activity, reservations and agenda. Operations remains plan-only.
+
+The user explicitly authorized `groundMedicalView` for all three operational crew: existing illustrative heart/SpO2 patterns (labelled as clock-generated, not received telemetry), confirmed exercise-session telemetry where present, FD24–FD30 sleep, received lab workflow without clinical values, and latest received exercise records. Explicit allowlists filter owner, occurrence, receipt and linked event gates. No impersonated Onboard viewer, active-identity change, new measurements, persisted medical store, hydration, clinical score, private notes or chat is included. GND03's Lucía chart and the 06:00 wake receipt gate are preserved; other profiles use only their own existing records, with missing FD30 nights explicit.
+
+Orbit is a separate predefined-query panel. It still receives only projected operational crew, role, local person selection and mission cursor. It never receives any medical projection. Query answers cite plan blocks and do not confirm attendance or equipment use. The FD30 authorized-summary inbox remains empty; the medical dashboard is a new explicit projection, not an M1 summary or transmission channel. Reproduction, source inventory and validation commands: `GND02.md`.

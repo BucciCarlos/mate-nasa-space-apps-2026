@@ -18,6 +18,8 @@ import { toHash } from '../../app/routes';
 import { TODAY_TEXT as TODAY } from './todayText';
 import { restingPulse, sessionPulse, spo2, wellbeingIndex, wellbeingParts } from '../../demo/wellbeing';
 import { WellbeingFigure, HeartCircles } from './WellbeingFigure';
+import { HydrationCircle } from './HydrationCircle';
+import { hydrationCount } from '../../demo/hydration';
 import { meanOfReadings, sessionPowerDifference, sleepDelta } from './todayMetrics';
 import './today.css';
 
@@ -122,7 +124,7 @@ export function TodaySummary({ state, owner, time, ops, onOpenSleep, onOpenExerc
       <div className="td-name">
         <h1 id="fd-view-h" tabIndex={-1}>{crewName}</h1>
         <WellbeingFigure index={wbIndex} sleepFd={wbParts.sleepFd} />
-        <HeartCircles now={wbNow} spo2={wbSpo2} />
+        <HeartCircles now={wbNow} spo2={wbSpo2}><HydrationCircle count={hydrationCount(owner, time)} /></HeartCircles>
       </div>
       <p className="td-meta"><span>{ft.mission}</span><span aria-hidden="true">·</span><time dateTime={new Date(time).toISOString()}>{clock} <small>{t.clock}</small></time></p>
     </header>
