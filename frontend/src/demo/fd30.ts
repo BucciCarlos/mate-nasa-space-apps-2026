@@ -1,8 +1,10 @@
-import { LAB_EVENTS, LAB_HISTORY, initialLab, ingestLab, labEvents, labSamples, validLab } from './laboratory';
+import { chatIntent, scriptedAnswer } from './fd30Chat';
+import type { ChatAnswer } from './fd30Chat';
+import { LAB_EVENTS, LAB_HISTORY, initialLab, ingestLab, labEvents, labSamples } from './laboratory';
 import type { LabSample } from './laboratory';
 
 // Isolated FD30 fixture (IMP02 + IMP03 + IMP04). The published M1 clock, plan, storage and medical queue are untouched.
-// The preview is in-memory only (no sessionStorage): the Redux store + backend remain the app's state sources.
+// Reuse the IMP02 key to migrate its journey in place; the snapshot carries its schema version.
 export const FD30_KEY = 'mate:fd30:imp02:v1';
 export const OWNER = 'iss:crew-lf';
 export const CREW = [
@@ -12,11 +14,12 @@ export const CREW = [
 ] as const;
 export type CrewId = typeof CREW[number]['id'];
 export interface Position { x: number; y: number }
-export interface ProfileState { seen: boolean; draft: string; turns: Turn[]; position: Position | null; exerciseSeenIds: string[]; highlightedSessionId: string | null; labSeenIds: string[]; highlightedSampleId: string | null }
+export interface ProfileState { announcedIds: string[]; guidedOpenedIds: string[]; seen: boolean; draft: string; turns: Turn[]; position: Position | null; exerciseSeenIds: string[]; highlightedSessionId: string | null; labSeenIds: string[]; highlightedSampleId: string | null }
 export function historyFor(crewId: CrewId) {
   return { ...HISTORY, crewId, id: `iss:history:${crewId.slice(-2)}:rest-fd29` };
 }
-export const START = Date.parse('2027-03-10T05:55:00Z');
+export { DAY_START, DAY_END, ENTRY, START, END, clampMissionTime } from './fd30Day';
+import { ENTRY, START, END, clampMissionTime } from './fd30Day';
 export const WAKE = Date.parse('2027-03-10T06:00:00Z');
 export const WAKE_EVENT = {
   id: 'iss:fd30:lf:wake-1', missionId: 'iss', scenarioSequence: 1,
@@ -73,7 +76,7 @@ export const DAY_EVENTS = [WAKE_EVENT, ...EXERCISE_EVENTS, ...LAB_EVENTS]
 export function nextPreviewEvent(state: PreviewState) {
   return DAY_EVENTS.find(e => !state.processedIds.includes(e.id));
 }
-function receivedPersonalEvents(state: PreviewState, crewId: CrewId) {
+export function receivedPersonalEvents(state: PreviewState, crewId: CrewId) {
   const receivedIds = [
     ...exerciseSessions(state, crewId).flatMap(s => [s.start?.id, s.finish?.id]),
     ...labSamples(state, crewId).flatMap(s => labEvents(s).map(e => e.id)),
@@ -117,36 +120,57 @@ export function ingestExercise(state: PreviewState, events: readonly ExerciseEve
   return result;
 }
 export function previewReply(state: PreviewState, owner: CrewId, text: string): Turn['reply'] {
-  if (/laboratory|lab\b|blood|urine|sample|result|laboratorio|sangre|orina|muestra|resultado/i.test(text)) return 'laboratory';
-  if (/exercise|training|ejercicio|entrenamiento/i.test(text)) return 'exercise';
-  if (/sleep|rest|sueño|dormi|descanso/i.test(text)) return 'sleep';
+  const intent = chatIntent(text);
+  if (intent) return intent;
   if (/summary|resumen/i.test(text)) {
     const event = latestPersonalEvent(state, owner);
     return event && 'sampleId' in event ? 'laboratory' : event && 'sessionId' in event ? 'exercise' : 'sleep';
   }
   return 'fallback';
 }
-export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'fallback' }
+export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' }
 export interface PreviewState {
-  version: 4; processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
+  version: 6; playback: 'explore' | 'guided'; running: boolean;
+  guidedRequest: { owner: CrewId; eventId: string } | null;
+  processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
   diagnostics: { eventId: string; sourceId: string; status: 'rejected' | 'unassigned' }[]; sessionStartMs: number; offsetMs: number; wakeReceived: boolean;
   activeCrewId: CrewId; profiles: Record<CrewId, ProfileState>;
 }
 export type PreviewAction = { type: 'tick' | 'next'; now: number }
+  | { type: 'seek'; now: number; target: number }
+  | { type: 'playback/set'; mode: 'explore' | 'guided' }
+  | { type: 'running/set'; running: boolean; now: number }
+  | { type: 'events/announce'; owner: CrewId; ids: string[] }
+  | { type: 'guided/consume'; owner: CrewId; eventId: string }
   | { type: 'select'; crewId: CrewId }
   | { type: 'laboratory/view'; owner: CrewId; sampleId: string; eventId: string }
   | { type: 'exercise/view'; owner: CrewId; sessionId: string; eventId: string }
   | { type: 'seen'; owner: CrewId } | { type: 'draft'; owner: CrewId; text: string }
   | { type: 'position'; owner: CrewId; position: Position | null }
-  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es' } | { type: 'reset'; now: number };
+  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' } | { type: 'reset'; now: number };
 export function freshPreview(now: number): PreviewState {
-  const profile = (): ProfileState => ({ seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
-  return { version: 4, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
+  const profile = (): ProfileState => ({ announcedIds: [], guidedOpenedIds: [], seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
+  return { version: 6, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
     exercise: [{ id: EXERCISE_HISTORY[0].sessionId, crewId: OWNER, start: EXERCISE_HISTORY[0], finish: EXERCISE_HISTORY[1] }], sessionStartMs: now, offsetMs: 0, wakeReceived: false, activeCrewId: OWNER,
     profiles: { [OWNER]: profile(), 'iss:crew-ti': profile(), 'iss:crew-mo': profile() } };
 }
 export function previewTime(state: PreviewState, now: number) {
-  return START + Math.max(0, now - state.sessionStartMs) + state.offsetMs;
+  return clampMissionTime(START + (state.running ? Math.max(0, now - state.sessionStartMs) : 0) + state.offsetMs);
+}
+function ingestDue(state: PreviewState, time: number): PreviewState {
+  let result = state;
+  for (const event of DAY_EVENTS) {
+    if (result.processedIds.includes(event.id) || Date.parse(event.receivedAt) > time || Date.parse(event.occurredAt) > time) continue;
+    if ('sampleId' in event) result = ingestLab(result, [event], time);
+    else if ('sessionId' in event) result = ingestExercise(result, [event], time);
+    else result = { ...result, wakeReceived: true, processedIds: [...result.processedIds, event.id] };
+  }
+  return result;
+}
+export function projectDomain(target: number) {
+  const projected = ingestDue(freshPreview(0), clampMissionTime(target));
+  const { processedIds, exercise, laboratory, wakeReceived, diagnostics } = projected;
+  return { processedIds, exercise, laboratory, wakeReceived, diagnostics };
 }
 export function previewReduce(state: PreviewState, action: PreviewAction): PreviewState {
   // Late pointer/chat actions must never be retargeted after View as.
@@ -155,21 +179,41 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
   const profile = state.profiles[owner];
   const update = (patch: Partial<ProfileState>): PreviewState => ({ ...state, profiles: { ...state.profiles, [owner]: { ...profile, ...patch } } });
   switch (action.type) {
-    case 'select': return CREW.some(c => c.id === action.crewId) ? { ...state, activeCrewId: action.crewId } : state;
+    case 'select': return CREW.some(c => c.id === action.crewId) ? { ...state, activeCrewId: action.crewId, guidedRequest: null } : state;
     case 'reset': return freshPreview(action.now);
+    case 'seek': {
+      if (!Number.isFinite(action.target) || !Number.isFinite(action.now)) return state;
+      const target = clampMissionTime(action.target);
+      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, running: target < END && state.running, guidedRequest: null };
+    }
+    case 'playback/set': return ['explore', 'guided'].includes(action.mode)
+      ? { ...state, playback: action.mode, guidedRequest: null } : state;
+    case 'running/set': {
+      if (action.running === state.running || !Number.isFinite(action.now)) return state;
+      return { ...state, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now, running: action.running && previewTime(state, action.now) < END };
+    }
+    case 'events/announce': {
+      const received = receivedPersonalEvents(state, owner).map(e => e.id);
+      const ids = [...new Set([...profile.announcedIds, ...action.ids.filter(id => received.includes(id))])];
+      return ids.length === profile.announcedIds.length ? state : update({ announcedIds: ids });
+    }
+    case 'guided/consume': return state.guidedRequest?.eventId === action.eventId && state.guidedRequest.owner === owner
+      ? { ...state, guidedRequest: null } : state;
     case 'tick':
     case 'next': {
       const next = nextPreviewEvent(state);
-      const offsetMs = action.type === 'next' && next
-        ? state.offsetMs + Math.max(0, Date.parse(next.receivedAt) - previewTime(state, action.now)) : state.offsetMs;
-      let result = offsetMs === state.offsetMs ? state : { ...state, offsetMs };
-      const time = previewTime(result, action.now);
-      for (const event of DAY_EVENTS) {
-        if (result.processedIds.includes(event.id) || Date.parse(event.receivedAt) > time || Date.parse(event.occurredAt) > time) continue;
-        if ('sampleId' in event) result = ingestLab(result, [event], time);
-        else if ('sessionId' in event) result = ingestExercise(result, [event], time);
-        else result = { ...result, wakeReceived: true, processedIds: [...result.processedIds, event.id] };
+      const current = previewTime(state, action.now);
+      const time = action.type === 'next' && next ? Math.max(current, Date.parse(next.receivedAt)) : current;
+      let result = action.type === 'next' && next && time > current
+        ? { ...state, sessionStartMs: action.now, offsetMs: time - START } : state;
+      result = ingestDue(result, time);
+      const start = EXERCISE_EVENTS[0];
+      if (state.playback === 'guided' && owner === OWNER && !state.processedIds.includes(start.id)
+        && result.processedIds.includes(start.id) && !profile.guidedOpenedIds.includes(start.id)) {
+        result = { ...result, guidedRequest: { owner, eventId: start.id },
+          profiles: { ...result.profiles, [owner]: { ...result.profiles[owner], guidedOpenedIds: [...profile.guidedOpenedIds, start.id] } } };
       }
+      if (time >= END && result.running) result = { ...result, running: false, sessionStartMs: action.now, offsetMs: END - ENTRY };
       return result;
     }
     case 'laboratory/view': {
@@ -190,8 +234,11 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
     case 'ask': {
       const text = action.text.trim();
       if (!text) return state;
-      const reply = previewReply(state, owner, text);
-      return update({ draft: '', turns: [...profile.turns, { text, lang: action.lang, reply }] });
+      const time = previewTime(state, action.now ?? state.sessionStartMs);
+      const projected = { ...state, ...projectDomain(time) };
+      const reply = previewReply(projected, owner, text);
+      const answer = action.now === undefined ? {} : { answer: scriptedAnswer(projected, owner, time, reply, action.lang), input: action.input ?? 'text' as const };
+      return update({ draft: action.input === 'simulated_voice' ? profile.draft : '', turns: [...profile.turns, { text, lang: action.lang, reply, ...answer }] });
     }
   }
 }
@@ -201,11 +248,7 @@ function validPosition(p: unknown): p is Position | null {
   const { x, y } = p as Position;
   return Number.isFinite(x) && Number.isFinite(y) && x >= 0 && x <= 1 && y >= 0 && y <= 1;
 }
-/** The preview is in-memory only; this entry point always starts fresh (no sessionStorage). */
+/** The preview is in-memory only (no sessionStorage): always start fresh. Redux + backend remain the app's state sources. */
 export function restorePreview(_raw: string | null, now: number): PreviewState {
   return freshPreview(now);
-}
-export function validPreview(state: PreviewState) {
-  return state.exercise.every(s => s.start?.sessionId === s.id && s.finish?.sessionId === s.id)
-    && validLab(state.laboratory);
 }

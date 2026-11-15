@@ -142,7 +142,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     original = previewReduce(original, { type: 'draft', owner: OWNER, text: 'private unfinished' });
     original = previewReduce(original, { type: 'position', owner: OWNER, position: { x: .4, y: .2 } });
     original = previewReduce(original, { type: 'exercise/view', owner: OWNER, sessionId: EXERCISE_SESSION, eventId: EXERCISE_EVENTS[1].id });
-    expect(original.version).toBe(4);
+    expect(original.version).toBe(6);
     expect(original.exercise).toEqual(tickAt('11:30').exercise);
     expect(original.wakeReceived).toBe(true);
     expect(original.profiles[OWNER].draft).toBe('private unfinished');
