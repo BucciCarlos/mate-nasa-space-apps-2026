@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialState } from './initialState';
-import { reduce } from './reducer';
-import { selectGroundCrew, selectGroundInbox, selectGroundLinkRows, selectGroundLog, selectGroundPlan } from './selectors';
-import type { AppState, GroundRole } from './types';
-import { en } from '../i18n/en';
-import { es } from '../i18n/es';
+import { createInitialState } from '../src/state/initialState';
+import { reduce } from '../src/state/reducer';
+import { selectGroundCrew, selectGroundInbox, selectGroundLinkRows, selectGroundLog, selectGroundPlan } from '../src/state/selectors';
+import type { AppState, GroundRole } from '../src/state/types';
+import { en } from '../src/i18n/en';
+import { es } from '../src/i18n/es';
 
 const T0 = 1_000_000;
 const ROLES: GroundRole[] = ['mission_operator', 'medical_professional'];

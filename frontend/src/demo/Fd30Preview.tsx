@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useApp } from '../state/AppProvider';
-import { sessionStorageOrNull } from '../state/persistence';
+import { useAppDispatch } from '../state/AppProvider';
+import { localeSet } from '../state/mateSlice';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { CREW, FD30_KEY, HISTORY, OWNER, REST, WAKE_EVENT, historyFor, previewReduce, previewTime, restorePreview } from './fd30';
+import { CREW, HISTORY, OWNER, REST, WAKE_EVENT, historyFor, previewReduce, previewTime, restorePreview } from './fd30';
 import { FloatingCompanion } from './FloatingCompanion';
 import type { CrewId } from './fd30';
 import '../styles/fd30.css';
@@ -27,16 +27,14 @@ function Daybreak() {
 }
 
 export function Fd30Preview({ page }: { page: 'today' | 'sleep' }) {
-  const { dispatch: appDispatch } = useApp();
+  const appDispatch = useAppDispatch();
   const navigate = useNavigate();
   const locale = useLocale();
   const messages = useT();
   const t = messages.fd30;
-  const [state, dispatch] = useReducer(previewReduce, undefined, () => {
-    let raw: string | null = null;
-    try { raw = sessionStorageOrNull()?.getItem(FD30_KEY) ?? null; } catch { /* In-memory preview remains usable. */ }
-    return restorePreview(raw, Date.now());
-  });
+  // No sessionStorage: the preview starts fresh on every mount (02 §3.3 —
+  // the Redux store + backend are the only state sources).
+  const [state, dispatch] = useReducer(previewReduce, undefined, () => restorePreview(null, Date.now()));
   const [now, setNow] = useState(Date.now);
   const [chatOpen, setChatOpen] = useState(false);
   const [showing, setShowing] = useState(false);
@@ -44,8 +42,6 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' }) {
   const characterRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
   const owner = state.activeCrewId;
   const crew = CREW.find(c => c.id === owner)!;
   const profile = state.profiles[owner];
@@ -62,12 +58,6 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' }) {
     window.addEventListener('visibilitychange', tick);
     return () => { window.clearInterval(timer); window.removeEventListener('visibilitychange', tick); };
   }, []);
-  useEffect(() => {
-    const save = () => { try { sessionStorageOrNull()?.setItem(FD30_KEY, JSON.stringify(stateRef.current)); } catch { /* Storage is optional. */ } };
-    save();
-    window.addEventListener('pagehide', save);
-    return () => { save(); window.removeEventListener('pagehide', save); };
-  }, [state]);
   useEffect(() => { if (chatOpen) closeRef.current?.focus(); }, [chatOpen]);
   useEffect(() => {
     if (!chatOpen) return;
@@ -116,7 +106,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' }) {
         </nav>
         <div className="fd-identity"><span className="fd-profile-mark" aria-hidden="true">✳</span><span><strong>{crew.name}</strong><small>{t.crew}</small></span></div>
         <div className="fd-languages" role="group" aria-label={messages.common.language}>
-          {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch({ type: 'locale/set', locale: lang })}>{lang.toUpperCase()}</button>)}
+          {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch(localeSet(lang))}>{lang.toUpperCase()}</button>)}
         </div>
       </header>
       <section className="fd-demo" aria-label={t.demo}>

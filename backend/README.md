@@ -24,10 +24,10 @@ backend/
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8002
 ```
 
-- API docs: http://localhost:8000/docs
+- API docs: http://localhost:8002/docs
 - Health: `GET /api/health`
 - Scenarios: `GET /api/scenarios` · `GET /api/scenarios/{iss|cislunar}`
 - Sources: `GET /api/sources`
@@ -42,8 +42,8 @@ pytest -q
 ## Frontend connection
 
 The frontend reads the API base from `VITE_API_BASE`
-(default `http://localhost:8000`). Set it in
-`frontend/.env.local` when the backend is not on port 8000:
+(default `http://localhost:8002`). Set it in
+`frontend/.env.local` when the backend is not on port 8002:
 
 ```
 VITE_API_BASE=http://localhost:9000

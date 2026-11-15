@@ -2,20 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SCENARIOS, createInitialState } from './initialState';
-import type { Bilingual, ScenarioFile, Source } from './types';
+import { SCENARIOS, createInitialState } from '../src/state/initialState';
+import type { Bilingual, ScenarioFile, Source } from '../src/state/types';
 
 // Scenario/source data now lives in backend/data (the backend serves it to the app).
-const DATA_DIR = join(fileURLToPath(new URL('.', import.meta.url)), '../../../backend/data');
+const DATA_DIR = join(fileURLToPath(new URL('.', import.meta.url)), '../../backend/data');
 const loadJson = (p: string) => JSON.parse(readFileSync(join(DATA_DIR, p), 'utf-8'));
 const sources = loadJson('sources.json') as Source[];
-import { MISSION_PREFIX } from '../domain/ids';
-import { overlaps, toMs, defaultAgendaRange, flightDay, missionTimeMs } from '../domain/time';
-import { parsePath, routePath } from '../app/routes';
-import type { Route } from './types';
-import { deserialize, serialize } from './persistence';
-import { en } from '../i18n/en';
-import { es } from '../i18n/es';
+import { MISSION_PREFIX } from '../src/domain/ids';
+import { overlaps, toMs, defaultAgendaRange, flightDay, missionTimeMs } from '../src/domain/time';
+import { parsePath, routePath } from '../src/app/routes';
+import type { Route } from '../src/state/types';
+import { deserialize, serialize } from '../src/state/persistence';
+import { en } from '../src/i18n/en';
+import { es } from '../src/i18n/es';
 
 const bilingualOk = (b: Bilingual) => typeof b.en === 'string' && b.en.trim().length > 0 && typeof b.es === 'string' && b.es.trim().length > 0;
 

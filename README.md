@@ -14,24 +14,54 @@ docs/       specs
 
 ## Run it locally
 
-Requirements: Node.js 22.12+ and Python 3.11+ (verified 2026-11-14).
+Requirements: Node.js 22.12+ (with pnpm) and Python 3.11+ (verified 2026-11-14).
+
+### Option A — one command (recommended)
 
 ```bash
-# 1. backend
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000   # API on :8000, docs on :8000/docs
-
-# 2. frontend (new terminal)
-cd frontend
-pnpm install
-pnpm dev                                     # Vite dev server
+./run.sh        # macOS / Linux / Git Bash
+# or on Windows (PowerShell):
+# .\run.ps1
 ```
 
-If the backend is not on `http://localhost:8000`, set `VITE_API_BASE`
-in `frontend/.env.local`.
+This creates the backend virtualenv, installs dependencies, and starts
+both servers. Stop everything with `Ctrl+C`.
 
-Tests: `cd frontend && pnpm test` · `cd backend && pytest -q`
+### Option B — manually, in two terminals
+
+```bash
+# 1. backend (FastAPI on :8002)
+cd backend
+python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8002            # API on :8002, docs on :8002/docs
+
+# 2. frontend (Vite dev server on :5173, new terminal)
+cd frontend
+pnpm install
+pnpm dev
+```
+
+Open **http://localhost:5173**.
+
+If the backend is not on `http://localhost:8002`, set `VITE_API_BASE`
+in `frontend/.env.local` (e.g. `VITE_API_BASE=http://localhost:9000`).
+
+### Production build
+
+```bash
+cd frontend && pnpm build   # emits the SPA into backend/app/static
+```
+
+The backend then serves the built frontend itself (same origin, SPA
+fallback included), so a single FastAPI process is enough to deploy.
+
+### Tests
+
+```bash
+cd frontend && pnpm test      # 48 Vitest tests (frontend/tests/)
+cd backend  && pytest -q      # API tests
+```
 
 ## What it is
 

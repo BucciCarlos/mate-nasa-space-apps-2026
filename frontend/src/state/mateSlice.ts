@@ -107,9 +107,9 @@ function tickMission(m: MissionState, nowMs: number): MissionState {
 
 export const mateSlice = createSlice({
   name: 'mate',
-  // The slice's initial state is an empty AppState. If a sessionStorage
-  // snapshot exists, store.ts's preloadedState overrides this. If not,
-  // AppProvider dispatches scenarioReset() once the API data arrives.
+  // The slice's initial state is an empty AppState (the store starts from it;
+  // no sessionStorage). AppProvider dispatches scenarioReset() once the
+  // backend scenario data arrives, seeding the store from the API.
   initialState: createEmptyState(Date.now()),
   reducers: {
     localeSet: (state, action: PayloadAction<Locale>) => {

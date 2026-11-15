@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialState } from './initialState';
-import { reduce } from './reducer';
-import type { AppState, LinkMessage, MissionId } from './types';
-import type { Action } from './actions';
+import { createInitialState } from '../src/state/initialState';
+import { reduce } from '../src/state/reducer';
+import type { AppState, LinkMessage, MissionId } from '../src/state/types';
+import type { Action } from '../src/state/actions';
 
 const T0 = 1_000_000;
 const ISS_T = 4000;

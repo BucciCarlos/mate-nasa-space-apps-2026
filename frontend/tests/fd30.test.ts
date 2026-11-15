@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CREW, FD30_KEY, HISTORY, OWNER, REST, START, WAKE, WAKE_EVENT, freshPreview, previewReduce, previewTime, restorePreview } from './fd30';
-import { fitPosition, fromPreference, intersects, toPreference } from './position';
-import { createInitialState } from '../state/initialState';
-import { STORAGE_KEY } from '../state/persistence';
-import { parsePath, routePath } from '../app/routes';
+import { CREW, HISTORY, OWNER, REST, START, WAKE, WAKE_EVENT, freshPreview, previewReduce, previewTime, restorePreview } from '../src/demo/fd30';
+import { fitPosition, fromPreference, intersects, toPreference } from '../src/demo/position';
+import { createInitialState } from '../src/state/initialState';
+import { parsePath, routePath } from '../src/app/routes';
 
 describe('FD30 wake cut — clock, provenance and isolation', () => {
   it('starts at 05:55 with readable history, no measurement and no news', () => {
@@ -44,7 +43,6 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
   });
   it('resets only the cut and rejects invalid snapshots without consuming an M1 snapshot', () => {
     const m1 = createInitialState(1000, undefined, 'es');
-    expect(FD30_KEY).not.toBe(STORAGE_KEY);
     for (const raw of ['invalid', JSON.stringify(m1), JSON.stringify({ ...freshPreview(1000), offsetMs: -1 }), JSON.stringify({ ...freshPreview(1000), profiles: {} })]) {
       expect(restorePreview(raw, 2000)).toEqual(freshPreview(2000));
     }

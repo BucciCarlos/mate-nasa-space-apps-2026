@@ -24,9 +24,8 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
   const state = useAppSelector((s) => s.mate) as AppState;
   const dispatch = useAppDispatch();
 
-  // Fetch scenarios from the backend on mount. A sessionStorage snapshot
-  // (hydrated in store.ts) is kept until the backend data arrives; then
-  // scenarioReset rebuilds the state from the authoritative data (02 §3.3).
+  // Fetch scenarios from the backend on mount; scenarioReset seeds the Redux
+  // store from the authoritative backend data (the only state source).
   const iss = useIssScenarioQuery();
   const cislunar = useCislunarScenarioQuery();
   const resetDone = useRef(false);
@@ -46,7 +45,7 @@ function AppCtxConsumer({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id);
   }, [dispatch]);
 
-  // Ready when the state has real crew data (fresh load or restored snapshot).
+  // Ready when the state has real crew data (seeded from the backend).
   const ready = state.missions.iss.crew.length > 0;
   const rawError = iss.error ?? cislunar.error;
   const loadError = (iss.isError || cislunar.isError)

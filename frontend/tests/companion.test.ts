@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { matchIntent } from './intents';
-import { respond } from './respond';
-import { createInitialState } from '../../state/initialState';
-import { reduce } from '../../state/reducer';
-import { en } from '../../i18n/en';
-import { es } from '../../i18n/es';
-import { renderReply } from '../../i18n/companionText';
-import type { CompanionReply, CompanionTemplateId, IntentId } from '../../state/types';
+import { matchIntent } from '../src/domain/companion/intents';
+import { respond } from '../src/domain/companion/respond';
+import { createInitialState } from '../src/state/initialState';
+import { reduce } from '../src/state/reducer';
+import { en } from '../src/i18n/en';
+import { es } from '../src/i18n/es';
+import { renderReply } from '../src/i18n/companionText';
+import type { CompanionReply, CompanionTemplateId, IntentId } from '../src/state/types';
 
 const T0 = 1_000_000;
 

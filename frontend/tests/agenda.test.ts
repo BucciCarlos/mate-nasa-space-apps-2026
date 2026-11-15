@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { advanceTask, diffForCrew, changeRange } from './agenda';
-import { createInitialState } from '../state/initialState';
-import { reduce } from '../state/reducer';
-import { durationMinutes } from './time';
+import { advanceTask, diffForCrew, changeRange } from '../src/domain/agenda';
+import { createInitialState } from '../src/state/initialState';
+import { reduce } from '../src/state/reducer';
+import { durationMinutes } from '../src/domain/time';
 
 const T0 = 1_000_000;
 const plan = () => createInitialState(T0).missions.iss.ground.plan;
