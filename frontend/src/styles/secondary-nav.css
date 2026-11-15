@@ -1,0 +1,17 @@
+/* Secondary access to "Sources & evidence": set apart from the working modules, still always visible (also on mobile). */
+.subnav { flex-wrap: wrap; }
+.subnav .subnav-secondary { margin-left: auto; font-size: var(--fs-0); color: var(--fg-2); border: 1px dashed var(--line); }
+.subnav .subnav-secondary[aria-current="page"] { color: var(--fg); border-style: solid; }
+@media (max-width: 600px) { .subnav .subnav-secondary { margin-left: 0; } }
+
+.fd-secondary-link { align-self: center; padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; color: var(--quiet); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.fd-secondary-link[aria-current="page"] { color: var(--ink); border-color: var(--ink); }
+.fd-secondary-link:hover { color: var(--ink); }
+.fd-evidence-hint { margin: 24px 0 0; font-size: 12px; color: var(--quiet); }
+.fd-evidence-hint a { color: inherit; }
+
+/* One visible perspective action and one secondary Evidence link, in Demo mode on both surfaces. */
+.fd30 .fd-demo-navigation { display: flex; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.fd30 .fd-demo-navigation .fd-perspective-switch { color: #fffdf8; background: var(--ink); border: 1px solid var(--ink); border-radius: 5px; padding: 10px 14px; font-size: 13px; font-weight: 700; }
+.fd30 .fd-demo-navigation .fd-perspective-switch:hover { background: #395857; }
+.fd30 .fd-demo-navigation .fd-secondary-link { margin: 0; color: var(--quiet); font-size: 12px; }

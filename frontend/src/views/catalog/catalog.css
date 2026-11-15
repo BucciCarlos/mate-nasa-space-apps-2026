@@ -1,0 +1,44 @@
+/* Module catalog. Scoped to .mcat; uses the shared tokens of the host surface (onboard light / ground dark).
+   Status is shape + text, never color alone, and no health colors. */
+.mcat { color: var(--fg); max-width: 1120px; }
+.mcat-head { margin-bottom: var(--sp-4); }
+.mcat-head p { color: var(--fg-2); }
+.mcat-permissions { border-left: 3px solid var(--line); padding-left: var(--sp-3); }
+.mcat-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); margin: var(--sp-3) 0; font-size: var(--fs-0); }
+.mcat-legend div { display: flex; gap: var(--sp-2); align-items: baseline; min-width: 0; }
+.mcat-legend dt, .mcat-legend dd { margin: 0; }
+.mcat-legend dd { color: var(--fg-2); }
+.mcat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--sp-3); }
+.mcat-card { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-4); min-width: 0; overflow-wrap: anywhere; }
+.mcat-card-head { display: flex; justify-content: space-between; gap: var(--sp-2); align-items: baseline; }
+.mcat-card-head h3 { margin: 0; }
+.mcat-id { font-family: var(--mono); font-size: var(--fs-0); color: var(--fg-2); }
+.mcat-levels { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-2) 0; }
+.mcat-level { display: inline-flex; gap: 4px; align-items: center; font-size: var(--fs-0); padding: 1px var(--sp-2); border: 1px solid var(--line); border-radius: 999px; color: var(--fg-2); white-space: nowrap; }
+.mcat-level-available { border-color: var(--accent); color: var(--fg); font-weight: 600; }
+.mcat-level-evidence { border-style: double; border-width: 3px; color: var(--fg); }
+.mcat-level-concept { border-style: dashed; }
+.mcat-surfaces { font-size: var(--fs-0); color: var(--fg-2); }
+.mcat-lead { margin-top: var(--sp-2); }
+.mcat-block { margin-top: var(--sp-3); }
+.mcat-block h4 { font-size: var(--fs-1); margin: 0 0 var(--sp-1); }
+.mcat-block ul { margin-bottom: var(--sp-2); }
+.mcat-caps { list-style: none; padding: 0; display: grid; gap: var(--sp-2); }
+.mcat-caps li { display: flex; flex-wrap: wrap; gap: 4px var(--sp-2); align-items: baseline; }
+.mcat-note { flex-basis: 100%; color: var(--fg-2); font-size: var(--fs-0); }
+.mcat-pending { font-size: var(--fs-0); border: 1px dashed var(--line); border-radius: var(--r-1); padding: 0 var(--sp-1); }
+.mcat-open { font-size: var(--fs-0); }
+.mcat-muted { color: var(--fg-2); font-size: var(--fs-0); }
+.mcat-quote { font-style: italic; }
+.mcat-source { font-size: var(--fs-0); color: var(--fg-2); }
+.mcat-details { margin-top: var(--sp-2); }
+.mcat-details summary { cursor: pointer; color: var(--accent); }
+.mcat-excluded { margin-top: var(--sp-3); }
+/* Available now first; the rest, folded by default under "Future capabilities". */
+.mcat-now { margin: var(--sp-4) 0; }
+.mcat-now h3 { margin: 0 0 var(--sp-1); }
+.mcat-now-list { list-style: none; margin: var(--sp-2) 0 0; padding: 0; display: grid; gap: var(--sp-2); }
+.mcat-now-list li { display: flex; flex-wrap: wrap; gap: 4px var(--sp-2); align-items: baseline; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); }
+.mcat-future { margin-top: var(--sp-4); }
+.mcat-future > summary { cursor: pointer; font-weight: 700; padding: var(--sp-2) 0; }
+.mcat-future > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

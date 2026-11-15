@@ -11,6 +11,13 @@ import { Fd30Timebar } from './Fd30Timebar';
 import { Fd30Agenda } from './Fd30Agenda';
 import { Fd30PersonalAgenda } from './Fd30PersonalAgenda';
 import { Fd30Conversation } from './Fd30Conversation';
+import { Fd30GroundAgenda } from './Fd30GroundAgenda';
+import { ModuleCatalog } from '../views/catalog/ModuleCatalog';
+import { EvidenceSuite } from '../views/evidence/EvidenceSuite';
+import { OpsPanel } from '../views/fd30-ops/OpsPanel';
+import { useOpsJournal } from '../views/fd30-ops/useOpsJournal';
+import { FD30_PUBLIC_TEXT } from './fd30PublicText';
+import type { GroundRole } from '../state/types';
 import { FloatingCompanion } from './FloatingCompanion';
 import type { ChatDetail } from './fd30Chat';
 import type { CrewId } from './fd30';
@@ -33,9 +40,9 @@ function Daybreak() {
   );
 }
 
-const PAGE_PATHS = { today: '/demo/fd30', sleep: '/onboard/personal/sleep', exercise: '/onboard/personal/exercise', laboratory: '/onboard/personal/laboratory' } as const;
+const PAGE_PATHS = { today: '/demo/fd30', sleep: '/onboard/personal/sleep', exercise: '/onboard/personal/exercise', laboratory: '/onboard/personal/laboratory', agenda: '/demo/fd30/agenda', catalog: '/onboard/personal/catalog', evidence: '/onboard/personal/evidence', ground: '/demo/fd30/ground', groundAgenda: '/demo/fd30/ground/agenda', groundCatalog: '/demo/fd30/ground/catalog', groundEvidence: '/demo/fd30/ground/evidence', crew: '/demo/fd30/ground/crew', wellbeing: '/demo/fd30/ground/wellbeing', requests: '/demo/fd30/ground/requests' } as const;
 
-export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | 'laboratory' | 'agenda' }) {
+export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'catalog' | 'evidence' | 'ground' | 'ground-agenda' | 'ground-catalog' | 'ground-evidence' | 'crew' | 'wellbeing' | 'requests' }) {
   const appDispatch = useAppDispatch();
   const navigate = useNavigate();
   const locale = useLocale();
@@ -49,6 +56,8 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   const [showing, setShowing] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   const [telemetryAsTable, setTelemetryAsTable] = useState(false);
+  const [groundRole, setGroundRole] = useState<GroundRole>('mission_operator');
+  const p = FD30_PUBLIC_TEXT[locale];
   const characterRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
@@ -72,6 +81,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   const newsText = labNewsText || (newsEvent?.kind === 'exercise.finished' ? t.exerciseCompleted : newsEvent?.kind === 'exercise.started' ? `${t.exerciseStart} · ${newsEvent.occurredAt.slice(11, 16)} · ${t.clock}` : t.newsText);
   const pose = chatOpen || showing ? 'interaction' : news ? 'news' : 'idle';
   const missionTime = previewTime(state, now);
+  const journal = useOpsJournal(owner, missionTime);
   const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' }).format(missionTime);
 
   useEffect(() => {
@@ -178,6 +188,9 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
           <NavLink to={PAGE_PATHS.sleep} aria-current="page" onClick={e => { e.preventDefault(); openSleep(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.sleep}</NavLink>
           <NavLink to={PAGE_PATHS.exercise} aria-current="page" onClick={e => { e.preventDefault(); openExercise(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.exercise}</NavLink>
           <NavLink to={PAGE_PATHS.laboratory} aria-current="page" onClick={e => { e.preventDefault(); openLaboratory(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.laboratory}</NavLink>
+          <NavLink to={PAGE_PATHS.catalog} aria-current="page" className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.catalog}</NavLink>
+          <NavLink to={PAGE_PATHS.evidence} aria-current="page" className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.evidence}</NavLink>
+          <NavLink to={PAGE_PATHS.ground} aria-current="page" className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{p.overview}</NavLink>
           <NavLink to="/demo/fd30/agenda" aria-current="page" onClick={e => { e.preventDefault(); openAgenda(); }} className={({ isActive }) => `flex items-center px-1 pb-[18px] no-underline font-semibold border-b-[3px] ${isActive ? 'border-fd-ink' : 'border-transparent'}`}>{t.agendaNav}</NavLink>
         </nav>
         <div className="ml-auto flex gap-2.5 pb-5 items-center"><span className="text-[29px] text-[#746b4e]" aria-hidden="true">✳</span><span><strong className="block text-fs2 font-semibold">{crew.name}</strong><small className="block text-fd-quiet text-xs">{t.crew}</small></span></div>
@@ -221,7 +234,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
               <section className="border-b border-fd-rule py-6" aria-labelledby="fd-lab-card-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.laboratory} · {t.labBlood}</p><h2 id="fd-lab-card-h" className="font-serif text-[30px] font-normal my-2.5">{owner === OWNER ? labLabels[bloodStatus] : t.labEmpty}</h2><strong className="block text-fs1 text-fd-quiet leading-[1.65]">{t.labNoValues}</strong><p className="text-fs1 text-fd-quiet leading-[1.65]">{t.labFuture}</p>{personalLink('laboratory', t.openLaboratory)}</section>
               <section className="py-7 pb-[22px]"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.nextAction}</p><h2 className="font-serif font-normal text-[29px] my-2">{t.review}</h2><p className="text-fd-quiet text-[15px]">{t.reviewBody}</p>{sleepLink(t.openSleep, `${fdLink} mt-3`)}</section>
               <section className="flex items-baseline flex-wrap gap-y-2 gap-x-5 border-t border-fd-rule py-5"><h2 className="text-fs2 font-semibold m-0">{t.observations}</h2><p className="text-fs1 text-fd-quiet m-0">{t.noObservations}</p></section>
-            </> : page === 'laboratory' ? <LaboratoryDetail state={state} owner={owner} /> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} /> : <>
+            </> : page === 'laboratory' ? <LaboratoryDetail state={state} owner={owner} /> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} /> : page === 'catalog' ? <ModuleCatalog perspective="onboard" /> : page === 'evidence' ? <EvidenceSuite perspective="onboard" /> : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} /> : page === 'ground-catalog' ? <ModuleCatalog perspective="ground" role={groundRole} /> : page === 'ground-evidence' ? <EvidenceSuite perspective="ground" /> : page === 'ground' || page === 'crew' || page === 'wellbeing' || page === 'requests' ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate(PAGE_PATHS.today)} /> : <>
               <div className="mt-[34px] mb-7"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.personal} / {t.sleep}</p><h1 id="fd-view-h" tabIndex={-1} className="font-serif text-[clamp(32px,5vw,46px)] font-normal tracking-[-.035em] leading-[1.12] my-2 mb-3">{t.sleepTitle}</h1><p className="text-fd-quiet text-fs1">{t.sleepIntro}</p></div>
               <section className="bg-fd-sage p-[26px] rounded-[4px_40px_4px_4px]" aria-labelledby="fd-plan-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.planLane}</p><h2 id="fd-plan-h" className="text-lg font-[550] my-3">{t.planned}</h2><strong className="block font-serif text-[clamp(30px,4.5vw,40px)] font-normal tabular-nums tracking-[-.05em]">{t.planTime}</strong><p className="text-fd-quiet text-fs1">{t.planDates} <span aria-hidden="true">·</span> {t.planDuration}</p><div className="bg-fd-line h-1 relative mx-1 my-[23px]" aria-hidden="true"><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px]" /><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px] right-0" /></div><p className="text-fd-quiet text-fs1">{t.calculated}</p><small className="block text-fd-quiet text-[12px] overflow-wrap-anywhere">{REST.sourceId} · {`iss:fd30:${owner.slice(-2)}:planned-rest`}</small></section>
               <section className="py-7" aria-labelledby="fd-record-h"><div className="flex flex-wrap items-center gap-3"><h2 id="fd-record-h" className="m-0 text-lg font-[550]">{t.recorded}</h2><span className="text-[12px] px-[7px] py-[3px] border border-[#c4cabb] rounded">{t.simulated}</span></div><p className="block font-serif font-normal text-[clamp(28px,4.5vw,38px)] my-3">{t.noRecord}</p><p className="text-fd-quiet text-[15px] max-w-[620px]">{t.noRecordBody}</p><div className="flex gap-3.5 py-[17px] mt-5 border-t border-fd-rule text-fs1"><span className="text-[20px] text-fd-rust" aria-hidden="true">{received ? '↳' : '—'}</span><div><strong className="font-[550]">{received ? t.received : t.waiting}</strong><p className="text-fd-quiet mt-1.5">{t.reportLimit}</p></div></div>

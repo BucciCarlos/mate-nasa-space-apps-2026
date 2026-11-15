@@ -90,7 +90,17 @@ const router = createBrowserRouter([
   {
     path: '/demo/fd30',
     element: <Fd30Layout />,
-    children: [{ index: true, element: <Fd30Preview page="today" /> }, { path: 'agenda', element: <Fd30Preview page="agenda" /> }],
+    children: [
+      { index: true, element: <Fd30Preview page="today" /> },
+      { path: 'agenda', element: <Fd30Preview page="agenda" /> },
+      { path: 'ground', element: <Fd30Preview page="ground" /> },
+      { path: 'ground/agenda', element: <Fd30Preview page="ground-agenda" /> },
+      { path: 'ground/catalog', element: <Fd30Preview page="ground-catalog" /> },
+      { path: 'ground/evidence', element: <Fd30Preview page="ground-evidence" /> },
+      { path: 'ground/crew', element: <Fd30Preview page="crew" /> },
+      { path: 'ground/wellbeing', element: <Fd30Preview page="wellbeing" /> },
+      { path: 'ground/requests', element: <Fd30Preview page="requests" /> },
+    ],
   },
   {
     path: '/onboard/personal',
@@ -99,6 +109,8 @@ const router = createBrowserRouter([
       { path: 'sleep', element: <Fd30Preview page="sleep" /> },
       { path: 'exercise', element: <Fd30Preview page="exercise" /> },
       { path: 'laboratory', element: <Fd30Preview page="laboratory" /> },
+      { path: 'catalog', element: <Fd30Preview page="catalog" /> },
+      { path: 'evidence', element: <Fd30Preview page="evidence" /> },
     ],
   },
   {

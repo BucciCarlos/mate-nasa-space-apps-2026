@@ -1,0 +1,73 @@
+/* Evidence and Sources. Scoped to .evd; uses the shared tokens of the host surface (onboard light / ground dark).
+   Series differ by marker shape, dash pattern and direct label, never by color alone. */
+.evd { color: var(--fg); max-width: 1120px; }
+.evd-head p, .evd-muted, .evd-meta { color: var(--fg-2); }
+.evd-historical { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-2); padding: var(--sp-2) var(--sp-3); margin: var(--sp-3) 0; background: var(--bg-2); }
+.evd-historical p { margin: 2px 0 0; }
+.evd-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-1); border-bottom: 1px solid var(--line); margin-bottom: var(--sp-3); }
+.evd-tab { background: transparent; color: var(--fg-2); border: 0; border-bottom: 3px solid transparent; padding: var(--sp-2) var(--sp-3); font: inherit; cursor: pointer; }
+.evd-tab[aria-selected="true"] { color: var(--fg); font-weight: 700; border-bottom-color: var(--accent); }
+.evd-tab:focus-visible, .evd select:focus-visible, .evd summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.evd-panel h3 { margin-top: 0; }
+.evd-disclaimer, .evd-notice { border-left: 3px solid var(--line); padding-left: var(--sp-3); }
+.evd-block { margin: var(--sp-4) 0; }
+.evd-block h4, .evd-card h4 { margin: 0 0 var(--sp-1); }
+.evd-card { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; }
+.evd-card dl, .evd-stats, .evd-source dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--sp-2) var(--sp-4); margin: 0; }
+.evd-card dt, .evd-stats dt, .evd-source dt { color: var(--fg-2); font-size: var(--fs-0); }
+.evd-card dd, .evd-stats dd, .evd-source dd { margin: 0; overflow-wrap: anywhere; }
+.evd-standard { border-left: 3px solid var(--line); padding-left: var(--sp-3); }
+.evd-tools { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: end; margin: var(--sp-3) 0; }
+.evd-tools label { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-0); }
+.evd-toggle { display: flex; gap: var(--sp-1); }
+.evd-toggle button[aria-pressed="true"] { border-color: var(--accent); font-weight: 700; }
+.evd-figure { margin: var(--sp-3) 0; overflow-x: auto; }
+.evd-chart { width: 100%; min-width: 560px; height: auto; max-width: 900px; display: block; }
+.evd-grid { stroke: var(--line); stroke-dasharray: 3 4; }
+.evd-axis-line { stroke: var(--fg-2); }
+.evd-axis, .evd-band-text { fill: var(--fg-2); font-size: 11px; font-family: var(--mono); }
+.evd-unit { fill: var(--fg); }
+.evd-band { fill: var(--bg-3); stroke: var(--fg-2); stroke-dasharray: 5 4; }
+.evd-band-text { fill: var(--fg); font-family: var(--font); }
+.evd-line { stroke: var(--fg); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.evd-dot { fill: var(--fg); }
+.evd-marker { fill: var(--bg-2); stroke: var(--fg); stroke-width: 2; }
+.evd-label { fill: var(--fg); font-size: 12px; font-weight: 700; }
+.evd-gap { fill: var(--amber-bg); stroke: var(--amber); stroke-dasharray: 4 3; }
+.evd-legend { display: flex; flex-wrap: wrap; gap: var(--sp-3); font-size: var(--fs-0); color: var(--fg-2); margin-top: var(--sp-1); }
+.evd-legend svg { vertical-align: middle; }
+.evd-legend .evd-line { stroke-width: 2; }
+.evd-table-wrap { overflow-x: auto; }
+.evd-table { border-collapse: collapse; width: 100%; font-size: var(--fs-0); }
+.evd-table caption { text-align: left; color: var(--fg-2); padding-bottom: var(--sp-1); }
+.evd-table th, .evd-table td { border: 1px solid var(--line); padding: 4px var(--sp-2); text-align: right; font-variant-numeric: tabular-nums; }
+.evd-table th[scope="row"], .evd-table thead th:first-child, .evd-table td:first-child:not(:only-child) { text-align: left; }
+.evd-flight-col { background: var(--bg-3); text-align: center !important; font-style: italic; }
+.evd-prov { margin: var(--sp-3) 0; }
+.evd-prov summary { cursor: pointer; font-weight: 600; }
+.evd-hash { font-size: 11px; word-break: break-all; }
+.evd-attribution { font-size: var(--fs-0); }
+.evd-nodata { border: 1px dashed var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; }
+.evd-nodata-state { font-weight: 600; }
+.evd-status { white-space: nowrap; font-size: var(--fs-0); border: 1px solid var(--line); border-radius: 999px; padding: 1px var(--sp-2); }
+.evd-status-verified { border-color: var(--accent); }
+.evd-status-partial { border-style: double; border-width: 3px; }
+.evd-status-pending { border-style: dashed; }
+.evd-badge { font-size: var(--fs-0); font-weight: 400; border: 1px solid var(--line); border-radius: 999px; padding: 1px var(--sp-2); white-space: nowrap; }
+.evd-source-mini { padding-left: var(--sp-4); font-size: var(--fs-0); }
+.evd-source-mini li { margin-bottom: var(--sp-1); overflow-wrap: anywhere; }
+.evd-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--sp-3); margin: var(--sp-3) 0; }
+.evd-groups > div { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3); }
+.evd-groups dt { color: var(--fg-2); font-size: var(--fs-0); }
+.evd-groups dd { margin: var(--sp-1) 0 0; }
+.evd-groups strong { font-size: var(--fs-4); }
+.evd-quotes { padding-left: var(--sp-4); }
+.evd-sources { list-style: none; padding: 0; display: grid; gap: var(--sp-3); }
+.evd-source { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); min-width: 0; }
+.evd-source h4 { margin: 0 0 var(--sp-1); overflow-wrap: anywhere; }
+.evd-meta { margin: 0 0 var(--sp-2); font-size: var(--fs-0); }
+.evd-empty { font-weight: 600; }
+@media (max-width: 600px) { .evd-tab { padding: var(--sp-2); } .evd-groups strong { font-size: var(--fs-3); } }
+
+/* FD30 keeps its light paper surface in both perspectives; M1 Ground keeps its dark tokens. */
+.fd30 .evd { --bg: var(--paper); --bg-2: #fffdf8; --bg-3: #ece9df; --fg: var(--ink); --fg-2: var(--quiet); --line: var(--rule); --accent: #137d83; --focus: var(--rust); --amber: #8c5b16; --amber-bg: #f5ead2; }

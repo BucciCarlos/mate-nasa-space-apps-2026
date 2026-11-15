@@ -6,6 +6,7 @@
 @import "./fd30.css";
 @import "./fd30-public.css";
 @import "./fd30-imp05.css";
+@import "./secondary-nav.css";
 
 /* Map the design tokens (defined in tokens.css) into Tailwind utilities so
    components can use bg-surface / text-ink / border-line / rounded-md /
