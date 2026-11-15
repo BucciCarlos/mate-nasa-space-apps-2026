@@ -1,0 +1,795 @@
+{
+  "sourceIds": [
+    "osdr-osd-575",
+    "osdr-osd-569"
+  ],
+  "accessedAt": "2026-11-14",
+  "rawFiles": [
+    {
+      "name": "LSDS-8_Comprehensive_Metabolic_Panel_CMP.upload_SUBMITTED.csv",
+      "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-575/download?source=datamanager&file=LSDS-8_Comprehensive_Metabolic_Panel_CMP.upload_SUBMITTED.csv",
+      "sha256": "dab247eb794edab59aaaa683c85fd1f2dbf4ae3684872739338e10ead4192a0c"
+    },
+    {
+      "name": "LSDS-7_Complete_Blood_Count_CBC.upload_SUBMITTED.csv",
+      "url": "https://osdr.nasa.gov/geode-py/ws/studies/OSD-569/download?source=datamanager&file=LSDS-7_Complete_Blood_Count_CBC.upload_SUBMITTED.csv",
+      "sha256": "10a878b009eb2ea11a13fe92ad698098858639e8ed02f5ee849431313b9457d3"
+    }
+  ],
+  "flight": {
+    "start": "2021-09-16",
+    "end": "2021-09-18"
+  },
+  "timepoints": [
+    "L-92",
+    "L-44",
+    "L-3",
+    "R+1",
+    "R+45",
+    "R+82",
+    "R+194"
+  ],
+  "subjects": [
+    "C001",
+    "C002",
+    "C003",
+    "C004"
+  ],
+  "analytes": [
+    {
+      "id": "glucose",
+      "panel": "CMP",
+      "sourceAnalytes": [
+        "GLUCOSE"
+      ],
+      "unit": "mg/dL",
+      "values": [
+        {
+          "subject": "C001",
+          "timepoint": "L-92",
+          "value": 83.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-44",
+          "value": 80.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-3",
+          "value": 69.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+1",
+          "value": 90.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+45",
+          "value": 84.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+82",
+          "value": 91.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+194",
+          "value": 87.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-92",
+          "value": 69.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-44",
+          "value": 72.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-3",
+          "value": 78.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+1",
+          "value": 83.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+45",
+          "value": 44.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+82",
+          "value": 77.0
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+194",
+          "value": 84.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-92",
+          "value": 77.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-44",
+          "value": 62.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-3",
+          "value": 75.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+1",
+          "value": 103.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+45",
+          "value": 36.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+82",
+          "value": 80.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+194",
+          "value": 73.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-92",
+          "value": 100.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-44",
+          "value": 83.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-3",
+          "value": 56.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+1",
+          "value": 97.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+45",
+          "value": 43.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+82",
+          "value": 80.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+194",
+          "value": 84.0
+        }
+      ]
+    },
+    {
+      "id": "calcium",
+      "panel": "CMP",
+      "sourceAnalytes": [
+        "CALCIUM"
+      ],
+      "unit": "mg/dL",
+      "values": [
+        {
+          "subject": "C001",
+          "timepoint": "L-92",
+          "value": 9.7
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-44",
+          "value": 10.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-3",
+          "value": 9.6
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+1",
+          "value": 9.7
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+45",
+          "value": 9.6
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+82",
+          "value": 10.1
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+194",
+          "value": 9.4
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-92",
+          "value": 10.2
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-44",
+          "value": 9.7
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-3",
+          "value": 9.3
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+1",
+          "value": 9.2
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+45",
+          "value": 9.3
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+82",
+          "value": 9.7
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+194",
+          "value": 9.5
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-92",
+          "value": 9.3
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-44",
+          "value": 10.3
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-3",
+          "value": 9.5
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+1",
+          "value": 9.4
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+45",
+          "value": 9.6
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+82",
+          "value": 10.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+194",
+          "value": 9.6
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-92",
+          "value": 10.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-44",
+          "value": 10.1
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-3",
+          "value": 10.2
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+1",
+          "value": 9.8
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+45",
+          "value": 9.8
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+82",
+          "value": 10.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+194",
+          "value": 9.8
+        }
+      ]
+    },
+    {
+      "id": "hemoglobin",
+      "panel": "CBC",
+      "sourceAnalytes": [
+        "HEMOGLOBIN",
+        "HEMOGLOBIN (FEMALE)"
+      ],
+      "unit": "g/dL",
+      "values": [
+        {
+          "subject": "C001",
+          "timepoint": "L-92",
+          "value": 14.1
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-44",
+          "value": 14.9
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-3",
+          "value": 14.7
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+1",
+          "value": 14.7
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+45",
+          "value": 14.3
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+82",
+          "value": 15.7
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+194",
+          "value": 14.1
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-92",
+          "value": 13.2
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-44",
+          "value": 12.8
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-3",
+          "value": 11.5
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+1",
+          "value": 12.1
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+45",
+          "value": 12.2
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+82",
+          "value": 11.5
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+194",
+          "value": 12.7
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-92",
+          "value": 13.2
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-44",
+          "value": 14.4
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-3",
+          "value": 13.3
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+1",
+          "value": 13.5
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+45",
+          "value": 14.6
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+82",
+          "value": 14.4
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+194",
+          "value": 13.3
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-92",
+          "value": 17.0
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-44",
+          "value": 16.6
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-3",
+          "value": 16.8
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+1",
+          "value": 16.5
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+45",
+          "value": 16.8
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+82",
+          "value": 16.4
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+194",
+          "value": 16.5
+        }
+      ]
+    },
+    {
+      "id": "rbc",
+      "panel": "CBC",
+      "sourceAnalytes": [
+        "RED BLOOD CELL COUNT",
+        "RED BLOOD CELL COUNT (FEMALE)"
+      ],
+      "unit": "10⁶/µL",
+      "values": [
+        {
+          "subject": "C001",
+          "timepoint": "L-92",
+          "value": 4.58
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-44",
+          "value": 4.85
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-3",
+          "value": 4.69
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+1",
+          "value": 4.84
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+45",
+          "value": 4.63
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+82",
+          "value": 5.02
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+194",
+          "value": 4.66
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-92",
+          "value": 4.36
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-44",
+          "value": 3.93
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-3",
+          "value": 3.72
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+1",
+          "value": 4.02
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+45",
+          "value": 4.02
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+82",
+          "value": 3.84
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+194",
+          "value": 4.11
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-92",
+          "value": 4.46
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-44",
+          "value": 4.62
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-3",
+          "value": 4.5
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+1",
+          "value": 4.67
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+45",
+          "value": 5.09
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+82",
+          "value": 4.89
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+194",
+          "value": 4.64
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-92",
+          "value": 5.48
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-44",
+          "value": 5.57
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-3",
+          "value": 5.4
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+1",
+          "value": 5.55
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+45",
+          "value": 5.54
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+82",
+          "value": 5.45
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+194",
+          "value": 5.58
+        }
+      ]
+    },
+    {
+      "id": "wbc",
+      "panel": "CBC",
+      "sourceAnalytes": [
+        "WHITE BLOOD CELL COUNT"
+      ],
+      "unit": "10³/µL",
+      "values": [
+        {
+          "subject": "C001",
+          "timepoint": "L-92",
+          "value": 5.4
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-44",
+          "value": 5.5
+        },
+        {
+          "subject": "C001",
+          "timepoint": "L-3",
+          "value": 7.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+1",
+          "value": 5.0
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+45",
+          "value": 4.9
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+82",
+          "value": 4.9
+        },
+        {
+          "subject": "C001",
+          "timepoint": "R+194",
+          "value": 4.9
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-92",
+          "value": 6.5
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-44",
+          "value": 5.4
+        },
+        {
+          "subject": "C002",
+          "timepoint": "L-3",
+          "value": 7.2
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+1",
+          "value": 5.5
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+45",
+          "value": 6.4
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+82",
+          "value": 5.3
+        },
+        {
+          "subject": "C002",
+          "timepoint": "R+194",
+          "value": 6.4
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-92",
+          "value": 9.6
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-44",
+          "value": 9.3
+        },
+        {
+          "subject": "C003",
+          "timepoint": "L-3",
+          "value": 9.8
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+1",
+          "value": 7.0
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+45",
+          "value": 7.8
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+82",
+          "value": 8.8
+        },
+        {
+          "subject": "C003",
+          "timepoint": "R+194",
+          "value": 7.4
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-92",
+          "value": 7.7
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-44",
+          "value": 6.4
+        },
+        {
+          "subject": "C004",
+          "timepoint": "L-3",
+          "value": 10.6
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+1",
+          "value": 8.1
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+45",
+          "value": 6.8
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+82",
+          "value": 7.9
+        },
+        {
+          "subject": "C004",
+          "timepoint": "R+194",
+          "value": 8.3
+        }
+      ]
+    }
+  ],
+  "transformations": [
+    "monitoring.transformations"
+  ]
+}

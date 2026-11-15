@@ -9,6 +9,8 @@ import { createInitialState } from './initialState';
 import { advanceTask, diffForCrew } from '../domain/agenda';
 import { belongsTo, makeId } from '../domain/ids';
 import { respond } from '../domain/companion/respond';
+import { latestFlightSample, MONITORING_CREW_IDS } from '../domain/monitoring';
+import { selectMonitoringProfile } from './selectors';
 
 const ALL_VIEWERS: Viewer[] = ['astronaut', 'mission_operator', 'medical_professional'];
 const GROUND_VIEWERS: Viewer[] = ['mission_operator', 'medical_professional'];
@@ -99,7 +101,8 @@ function tickMission(m: MissionState, nowMs: number): MissionState {
     if (msg.status !== 'in_transit' || msg.deliverAtMs === null || msg.deliverAtMs > nowMs) break;
     const delivered: LinkMessage = { ...msg, status: 'delivered', statusSinceMs: nowMs, deliveredAtMs: nowMs };
     next = { ...next, messages: next.messages.map((x) => (x.id === msg.id ? delivered : x)) };
-    next = delivered.kind === 'plan_update' ? deliverPlanUpdate(next, delivered, nowMs) : deliverSummary(next, delivered, nowMs);
+    if (delivered.kind === 'plan_update') next = deliverPlanUpdate(next, delivered, nowMs);
+    if (delivered.kind === 'crew_summary') next = deliverSummary(next, delivered, nowMs);
     changed = true;
   }
   return changed ? next : m;
@@ -113,6 +116,97 @@ export function reduce(state: AppState, action: Action): AppState {
       return state.locale === action.locale ? state : { ...state, locale: action.locale };
     case 'ground/role_set':
       return state.groundRole === action.role ? state : { ...state, groundRole: action.role };
+
+    case 'monitoring/profile_selected': {
+      const mission = state.missions.iss;
+      if (mission.onboardUserId === action.crewId || !MONITORING_CREW_IDS.includes(action.crewId) ||
+        !mission.crew.some((crew) => crew.id === action.crewId)) return state;
+      return {
+        ...setMission(state, { ...mission, onboardUserId: action.crewId }),
+        ui: { ...state.ui, agendaRange: null, highlight: null, observationPrefill: null, openSourceId: null },
+      };
+    }
+
+    case 'monitoring/stage_set':
+    case 'monitoring/companion_saved':
+    case 'monitoring/activity_saved':
+    case 'monitoring/review_requested': {
+      const mission = state.missions.iss;
+      const crewId = mission.onboardUserId;
+      if (!crewId || !MONITORING_CREW_IDS.includes(crewId)) return state;
+      const profile = selectMonitoringProfile(state, crewId);
+      let updated = profile;
+      let next = mission;
+      if (action.type === 'monitoring/stage_set') {
+        updated = { ...profile, stage: action.stage };
+      } else if (action.type === 'monitoring/companion_saved') {
+        const name = action.preferences.name.trim();
+        if (!name || name.length > 24) return state;
+        updated = { ...profile, companion: { ...action.preferences, name } };
+      } else {
+        if (action.crewId !== crewId) return state;
+        const activity = nextId(mission, 'activity');
+        next = activity.m;
+        if (action.type === 'monitoring/review_requested') {
+          const sample = latestFlightSample(crewId, action.metric);
+          if (!sample || action.consent !== true) return state;
+          next = enqueue(next, (id, seq) => ({
+            id, seq, missionId: mission.id, status: 'queued', createdAtMs: action.nowMs, statusSinceMs: action.nowMs,
+            deliverAtMs: null, deliveredAtMs: null, direction: 'downlink', kind: 'medical_review', crewId, sample,
+          }), action.nowMs).m;
+        }
+        updated = { ...profile, activities: [...profile.activities, {
+          id: activity.id, atMs: action.nowMs, metric: action.metric,
+          kind: action.type === 'monitoring/review_requested' ? 'medical_review' : action.kind,
+          ...(action.type === 'monitoring/activity_saved' && action.note ? { note: action.note } : {}),
+        }] };
+      }
+      return { ...setMission(state, next), monitoring: { profiles: { ...state.monitoring?.profiles, [crewId]: updated } } };
+    }
+    case 'wellbeing/check_in':
+    case 'wellbeing/hobby':
+    case 'wellbeing/decision':
+    case 'wellbeing/note':
+    case 'wellbeing/family_read': {
+      const mission = state.missions.iss;
+      const { crewId } = action;
+      if (mission.onboardUserId !== crewId || !MONITORING_CREW_IDS.includes(crewId)) return state;
+      const profile = selectMonitoringProfile(state, crewId);
+      let wellbeing = profile.wellbeing ?? { checkIns: [], decisions: [] };
+      switch (action.type) {
+        case 'wellbeing/check_in': {
+          const { entry } = action;
+          if (![entry.stress, entry.satisfaction, entry.fatigue].every((n) =>
+            n === undefined || (Number.isInteger(n) && n >= 1 && n <= 5))) return state;
+          if (entry.taskId && !mission.onboard.plan.blocks.some((block) =>
+            block.id === entry.taskId && block.kind === 'task' && block.crewIds.includes(crewId))) return state;
+          if (!entry.taskId && (entry.satisfaction !== undefined || entry.fatigue !== undefined)) return state;
+          if (!entry.feeling && entry.stress === undefined && entry.satisfaction === undefined && entry.fatigue === undefined) return state;
+          wellbeing = { ...wellbeing, checkIns: [...wellbeing.checkIns, entry] };
+          break;
+        }
+        case 'wellbeing/hobby':
+          wellbeing = { ...wellbeing, hobby: action.hobby };
+          break;
+        case 'wellbeing/decision':
+          wellbeing = { ...wellbeing, decisions: [...wellbeing.decisions, {
+            atMs: action.atMs, activity: action.activity, decision: action.decision,
+          }] };
+          break;
+        case 'wellbeing/family_read':
+          wellbeing = { ...wellbeing, familyRead: true };
+          break;
+        case 'wellbeing/note': {
+          const text = action.note.text.trim();
+          if (!text || text.length > 600) return state;
+          wellbeing = { ...wellbeing, notes: [...(wellbeing.notes ?? []), {
+            atMs: action.atMs, text: { ...action.note, text },
+          }] };
+          break;
+        }
+      }
+      return { ...state, monitoring: { profiles: { ...state.monitoring?.profiles, [crewId]: { ...profile, wellbeing } } } };
+    }
 
     case 'plan/change_sent': {
       const m = state.missions[action.missionId];
@@ -171,7 +265,7 @@ export function reduce(state: AppState, action: Action): AppState {
 
     case 'notice/seen': {
       const m = state.missions[action.missionId];
-      if (!m || !m.onboard.notices.some((n) => n.id === action.noticeId && !n.seen)) return state;
+      if (!m || !m.onboard.notices.some((n) => n.id === action.noticeId && n.crewId === m.onboardUserId && !n.seen)) return state;
       return setMission(state, { ...m, onboard: { ...m.onboard, notices: m.onboard.notices.map((n) => (n.id === action.noticeId ? { ...n, seen: true } : n)) } });
     }
 
@@ -179,17 +273,17 @@ export function reduce(state: AppState, action: Action): AppState {
       const m = state.missions[action.missionId];
       if (!m || m.onboardUserId === null) return state;
       const u = nextId(m, 'turn');
-      const userTurn: CompanionTurn = { id: u.id, atMs: action.nowMs, speaker: 'user', input: action.input };
+      const userTurn: CompanionTurn = { id: u.id, atMs: action.nowMs, speaker: 'user', input: action.input, crewId: m.onboardUserId };
       const c = nextId(u.m, 'turn');
-      const reply = respond(state, m.id, action.input.intent);
-      const companionTurn: CompanionTurn = { id: c.id, atMs: action.nowMs, speaker: 'companion', reply };
+      const reply = respond(state, m.id, action.input.intent, action.input.metric);
+      const companionTurn: CompanionTurn = { id: c.id, atMs: action.nowMs, speaker: 'companion', reply, crewId: m.onboardUserId };
       return setMission(state, { ...c.m, onboard: { ...c.m.onboard, conversation: [...c.m.onboard.conversation, userTurn, companionTurn] } });
     }
 
     case 'companion/actions_executed': {
       const m = state.missions[action.missionId];
       const turn = m?.onboard.conversation.find((t) => t.id === action.turnId);
-      if (!m || !turn?.reply || turn.reply.executed) return state;
+      if (!m || !turn?.reply || (turn.crewId ?? MONITORING_CREW_IDS[0]) !== m.onboardUserId || turn.reply.executed) return state;
       return setMission(state, {
         ...m,
         onboard: { ...m.onboard, conversation: m.onboard.conversation.map((t) => (t.id === action.turnId && t.reply ? { ...t, reply: { ...t.reply, executed: true } } : t)) },
@@ -198,7 +292,7 @@ export function reduce(state: AppState, action: Action): AppState {
 
     case 'observation/saved': {
       const m = state.missions[action.missionId];
-      if (!m || !m.crew.some((c) => c.id === action.crewId) || action.topics.length === 0) return state;
+      if (!m || m.onboardUserId !== action.crewId || !m.crew.some((c) => c.id === action.crewId) || action.topics.length === 0) return state;
       if (action.relatedChangeId && !belongsTo(action.relatedChangeId, m.id)) { warn('observation: related change of another mission'); return state; }
       const o = nextId(m, 'obs');
       const observation: Observation = {

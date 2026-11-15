@@ -81,8 +81,10 @@ describe('U-ROUTE-01', () => {
       { view: 'ground', missionId: 'iss', page: 'crew' }, { view: 'ground', missionId: 'cislunar', page: 'log' }, { view: 'settings' },
     ];
     for (const r of routes) expect(parseRoute(toHash(r))).toEqual(r);
-    expect(parseRoute('')).toEqual({ view: 'onboard', page: 'today' });
-    expect(parseRoute('#/')).toEqual({ view: 'onboard', page: 'today' });
+    expect(parseRoute('')).toEqual({ view: 'onboard', page: 'wellbeing' });
+    expect(parseRoute('#/')).toEqual({ view: 'onboard', page: 'wellbeing' });
+    expect(parseRoute('#/onboard/today')).toEqual({ view: 'onboard', page: 'today' });
+    expect(parseRoute('#/ground/iss/commander')).toEqual({ view: 'ground', missionId: 'iss', page: 'commander' });
     for (const bad of ['#/nope', '#/ground/mars/agenda', '#/ground/iss/xyz', '#/onboard/modules', '#/settings/x']) expect(parseRoute(bad), bad).toBeNull();
   });
 });

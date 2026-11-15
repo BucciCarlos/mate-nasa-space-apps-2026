@@ -1,10 +1,11 @@
 // Selectors. Ground selectors take (state, missionId, role) and never expose onboard-private data (02 §9).
 import type {
   AppState, CrewMember, GroundRole, InboxItem, LinkMessage, LogEntry, MessageStatus, MissionId, ObservationTopic, ScheduleBlock,
-  ScheduleChange, SharedSummary, UserText,
+  ScheduleChange, SharedSummary, UserText, MonitoringProfile, CompanionPreferences, MedicalReviewMessage,
 } from './types';
 import { ONBOARD_MISSION_ID } from './types';
 import { defaultAgendaRange, toMs } from '../domain/time';
+import { MONITORING_CREW_IDS } from '../domain/monitoring';
 
 // ---- Ground: link rows (02 §9.4) ----
 
@@ -61,6 +62,11 @@ export function selectGroundCrew(state: AppState, missionId: MissionId, _role: G
   return { crew: m.crew, linkDownSinceMs: m.link.downSinceMs };
 }
 
+export function selectCommander(state: AppState, missionId: MissionId) {
+  const mission = state.missions[missionId];
+  return { plan: mission.onboard.plan, crew: mission.crew, linkStatus: mission.link.status, clockStart: mission.clockStart };
+}
+
 // ---- Ground: agenda and log ----
 
 export function selectGroundPlan(state: AppState, missionId: MissionId, _role: GroundRole) {
@@ -82,7 +88,39 @@ export function selectChange(state: AppState, missionId: MissionId, changeId: st
 export function selectOnboard(state: AppState) {
   const m = state.missions[ONBOARD_MISSION_ID];
   const user = m.crew.find((c) => c.id === m.onboardUserId) ?? m.crew[0];
-  return { mission: m, user, plan: m.onboard.plan, notices: m.onboard.notices, observations: m.onboard.observations, conversation: m.onboard.conversation, link: m.link };
+  return {
+    mission: m, user, plan: m.onboard.plan, link: m.link,
+    notices: m.onboard.notices.filter((notice) => notice.crewId === user.id),
+    observations: m.onboard.observations.filter((observation) => observation.crewId === user.id),
+    conversation: m.onboard.conversation.filter((turn) => (turn.crewId ?? MONITORING_CREW_IDS[0]) === user.id),
+  };
+}
+
+export function selectMonitoringProfile(state: AppState, crewId: string): MonitoringProfile {
+  return state.monitoring?.profiles[crewId] ?? { activities: [] };
+}
+
+export function selectCompanionPreferences(state: AppState, crewId: string): CompanionPreferences {
+  return selectMonitoringProfile(state, crewId).companion ?? {
+    ...(crewId === MONITORING_CREW_IDS[0] ? state.companion : { name: 'Mate', color: 'teal' as const }),
+    avatar: 'isotype', style: 'guided',
+  };
+}
+
+export function selectOwnMedicalReviews(state: AppState): MedicalReviewMessage[] {
+  const mission = state.missions.iss;
+  return mission.messages.filter((message): message is MedicalReviewMessage =>
+    message.kind === 'medical_review' && message.crewId === mission.onboardUserId);
+}
+
+export function selectDeliveredMedicalReviews(state: AppState, missionId: MissionId, role: GroundRole) {
+  if (role !== 'medical_professional') return [];
+  const mission = state.missions[missionId];
+  return mission.messages.flatMap((message) =>
+    message.kind === 'medical_review' && message.status === 'delivered' && message.deliveredAtMs !== null &&
+    mission.crew.some((crew) => crew.id === message.crewId)
+      ? [{ id: message.id, crewId: message.crewId, sample: message.sample, receivedAtMs: message.deliveredAtMs }]
+      : []);
 }
 
 export function selectOnboardLog(state: AppState): LogEntry[] {

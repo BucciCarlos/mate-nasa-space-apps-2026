@@ -1,7 +1,9 @@
 // Renders a companion reply from its raw params in the current locale (02 §8.3).
-import type { AppState, CompanionReply, Locale, MissionId } from '../state/types';
+import type { AppState, CompanionReply, FlightMetric, Locale, MissionId } from '../state/types';
+import { METRIC_UNITS } from '../domain/monitoring';
 import type { Messages } from './en';
-import { fmtDelta, fmtDuration, fmtInterval, fmtTime } from './format';
+import { selectCompanionPreferences } from '../state/selectors';
+import { fmtDateTime, fmtNumber, fmtDelta, fmtDuration, fmtInterval, fmtTime } from './format';
 import { durationMinutes, missionTimeMs } from '../domain/time';
 
 function missionTime(state: AppState, missionId: MissionId, realMs: number, locale: Locale): string {
@@ -14,6 +16,18 @@ export function renderReply(reply: CompanionReply, state: AppState, missionId: M
   const m = state.missions[missionId];
   const tt = t.companion.t;
   switch (reply.templateId) {
+    case 'monitoringExplanation': {
+      const metric = (p.metric ?? 'reaction') as FlightMetric;
+      const unit = METRIC_UNITS[metric];
+      const values = {
+        metric: t.monitoring.metrics[metric],
+        value: `${fmtNumber(Number(p.value), locale)} ${unit}`,
+        delta: `${fmtNumber(Number(p.delta), locale)} ${unit}`,
+        date: fmtDateTime(String(p.at), locale),
+      };
+      const preferences = selectCompanionPreferences(state, m.onboardUserId ?? '');
+      return preferences.style === 'brief' ? t.monitoring.explainBrief(values) : t.monitoring.explainGuided(values);
+    }
     case 'changeSummary': {
       const task = m.onboard.plan.blocks.find((b) => b.id === p.taskId);
       const linkDown = Number(p.linkDownSinceMs) > 0;

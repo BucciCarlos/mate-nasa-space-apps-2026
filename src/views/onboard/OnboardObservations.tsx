@@ -14,7 +14,7 @@ export function OnboardObservations() {
   const t = useT();
   const locale = useLocale();
   const mt = useMissionTime(ONBOARD_MISSION_ID);
-  const { mission, user, observations } = selectOnboard(state);
+  const { mission, user, observations, notices } = selectOnboard(state);
   const prefill = state.ui.observationPrefill;
   const [topics, setTopics] = useState<ObservationTopic[]>([]);
   const [note, setNote] = useState('');
@@ -37,7 +37,7 @@ export function OnboardObservations() {
     const task = c ? mission.onboard.plan.blocks.find((b) => b.id === c.taskId) : null;
     return c && task ? t.ground.changeRow({ task: task.title[locale], minutes: c.advanceMinutes, version: c.toVersion }) : t.observations.noRelatedChange;
   };
-  const receivedChanges = mission.onboard.notices.map((n) => n.changeId);
+  const receivedChanges = notices.map((n) => n.changeId);
   const canSave = topics.length > 0;
 
   const save = () => {

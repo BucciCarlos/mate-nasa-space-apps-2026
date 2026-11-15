@@ -1,6 +1,10 @@
+import { wellbeingEn } from './wellbeing';
+import { monitoringEn } from './monitoring';
 // English catalog: source of truth. `es.ts` must mirror every key (checked by tsc through `Messages`).
 
 export const en = {
+  monitoring: monitoringEn,
+  wellbeing: wellbeingEn,
   common: {
     appName: 'M.A.T.E.',
     appTagline: 'Medical & Astronaut Therapeutic Environment',
@@ -43,6 +47,9 @@ export const en = {
     },
     mission: { label: 'Mission', iss: 'ISS', cislunar: 'Cislunar mission' },
     nav: {
+      wellbeing: wellbeingEn.title,
+      commander: 'Commander',
+      monitoring: 'In-flight monitoring',
       today: 'Today',
       agenda: 'Agenda',
       observations: 'Observations',
@@ -73,6 +80,22 @@ export const en = {
     queued: 'Queued — waiting for link',
     inTransit: 'In transit',
     delivered: 'Delivered',
+  },
+  operations: {
+    title: "Mission operations",
+    activities: "Scheduled activities",
+    pending: "Pending transmissions",
+    timeControls: "Time navigation",
+    previous: "Previous",
+    current: "Current time",
+    next: "Next",
+    zoom: "Time window",
+    details: "Activity details",
+    nextActivity: "Current or next scheduled activity",
+    noActivities: "No scheduled activity remaining",
+    emptyWindow: "No activities in this time window",
+    hours: (p: { hours: number }) => `${p.hours} h`,
+    activityDetails: (p: { title: string }) => `Activity details · ${p.title}`,
   },
   ground: {
     title: 'Ground console',
@@ -124,7 +147,7 @@ export const en = {
     planningRule: 'Planning rule (simulated)',
     planningRuleBody: 'When a task is advanced, the post-sleep routine moves earlier by the same amount and the planned sleep block ends earlier. The start of sleep and all other blocks never move. Any other overlap is a conflict.',
     noSleepRecords: 'No sleep records for this crew member in the prototype',
-    noSleepRecordsBody: 'M.A.T.E. does not simulate sleep measurements. A planned rest window is a schedule, not measured sleep.',
+    noSleepRecordsBody: 'This agenda shows planned rest windows. Simulated sleep measurements are available separately in In-flight monitoring.',
     sleepRecords: 'Sleep records',
     whyMatters: 'Why this matters',
     range: 'Period',
@@ -173,9 +196,11 @@ export const en = {
       `Ground advanced "${p.task}" by ${p.minutes} min (plan version ${p.from} → ${p.to}). The planned rest window was recomputed with the simulated planning rule.`,
   },
   companion: {
-    panelTitle: 'Companion',
-    openPanel: 'Open companion',
-    closePanel: 'Collapse companion',
+    panelTitle: (p: { name: string }) => `${p.name} · Your mission companion`,
+    openPanel: 'Show Mate',
+    closePanel: 'Hide Mate',
+    about: 'About Mate',
+    limitations: 'Mate uses guided responses. Sensor readings and voice interactions are simulated. Mate can explain available records and suggest optional activities. Medical interpretation belongs to medical staff.',
     askPlaceholder: (p: { name: string }) => `Ask ${p.name}…`,
     send: 'Send',
     micButton: 'Simulated voice query',
@@ -197,7 +222,7 @@ export const en = {
       open_observation_form: 'Opened the observation form',
     },
     sources: 'Sources',
-    intro: (p: { name: string }) => `I am ${p.name}, your companion. I explain what changed in your context and I never guess how you feel.`,
+    intro: (p: { name: string }) => `Hi, ${p.name}! How’s your day going? We can look at your records or take a few minutes for you.`,
     // templates (02 §8.3): params are pre-formatted strings or flags
     t: {
       changeSummary: (p: { task: string; advance: string; delta: string; hasRest: boolean; linkDown: boolean; since: string }) =>
@@ -219,6 +244,7 @@ export const en = {
     },
   },
   intents: {
+    'monitoring.explain': 'Explain my flight metrics',
     'schedule.what_changed': 'What changed?',
     'schedule.show_change': 'Show me what changed',
     'rest.how_much': 'How much rest do I lose?',

@@ -26,6 +26,7 @@ const PHRASES: Record<Exclude<IntentId, 'unknown'>, string[]> = {
     'how much rest', 'how much sleep', 'rest window', 'lose',
     'cuanto descanso', 'cuanto sueno', 'ventana de descanso', 'pierdo',
   ],
+  'monitoring.explain': ['flight metrics', 'my metrics', 'explain metrics', 'metricas en vuelo', 'mis metricas', 'explicame las metricas'],
   'why.it_matters': [
     'why does this matter', 'why does it matter', 'why', 'matter',
     'por que importa', 'por que', 'importa',
