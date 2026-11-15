@@ -45,7 +45,7 @@ describe('FD30 wake cut — clock, provenance and isolation', () => {
   it('resets only the cut and rejects invalid snapshots without consuming an M1 snapshot', () => {
     const m1 = createInitialState(1000, 'es');
     expect(FD30_KEY).not.toBe(STORAGE_KEY);
-    for (const raw of ['invalid', JSON.stringify(m1), JSON.stringify({ ...freshPreview(1000), offsetMs: -1 }), JSON.stringify({ ...freshPreview(1000), profiles: {} })]) {
+    for (const raw of ['invalid', JSON.stringify(m1), JSON.stringify({ ...freshPreview(1000), offsetMs: -24 * 3600_000 }), JSON.stringify({ ...freshPreview(1000), profiles: {} })]) {
       expect(restorePreview(raw, 2000)).toEqual(freshPreview(2000));
     }
     expect(previewReduce(freshPreview(1000), { type: 'reset', now: 2000 })).toEqual(freshPreview(2000));
@@ -88,7 +88,7 @@ describe('Floating companions — private preferences and safe positions', () =>
     const legacy = { version: 1, sessionStartMs: 1000, offsetMs: 300000, wakeReceived: true,
       profiles: { [OWNER]: { seen: true, draft: 'unfinished', turns: [{ text: 'resumen', lang: 'es', reply: 'sleep' }] } } };
     const s = restorePreview(JSON.stringify(legacy), 2000);
-    expect(s.version).toBe(5);
+    expect(s.version).toBe(6);
     expect(s.sessionStartMs).toBe(1000);
     expect(s.offsetMs).toBe(300000);
     expect(s.wakeReceived).toBe(true);
@@ -185,7 +185,7 @@ describe('IMP03 exercise — owner-scoped workflow, journal and migration', () =
     const legacy = { version: 2, sessionStartMs: 1000, offsetMs: 500000, wakeReceived: true, activeCrewId: 'iss:crew-ti',
       profiles: Object.fromEntries(CREW.map((c, i) => [c.id, { seen: true, draft: `private-${i}`, turns: [{ text: `turn-${i}`, lang: 'es', reply: 'sleep' }], position: { x: i / 4, y: .4 } }])) };
     const restored = restorePreview(JSON.stringify(legacy), 10000);
-    expect(restored.version).toBe(5);
+    expect(restored.version).toBe(6);
     expect(restored.activeCrewId).toBe(legacy.activeCrewId);
     expect(restored.sessionStartMs).toBe(legacy.sessionStartMs);
     expect(restored.offsetMs).toBe(legacy.offsetMs);
@@ -254,13 +254,13 @@ describe('IMP05 reversible time and guided replay', () => {
     expect(seek(previewReduce(again, { type: 'select', crewId: 'iss:crew-ti' }), '10:41').activeCrewId).toBe('iss:crew-ti');
   });
   it('clamps endpoints, pauses without drift and resumes continuously', async () => {
-    const { END } = await import('./fd30');
-    let s = previewReduce(freshPreview(1000), { type: 'seek', now: 1000, target: START - 1 });
-    expect(previewTime(s, 1000)).toBe(START);
+    const { END, DAY_START } = await import('./fd30');
+    let s = previewReduce(freshPreview(1000), { type: 'seek', now: 1000, target: DAY_START - 1 });
+    expect(previewTime(s, 1000)).toBe(DAY_START);
     s = previewReduce(s, { type: 'running/set', now: 2000, running: false });
-    expect(previewTime(s, 32000)).toBe(START + 1000);
+    expect(previewTime(s, 32000)).toBe(DAY_START + 1000);
     s = previewReduce(s, { type: 'running/set', now: 32000, running: true });
-    expect(previewTime(s, 33000)).toBe(START + 2000);
+    expect(previewTime(s, 33000)).toBe(DAY_START + 2000);
     s = previewReduce(s, { type: 'seek', now: 33000, target: END + 100 });
     expect(previewTime(s, 99999999)).toBe(END);
     expect(s.offsetMs).toBeGreaterThanOrEqual(0);
@@ -289,7 +289,7 @@ describe('IMP05 reversible time and guided replay', () => {
     const future = seek(freshPreview(1000), '11:45');
     const old = { ...future, version: 4, offsetMs: 0 };
     const loaded = restorePreview(JSON.stringify(old), 1000);
-    expect(loaded.version).toBe(5);
+    expect(loaded.version).toBe(6);
     expect(loaded.playback).toBe('explore');
     expect(loaded.profiles[OWNER].turns).toEqual(future.profiles[OWNER].turns);
     expect(loaded.laboratory.some(s => s.result)).toBe(false);

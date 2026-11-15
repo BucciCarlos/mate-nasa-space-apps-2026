@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 import type { ScheduleBlock } from '../state/types';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { fmtInterval } from '../i18n/format';
 import { GroundTimeline } from '../views/ground/GroundTimeline';
 import { GroundCards } from '../views/ground/GroundCards';
 import { groundAgendaText } from '../views/ground/groundAgendaText';
 import { operationalPlan } from '../views/fd30-ops/opsSelectors';
 import { CREW } from './fd30';
 import { PLAN_SOURCE, PLAN_VERSION } from './fd30Plan';
-import { SCHEDULE_END, SCHEDULE_START } from './fd30Schedule';
+import { SCHEDULE_END, SCHEDULE_START, scheduleInterval, scheduleClock, scheduleContinuation } from './fd30Schedule';
+import { SCHEDULE_TEXT } from '../i18n/fd30Schedule';
 import { FD30_PUBLIC_TEXT } from './fd30PublicText';
 import '../styles/ground-agenda.css';
 import '../styles/fd30-public.css';
@@ -31,6 +31,12 @@ export function Fd30GroundAgenda({ time }: { time: number }) {
   const [selected, setSelected] = useState<string | null>(null);
   const scrollRef = useRef<number | null>(null);
   const lanes = groundAgendaLanes();
+  // Clip presentation only. Canonical IDs/source times remain in the shared plan and selected detail.
+  const shownLanes = lanes.map(l => ({ ...l, blocks: l.blocks.map(b => ({ ...b,
+    start: new Date(Math.max(SCHEDULE_START, Date.parse(b.start))).toISOString(),
+    end: new Date(Math.min(SCHEDULE_END, Date.parse(b.end))).toISOString(),
+    title: { en: `${b.title.en} ${scheduleContinuation(b, SCHEDULE_TEXT.en)}`, es: `${b.title.es} ${scheduleContinuation(b, SCHEDULE_TEXT.es)}` },
+  })) }));
   const range = { start: new Date(SCHEDULE_START).toISOString(), end: new Date(SCHEDULE_END).toISOString() };
   const block = lanes.flatMap(l => l.blocks).find(b => b.id === selected);
   const onSelect = (b: ScheduleBlock) => setSelected(b.id);
@@ -43,13 +49,13 @@ export function Fd30GroundAgenda({ time }: { time: number }) {
       <span>{messages.common.utc}</span>
     </div>
     {view === 'timeline'
-      ? <GroundTimeline range={range} lanes={lanes} nowMs={time} selectedId={selected} onSelect={onSelect} scrollRef={scrollRef} text={g} />
-      : <GroundCards range={range} lanes={lanes} selectedId={selected} onSelect={onSelect} text={g} selectAll={{ label: t.details, ariaLabel: t.inspect }} />}
+      ? <GroundTimeline includeStart closingLabel="24:00" intervalLabel={scheduleInterval} clockLabel={scheduleClock} range={range} lanes={shownLanes} nowMs={time} selectedId={selected} onSelect={onSelect} scrollRef={scrollRef} text={g} />
+      : <GroundCards showDuration={false} intervalLabel={scheduleInterval} range={range} lanes={shownLanes} selectedId={selected} onSelect={onSelect} text={g} selectAll={{ label: t.details, ariaLabel: t.inspect }} />}
     <section className="fd-ground-plan-detail" aria-label={t.details}>
       <h2>{block?.title[locale] ?? t.details}</h2>
-      {block ? <><p>{messages.blocks[block.kind]} · {fmtInterval(block, locale)}</p><p>{t.affected}: {lanes.filter(l => l.blocks.some(b => b.id === block.id)).map(l => l.crew.name).join(', ')}</p>
+      {block ? <><p>{messages.blocks[block.kind]} · {scheduleInterval(block)} {scheduleContinuation(block, SCHEDULE_TEXT[locale])}</p><p>{t.affected}: {lanes.filter(l => l.blocks.some(b => b.id === block.id)).map(l => l.crew.name).join(', ')}</p>
         {block.equipment && <p>{t.equipment}: {block.equipment[locale]}</p>}<strong>{t.planned}</strong></> : <p>{t.select}</p>}
     </section>
-    <p className="fd-ground-plan-note">{messages.fd30.simulated} · {PLAN_SOURCE} · {PLAN_VERSION}</p>
+    <p className="fd-ground-plan-note">{SCHEDULE_TEXT[locale].simulatedPlan} · {PLAN_SOURCE} · {PLAN_VERSION}</p>
   </section>;
 }

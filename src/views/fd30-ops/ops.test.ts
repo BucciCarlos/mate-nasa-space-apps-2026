@@ -124,7 +124,7 @@ describe('OPS01 role projections, planned progress and rewind', () => {
     const during = operationalCrew(time);
     expect(during[0].current?.title.en).toBe('Ergometer reservation'); expect(during[0].progress).toBe(18);
     expect(during[1].current?.title.en).toBe('Treadmill reservation'); expect(during[1].progress).toBe(18);
-    expect(during[2].current).toBeNull(); expect(during[2].progress).toBeNull();
+    expect(during[2].current?.title.en).toBe('Payload operations'); expect(during[2].progress).toBe(12);
     expect(during[2].reservation?.start).toContain('13:00');
     expect(operationalCrew(at('11:30'))[0].current).toBeNull();
     expect(operationalCrew(at('10:29'))[0].current?.kind).toBe('conference');

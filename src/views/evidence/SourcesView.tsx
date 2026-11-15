@@ -1,3 +1,4 @@
+import { SleepProvenance } from '../history/sleep/SleepProvenance';
 import { useLocale } from '../../i18n/I18nProvider';
 import type { EvidenceSource } from './evidenceTypes';
 import { EVIDENCE_TEXT } from './evidenceText';
@@ -13,6 +14,7 @@ export function SourcesView({ sources }: { sources: readonly EvidenceSource[] })
     <section className="evd-panel" aria-labelledby="evd-sources-h" data-evidence="sources">
       <h3 id="evd-sources-h">{S.title}</h3>
       <p>{S.intro}</p>
+      <SleepProvenance />
       <p className="evd-muted">{S.count(sources.length)} · {S.thirdParty}</p>
       {sources.length === 0 ? <p className="evd-empty">{S.empty}</p> : (
         <ul className="evd-sources">

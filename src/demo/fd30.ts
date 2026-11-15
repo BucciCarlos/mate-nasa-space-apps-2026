@@ -18,9 +18,8 @@ export interface ProfileState { announcedIds: string[]; guidedOpenedIds: string[
 export function historyFor(crewId: CrewId) {
   return { ...HISTORY, crewId, id: `iss:history:${crewId.slice(-2)}:rest-fd29` };
 }
-export const START = Date.parse('2027-03-10T05:55:00Z');
-export const END = Date.parse('2027-03-10T12:00:00Z');
-export const clampMissionTime = (time: number) => Math.max(START, Math.min(END, time));
+export { DAY_START, DAY_END, ENTRY, START, END, clampMissionTime } from './fd30Day';
+import { DAY_START, ENTRY, START, END, clampMissionTime } from './fd30Day';
 export const WAKE = Date.parse('2027-03-10T06:00:00Z');
 export const WAKE_EVENT = {
   id: 'iss:fd30:lf:wake-1', missionId: 'iss', scenarioSequence: 1,
@@ -131,7 +130,7 @@ export function previewReply(state: PreviewState, owner: CrewId, text: string): 
 }
 export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' }
 export interface PreviewState {
-  version: 5; playback: 'explore' | 'guided'; running: boolean;
+  version: 6; playback: 'explore' | 'guided'; running: boolean;
   guidedRequest: { owner: CrewId; eventId: string } | null;
   processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
   diagnostics: { eventId: string; sourceId: string; status: 'rejected' | 'unassigned' }[]; sessionStartMs: number; offsetMs: number; wakeReceived: boolean;
@@ -151,7 +150,7 @@ export type PreviewAction = { type: 'tick' | 'next'; now: number }
   | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' } | { type: 'reset'; now: number };
 export function freshPreview(now: number): PreviewState {
   const profile = (): ProfileState => ({ announcedIds: [], guidedOpenedIds: [], seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
-  return { version: 5, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
+  return { version: 6, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
     exercise: [{ id: EXERCISE_HISTORY[0].sessionId, crewId: OWNER, start: EXERCISE_HISTORY[0], finish: EXERCISE_HISTORY[1] }], sessionStartMs: now, offsetMs: 0, wakeReceived: false, activeCrewId: OWNER,
     profiles: { [OWNER]: profile(), 'iss:crew-ti': profile(), 'iss:crew-mo': profile() } };
 }
@@ -185,13 +184,13 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
     case 'seek': {
       if (!Number.isFinite(action.target) || !Number.isFinite(action.now)) return state;
       const target = clampMissionTime(action.target);
-      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, guidedRequest: null };
+      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, running: target < END && state.running, guidedRequest: null };
     }
     case 'playback/set': return ['explore', 'guided'].includes(action.mode)
       ? { ...state, playback: action.mode, guidedRequest: null } : state;
     case 'running/set': {
       if (action.running === state.running || !Number.isFinite(action.now)) return state;
-      return { ...state, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now, running: action.running };
+      return { ...state, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now, running: action.running && previewTime(state, action.now) < END };
     }
     case 'events/announce': {
       const received = receivedPersonalEvents(state, owner).map(e => e.id);
@@ -214,6 +213,7 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
         result = { ...result, guidedRequest: { owner, eventId: start.id },
           profiles: { ...result.profiles, [owner]: { ...result.profiles[owner], guidedOpenedIds: [...profile.guidedOpenedIds, start.id] } } };
       }
+      if (time >= END && result.running) result = { ...result, running: false, sessionStartMs: action.now, offsetMs: END - ENTRY };
       return result;
     }
     case 'laboratory/view': {
@@ -261,8 +261,8 @@ function validProfile(p: unknown): p is ProfileState {
 export function restorePreview(raw: string | null, now: number): PreviewState {
   try {
     const s = JSON.parse(raw ?? 'null');
-    if (!s || ![1, 2, 3, 4, 5].includes(s.version) || !Number.isFinite(s.sessionStartMs) || s.sessionStartMs > now
-      || !Number.isFinite(s.offsetMs) || s.offsetMs < 0 || typeof s.wakeReceived !== 'boolean') return freshPreview(now);
+    if (!s || ![1, 2, 3, 4, 5, 6].includes(s.version) || !Number.isFinite(s.sessionStartMs) || s.sessionStartMs > now
+      || !Number.isFinite(s.offsetMs) || (s.version < 6 ? s.offsetMs < 0 : s.offsetMs < DAY_START - ENTRY || s.offsetMs > END - ENTRY) || typeof s.wakeReceived !== 'boolean') return freshPreview(now);
     const fresh = freshPreview(s.sessionStartMs);
     const owner = s.version === 1 ? OWNER : s.activeCrewId;
     const owners = s.version === 1 ? [CREW[0]] : CREW;
@@ -275,7 +275,7 @@ export function restorePreview(raw: string | null, now: number): PreviewState {
     if (s.version >= 4 && (!Array.isArray(s.laboratory) || !validLab(s.laboratory)
       || !owners.every(c => stringIds(s.profiles[c.id].labSeenIds)
         && (s.profiles[c.id].highlightedSampleId === null || typeof s.profiles[c.id].highlightedSampleId === 'string')))) return freshPreview(now);
-    if (s.version === 5 && (!['explore', 'guided'].includes(s.playback) || typeof s.running !== 'boolean'
+    if (s.version >= 5 && (!['explore', 'guided'].includes(s.playback) || typeof s.running !== 'boolean'
       || !owners.every(c => stringIds(s.profiles[c.id].announcedIds) && stringIds(s.profiles[c.id].guidedOpenedIds)))) return freshPreview(now);
     const profiles = { ...fresh.profiles };
     for (const c of owners) {
@@ -286,12 +286,18 @@ export function restorePreview(raw: string | null, now: number): PreviewState {
         highlightedSessionId: s.version >= 3 ? old.highlightedSessionId : null,
         labSeenIds: s.version >= 4 ? [...new Set<string>(old.labSeenIds)] : [],
         highlightedSampleId: s.version >= 4 ? old.highlightedSampleId : null,
-        announcedIds: s.version === 5 ? [...new Set<string>(old.announcedIds)] : [],
-        guidedOpenedIds: s.version === 5 ? [...new Set<string>(old.guidedOpenedIds)] : [],
+        announcedIds: s.version >= 5 ? [...new Set<string>(old.announcedIds)] : [],
+        guidedOpenedIds: s.version >= 5 ? [...new Set<string>(old.guidedOpenedIds)] : [],
       };
     }
     const restored: PreviewState = { ...fresh, profiles, activeCrewId: owner, offsetMs: s.offsetMs,
-      playback: s.version === 5 ? s.playback : 'explore', running: s.version === 5 ? s.running : true };
+      playback: s.version >= 5 ? s.playback : 'explore', running: s.version >= 5 ? s.running : true };
+    if (s.version < 6 && previewTime(restored, now) > Date.parse('2027-03-10T12:00:00Z')) {
+      restored.sessionStartMs = now; restored.offsetMs = Date.parse('2027-03-10T12:00:00Z') - ENTRY;
+    }
+    if (previewTime(restored, now) >= END) {
+      restored.running = false; restored.sessionStartMs = now; restored.offsetMs = END - ENTRY;
+    }
     // Never trust a stored receipt whose timestamp is beyond the restored clock.
     return { ...restored, ...projectDomain(previewTime(restored, now)) };
   } catch { return freshPreview(now); }

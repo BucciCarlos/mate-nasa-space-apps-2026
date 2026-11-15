@@ -6,10 +6,11 @@ import type { Bilingual, GroundRole, ScheduleBlock } from '../../state/types';
 import { COMMANDER, visibleRequests } from './opsState';
 import type { OpsState } from './opsState';
 
-export interface OperationalBlock { id: string; kind: ScheduleBlock['kind']; title: Bilingual; start: string; end: string; equipment: Bilingual | null }
+export interface OperationalBlock { id: string; kind: ScheduleBlock['kind']; title: Bilingual; start: string; end: string; equipment: Bilingual | null; continuesAfterDay?: boolean }
 const personalTitle: Bilingual = { en: 'Planned personal activity', es: 'Actividad personal planificada' };
 export function operationalPlan(owner: CrewId): OperationalBlock[] {
   return planFor(owner).map(b => ({ id: b.id, kind: b.kind, start: b.start, end: b.end,
+    ...(b.continuesAfterDay ? { continuesAfterDay: true } : {}),
     title: { ...(b.id === LAB_PLAN.blood.id || b.id === LAB_PLAN.urine.id ? personalTitle : b.title) }, equipment: b.equipmentId ? { ...EQUIPMENT[b.equipmentId] } : null }));
 }
 export function operationalCrew(time: number) {

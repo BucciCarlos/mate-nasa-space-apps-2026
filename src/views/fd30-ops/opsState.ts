@@ -1,4 +1,4 @@
-import { CREW, END, START } from '../../demo/fd30';
+import { CREW, END, DAY_START } from '../../demo/fd30';
 import type { CrewId } from '../../demo/fd30';
 import { planFor } from '../../demo/fd30Plan';
 import type { Bilingual, Locale } from '../../state/types';
@@ -29,7 +29,7 @@ export type OpsAction = { type: 'reset' }
 
 const profile = (): OpsProfile => ({ wellbeing: { topic: 'day', text: '' }, checkins: [], request: { kind: 'support', blockId: null, text: '' }, preview: null });
 export const freshOps = (): OpsState => ({ version: 1, nextId: 1, requests: [], profiles: Object.fromEntries(CREW.map(c => [c.id, profile()])) as Record<CrewId, OpsProfile> });
-const validTime = (time: number) => Number.isFinite(time) && time >= START && time <= END;
+const validTime = (time: number) => Number.isFinite(time) && time >= DAY_START && time <= END;
 
 /** Voluntary journal only. Identity and time are supplied by the one existing FD30 session. */
 export function opsReduce(state: OpsState, action: OpsAction, activeOwner: CrewId, time: number): OpsState {

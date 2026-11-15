@@ -11,6 +11,10 @@ export const PX_PER_HOUR = 80;
 export const NAME_COL = 150;
 
 interface Props {
+  includeStart?: boolean;
+  closingLabel?: string;
+  intervalLabel?: (block: ScheduleBlock) => string;
+  clockLabel?: (time: number | string) => string;
   text?: typeof groundAgendaText.en;
   range: Interval;
   lanes: { crew: CrewMember; blocks: ScheduleBlock[] }[];
@@ -22,7 +26,7 @@ interface Props {
 }
 
 /** Wide, horizontally scrollable crew timeline. Names are sticky on the left, one per row. */
-export function GroundTimeline({ range, lanes, nowMs, selectedId, onSelect, scrollRef, text }: Props) {
+export function GroundTimeline({ range, lanes, nowMs, selectedId, onSelect, scrollRef, text, includeStart = false, closingLabel, intervalLabel, clockLabel }: Props) {
   const t = useT();
   const locale = useLocale();
   const g = text ?? groundAgendaText[locale];
@@ -30,9 +34,11 @@ export function GroundTimeline({ range, lanes, nowMs, selectedId, onSelect, scro
   const startMs = toMs(range.start), endMs = toMs(range.end);
   const x = (ms: number) => ((ms - startMs) / HOUR_MS) * PX_PER_HOUR;
   const trackWidth = x(endMs);
+  const interval = intervalLabel ?? ((b: ScheduleBlock) => fmtInterval(b, locale));
+  const clock = clockLabel ?? fmtClock;
   const hours: number[] = [];
   for (let h = Math.ceil(startMs / HOUR_MS) * HOUR_MS; h < endMs; h += HOUR_MS) hours.push(h);
-  const nowVisible = nowMs !== null && nowMs > startMs && nowMs < endMs;
+  const nowVisible = nowMs !== null && (includeStart ? nowMs >= startMs : nowMs > startMs) && nowMs < endMs;
   const visible = (b: ScheduleBlock) => toMs(b.end) > startMs && toMs(b.start) < endMs;
 
   // Pure scrolling: it never touches the mission clock or any state.
@@ -67,11 +73,12 @@ export function GroundTimeline({ range, lanes, nowMs, selectedId, onSelect, scro
                 return (
                   <Fragment key={h}>
                     {(midnight || i === 0) && <span className="gat-date" style={{ left: x(h) }}>{fmtDate(h, locale)}</span>}
-                    <span className="gat-tick" style={{ left: x(h) }}>{fmtClock(h)}</span>
+                    <span className="gat-tick" style={{ left: x(h) }}>{clock(h)}</span>
                   </Fragment>
                 );
               })}
-              {nowVisible && <span className="gat-now-chip" style={{ left: x(nowMs!) }}>{t.ground.nowLine} · {fmtClock(nowMs!)}</span>}
+              {closingLabel && <span className="gat-tick gat-close" style={{ left: trackWidth }}>{closingLabel}</span>}
+              {nowVisible && <span className="gat-now-chip" style={{ left: x(nowMs!) }}>{t.ground.nowLine} · {clock(nowMs!)}</span>}
             </div>
           </div>
           {lanes.map(({ crew, blocks }) => (
@@ -84,14 +91,14 @@ export function GroundTimeline({ range, lanes, nowMs, selectedId, onSelect, scro
                 {hours.map((h) => <span key={h} className="gat-grid" style={{ left: x(h) }} aria-hidden="true" />)}
                 {blocks.filter(visible).map((b) => {
                   const title = b.title[locale];
-                  const label = t.a11y.blockLabel({ kind: t.blocks[b.kind], title, range: fmtInterval(b, locale) });
+                  const label = t.a11y.blockLabel({ kind: t.blocks[b.kind], title, range: interval(b) });
                   return (
                     <button key={b.id} type="button" className={`blk blk-${b.kind}${selectedId === b.id ? ' is-selected' : ''}${b.movable ? ' is-movable' : ''}`}
                       style={{ left: x(toMs(b.start)), width: Math.max(2, x(toMs(b.end)) - x(toMs(b.start))) }}
                       aria-label={label} aria-pressed={selectedId === b.id} onClick={() => onSelect(b)}>
                       <span className="blk-kind">{t.blocks[b.kind]}</span>
                       <span className="blk-title">{title}</span>
-                      <span className="blk-time">{fmtClock(b.start)}–{fmtClock(b.end)}</span>
+                      <span className="blk-time">{intervalLabel ? interval(b) : `${clock(b.start)}–${clock(b.end)}`}</span>
                       {b.movable && <span className="blk-movable">{t.ground.movable}</span>}
                     </button>
                   );

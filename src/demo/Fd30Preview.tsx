@@ -7,9 +7,11 @@ import { Fd30GroundAgenda } from './Fd30GroundAgenda';
 import { useApp } from '../state/AppProvider';
 import { sessionStorageOrNull } from '../state/persistence';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { CREW, FD30_KEY, HISTORY, OWNER, REST, WAKE_EVENT, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, exerciseSessions, latestPersonalEvent, latestNews, nextPreviewEvent, historyFor, previewReduce, previewTime, restorePreview } from './fd30';
+import { CREW, FD30_KEY, OWNER, REST, WAKE_EVENT, EXERCISE_SESSION, clampMissionTime, projectDomain, receivedPersonalEvents, exerciseSessions, latestPersonalEvent, latestNews, nextPreviewEvent, previewReduce, previewTime, restorePreview } from './fd30';
 import { LaboratoryDetail, labHeadingId } from './LaboratoryDetail';
 import { BLOOD_SAMPLE, labSamples, labStatus } from './laboratory';
+import { SleepDetail } from '../views/history/sleep/SleepDetail';
+import { SleepSummary } from '../views/history/sleep/SleepSummary';
 import { ExerciseDetail } from './ExerciseDetail';
 import { Fd30Timebar } from './Fd30Timebar';
 import { Fd30Agenda } from './Fd30Agenda';
@@ -88,7 +90,6 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
   const owner = state.activeCrewId;
   const crew = CREW.find(c => c.id === owner)!;
   const profile = state.profiles[owner];
-  const history = historyFor(owner);
   const received = state.wakeReceived && owner === OWNER;
   const newsEvent = latestNews(state, owner);
   const summaryEvent = latestPersonalEvent(state, owner);
@@ -255,7 +256,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
               </section>
               <section className="fd-sleep-strip" aria-label={t.sleep}>
                 <div><p className="fd-eyebrow">{t.planned}</p><strong className="fd-plan-time">{t.planTime}</strong><p>{t.planDates} · {t.planDuration}</p><small>{t.planLane}</small></div>
-                <div><p className="fd-eyebrow">{t.recorded}</p><strong className="fd-no-record">{t.noRecord}</strong><p>{received ? t.received : t.waiting}</p>{sleepLink(t.openSleep)}</div>
+                <div><p className="fd-eyebrow">{t.recorded}</p><SleepSummary state={state} owner={owner} time={missionTime} />{sleepLink(t.openSleep)}</div>
               </section>
               <section className="fd-exercise-card" aria-labelledby="fd-exercise-card-h"><p className="fd-eyebrow">{t.exercise}</p><h2 id="fd-exercise-card-h">{exerciseStatus}</h2><p>{exercisePlan && `${exercisePlan.start.slice(11, 16)}–${exercisePlan.end.slice(11, 16)} UTC · ${EQUIPMENT[exercisePlan.equipmentId!][locale]}`}</p><strong>{owner === OWNER ? t.telemetryCount(telemetry.length, telemetry.filter(p => p.workload_w !== null).length) : t.telemetryOther}</strong><p>{t.simulated} · {exercise ? 'demo-exercise' : 'demo-plan'}</p>{personalLink('exercise', t.openExercise)}</section>
               <section className="fd-lab-card" aria-labelledby="fd-lab-card-h"><p className="fd-eyebrow">{t.laboratory} · {t.labBlood}</p><h2 id="fd-lab-card-h">{owner === OWNER ? labLabels[bloodStatus] : t.labEmpty}</h2><strong>{t.labNoValues}</strong><p>{t.labFuture}</p>{personalLink('laboratory', t.openLaboratory)}</section>
@@ -268,15 +269,8 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
             </> : page === 'evidence' ? <>
               <div className="fd-page-intro"><h1 id="fd-view-h" tabIndex={-1}>{t.evidence}</h1></div>
               <EvidenceSuite perspective="onboard" />
-            </> : <>
-              <div className="fd-page-intro"><p className="fd-eyebrow">{t.personal} / {t.sleep}</p><h1 id="fd-view-h" tabIndex={-1}>{t.sleepTitle}</h1><p>{t.sleepIntro}</p></div>
-              <section className="fd-rest-plan" aria-labelledby="fd-plan-h"><p className="fd-eyebrow">{t.planLane}</p><h2 id="fd-plan-h">{t.planned}</h2><strong className="fd-large-time">{t.planTime}</strong><p>{t.planDates} <span aria-hidden="true">·</span> {t.planDuration}</p><div className="fd-rest-line" aria-hidden="true"><span /><span /></div><p>{t.calculated}</p><small>{REST.sourceId} · {`iss:fd30:${owner.slice(-2)}:planned-rest`}</small></section>
-              <section className="fd-record" aria-labelledby="fd-record-h"><div className="fd-record-heading"><h2 id="fd-record-h">{t.recorded}</h2><span className="fd-tag">{t.simulated}</span></div><p className="fd-no-record">{t.noRecord}</p><p>{t.noRecordBody}</p><div className="fd-report-status"><span aria-hidden="true">{received ? '↳' : '—'}</span><div><strong>{received ? t.received : t.waiting}</strong><p>{t.reportLimit}</p></div></div>
-                {received && <details className="fd-report-details"><summary>{t.details}</summary><dl><dt>{t.instrument}</dt><dd>{t.deviceSource}</dd><dt>{t.variable}</dt><dd>{t.variableValue}</dd><dt>{t.nature}</dt><dd>{t.natureValue}</dd><dt>{t.availability}</dt><dd>{t.availabilityValue}</dd><dt>{t.attribution}</dt><dd>{t.attributionValue}</dd><dt>{t.source}</dt><dd>{WAKE_EVENT.sourceId} · {WAKE_EVENT.id} · {WAKE_EVENT.episodeId}</dd><dt>{t.timing}</dt><dd>{WAKE_EVENT.occurredAt} / {WAKE_EVENT.receivedAt}</dd><dt>{t.version}</dt><dd>{HISTORY.version}</dd></dl></details>}
-              </section>
-              <section className="fd-history"><p className="fd-eyebrow">{t.history}</p><h2>{t.historyTitle}</h2><p>{t.historyBody}</p><strong>{t.recorded} · {t.noRecord}</strong><small>{t.historySource} · {HISTORY.sourceId} · {history.id} · {HISTORY.version}</small><small>{crew.name} · {owner} · {history.date}</small></section>
-            </>}
-            {!onGround && !opsPage && page !== 'catalog' && page !== 'agenda' && page !== 'evidence' && page !== 'ground-evidence' && <section className="fd-provenance" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h">{t.provenance}</h2><div><article><h3>{t.planLane}</h3><p>{page === 'laboratory' ? t.labPlanBody : page === 'exercise' ? t.exercisePlanLimit : t.planSource}</p></article><article><h3>{t.deviceLane}</h3><p>{page === 'laboratory' ? t.labAdapter : page === 'exercise' ? t.exerciseAdapter : t.deviceSource}</p></article><article><h3>{t.evidenceLane}</h3><p>{t.evidenceBody}</p></article></div><p className="fd-research"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer">{t.research}<span aria-hidden="true"> ↗</span></a><span>{t.researchBody}</span></p></section>}
+            </> : <SleepDetail state={state} owner={owner} time={missionTime} />}
+            {!onGround && !opsPage && page !== 'catalog' && page !== 'agenda' && page !== 'sleep' && page !== 'evidence' && page !== 'ground-evidence' && <section className="fd-provenance" aria-labelledby="fd-provenance-h"><h2 id="fd-provenance-h">{t.provenance}</h2><div><article><h3>{t.planLane}</h3><p>{page === 'laboratory' ? t.labPlanBody : page === 'exercise' ? t.exercisePlanLimit : t.planSource}</p></article><article><h3>{t.deviceLane}</h3><p>{page === 'laboratory' ? t.labAdapter : page === 'exercise' ? t.exerciseAdapter : t.deviceSource}</p></article><article><h3>{t.evidenceLane}</h3><p>{t.evidenceBody}</p></article></div><p className="fd-research"><a href="https://ntrs.nasa.gov/citations/20230014025" target="_blank" rel="noreferrer">{t.research}<span aria-hidden="true"> ↗</span></a><span>{t.researchBody}</span></p></section>}
             {!onGround && !!state.diagnostics.length && <details className="fd-report-details"><summary>{t.diagnostics}</summary>{state.diagnostics.map(d => <p key={d.eventId}>{d.eventId} · {d.sourceId} · {d.status === 'rejected' ? t.rejected : t.unassigned}</p>)}</details>}
             <footer className="fd-foot">{opsPage ? o.resetLimit : t.scope}{!onGround && <> <span aria-hidden="true">·</span> {crew.name}</>}</footer>
           </div>

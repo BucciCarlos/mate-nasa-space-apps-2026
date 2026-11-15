@@ -144,7 +144,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     const legacy = { ...old, version: 3, processedIds: original.processedIds.filter(id => !id.includes('sample') && id !== LAB_HISTORY.id),
       profiles: Object.fromEntries(Object.entries(original.profiles).map(([id, profile]) => { const { labSeenIds: _seen, highlightedSampleId: _highlight, ...rest } = profile; return [id, rest]; })) };
     const loaded = restorePreview(JSON.stringify(legacy), wallAt('11:30'));
-    expect(loaded.version).toBe(5);
+    expect(loaded.version).toBe(6);
     expect(loaded.sessionStartMs).toBe(original.sessionStartMs);
     expect(loaded.offsetMs).toBe(original.offsetMs);
     expect(loaded.exercise).toEqual(original.exercise);

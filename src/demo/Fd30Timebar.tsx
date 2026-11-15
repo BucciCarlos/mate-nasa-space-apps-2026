@@ -1,6 +1,6 @@
 import type { Dispatch } from 'react';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { DAY_EVENTS, END, START } from './fd30';
+import { DAY_EVENTS, DAY_START, END, ENTRY } from './fd30';
 import type { PreviewAction, PreviewState } from './fd30';
 
 export function Fd30Timebar({ state, time, dispatch, onSeek }: {
@@ -13,20 +13,23 @@ export function Fd30Timebar({ state, time, dispatch, onSeek }: {
   return <fieldset className="fd-timebar">
     <legend>{t.timeSlider}</legend>
     <div className="fd-timebar-range">
-      <span>{format(START)}</span>
-      <input type="range" min={START} max={END} step={60_000} value={time} aria-label={t.timeSlider}
-        aria-valuetext={`${format(time)} UTC`} onChange={e => onSeek(Number(e.target.value))} />
+      <span>{format(DAY_START)}</span>
+      <input type="range" min={DAY_START} max={END} step={60_000} value={time} aria-label={t.timeSlider}
+        aria-valuetext={`${format(time)} UTC, FD30`} onChange={e => onSeek(Number(e.target.value))} />
       <output>{format(time)} {/* i18n-ignore — UTC is a time standard */}UTC</output>
     </div>
+    <div className="fd-timebar-scale" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i}>{String(i * 3).padStart(2, '0')}</span>)}</div>
+    <p className="fd-timebar-close">{t.timeClose}</p>
     <div className="fd-timebar-controls">
-      <button type="button" disabled={time <= START} onClick={() => onSeek(time - 15 * 60_000)}>{t.timeBack}</button>
+      <button type="button" disabled={time <= DAY_START} onClick={() => onSeek(time - 15 * 60_000)}>{t.timeBack}</button>
       <button type="button" disabled={!previous} onClick={() => previous && onSeek(Date.parse(previous.receivedAt))}>{t.timePrevious}</button>
       <button type="button" disabled={time >= END} onClick={() => onSeek(time + 15 * 60_000)}>{t.timeForward}</button>
-      <button type="button" aria-pressed={state.running}
+      <button type="button" disabled={time >= END} aria-pressed={state.running}
         onClick={() => dispatch({ type: 'running/set', now: Date.now(), running: !state.running })}>{state.running ? t.timePause : t.timePlay}</button>
       <label><span>{t.timeMode}</span><select aria-label={t.timeMode} value={state.playback} onChange={e => dispatch({ type: 'playback/set', mode: e.target.value as PreviewState['playback'] })}>
         <option value="explore">{t.timeExplore}</option><option value="guided">{t.timeGuided}</option>
       </select></label>
+      <button type="button" onClick={() => onSeek(ENTRY)}>{t.timeEntry}</button>
       <span>{time >= END ? t.timeFinished : state.running ? t.timeRunning : t.timePaused}</span>
     </div>
     <p>{t.timeHint}</p>

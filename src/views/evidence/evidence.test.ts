@@ -219,10 +219,10 @@ describe('Sleep and schedules', () => {
     expect(out).toContain('data-group="inflight"');
     expect(out).toContain('5.50');
     expect(out).toContain('such as work overload, irregular light-dark cycles, and sleep-pattern disruptions');
-    expect(out).toContain('No sleep records for Test Name in this prototype');
+    expect(out).toContain('No personal sleep records for Test Name are shown in this evidence view');
     expect(out).not.toMatch(/<svg|<table|<img|<polyline/);
     expect(html(createElement(SleepView, { raw: sleepFixture(), sources }), 'es')).toContain('5,50');
-    expect(html(createElement(SleepView, { raw: sleepFixture(), sources }))).toContain('No sleep records for any profile in this prototype');
+    expect(html(createElement(SleepView, { raw: sleepFixture(), sources }))).toContain('No personal sleep records are shown in this evidence view');
   });
   it('shows its state and no numbers when the aggregate is absent', () => {
     const out = html(createElement(SleepView, { raw: undefined, sources }));

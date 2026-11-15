@@ -1,3 +1,7 @@
+import { sleepHistory, fdLabel, sleepDuration } from './history/sleep';
+import { SLEEP_TEXT } from '../views/history/sleep/sleepText';
+import { scheduleInterval, scheduleContinuation } from './fd30Day';
+import { SCHEDULE_TEXT } from '../i18n/fd30Schedule';
 import type { CrewId, PreviewState, Turn } from './fd30';
 import { EQUIPMENT, planFor, plannedExercise } from './fd30Plan';
 import { BLOOD_SAMPLE, URINE_SAMPLE } from './laboratory';
@@ -22,7 +26,7 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
     !!e && e.association.status === 'confirmed' && e.association.crewId === owner && Date.parse(e.occurredAt) <= time && Date.parse(e.receivedAt) <= time;
   if (intent === 'agenda') {
     const blocks = planFor(owner).filter(b => Date.parse(b.end) > time).slice(0, 3);
-    const lines = blocks.map(b => `${b.start.slice(11, 16)}–${b.end.slice(11, 16)} UTC · ${b.title[lang]}${b.equipmentId ? ` · ${EQUIPMENT[b.equipmentId][lang]}` : ''}`);
+    const lines = blocks.map(b => `${scheduleInterval(b)} ${scheduleContinuation(b, SCHEDULE_TEXT[lang])} · ${b.title[lang]}${b.equipmentId ? ` · ${EQUIPMENT[b.equipmentId][lang]}` : ''}`);
     return { at: time, detail: 'agenda', body: `${t.planned}\n${lines.length ? lines.join('\n') : t.noPlan}` };
   }
   if (intent === 'exercise') {
@@ -43,5 +47,10 @@ export function scriptedAnswer(state: PreviewState, owner: CrewId, time: number,
     };
     return { at: time, detail: 'laboratory', body: `${t.blood}: ${status(samples[0])}.\n${t.urine}: ${status(samples[1])}.\n${t.labLimit}` };
   }
-  return { at: time, ...(intent === 'sleep' ? { detail: 'sleep' as const } : {}), body: intent === 'sleep' ? t.sleep : t.fallback };
+  if (intent === 'sleep') {
+    const history = sleepHistory(state, { perspective: 'onboard', owner }, time, 'last7');
+    const latest = history?.latest, text = SLEEP_TEXT[lang];
+    return { at: time, detail: 'sleep', body: latest ? text.chat(fdLabel(latest.fd), sleepDuration(latest.durationMinutes), history!.records.length) : text.empty };
+  }
+  return { at: time, body: t.fallback };
 }

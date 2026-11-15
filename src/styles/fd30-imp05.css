@@ -49,3 +49,9 @@
 @media (max-width: 600px) {
   .fd-telemetry svg text { font-size: 24px; }
 }
+/* DAY01: the scale includes the visual exclusive midnight edge. */
+.fd-timebar-scale { display: flex; justify-content: space-between; margin: 0 98px 0 44px; font-variant-numeric: tabular-nums; font-size: 10px; color: var(--quiet); }
+.fd-timebar .fd-timebar-close { text-align: right; border-right: 5px solid #8c998a; padding-right: 7px; margin-bottom: 8px; }
+.fd-schedule-block-copy small { display: block; white-space: normal; max-width: 250px; font-size: 11px; margin-top: 6px; }
+.fd-ground-agenda .gat-close { transform: translateX(-100%); padding-right: 4px; border-right: 3px solid var(--quiet); }
+.fd-schedule-close time { left: auto; right: 6px; white-space: nowrap; }
