@@ -169,7 +169,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   const fdPrimary = 'inline-flex items-center gap-5 no-underline px-4 py-3 rounded-md bg-fd-ink text-white text-fs1 font-semibold my-[18px] mb-3 cursor-pointer hover:bg-[#395857]';
 
   return (
-    <div className={`h-screen h-dvh bg-fd-paper text-fd-ink overflow-hidden grid grid-rows-[auto_auto_minmax(0,1fr)] ${chatOpen ? 'fd-chat-open' : ''}`} data-surface="onboard">
+    <div className={`h-screen h-dvh bg-fd-paper text-fd-ink grid grid-rows-[auto_auto_minmax(0,1fr)] ${chatOpen ? 'fd-chat-open' : ''}`} data-surface="onboard">
       <a className="sr-only focus:not-sr-only" href="#fd-main">{messages.a11y.skipToContent}</a>
       <header className="flex flex-wrap items-center gap-x-[34px] gap-y-2 px-9 pt-5 border-b border-fd-rule relative z-[60]">
         <Link className="flex gap-3.5 items-baseline no-underline text-xl font-extrabold tracking-[.12em] whitespace-nowrap pb-5" to={PAGE_PATHS.today}>{messages.common.appName}<span className="text-xs font-medium tracking-[.02em] text-fd-quiet">{t.onboard}</span></Link>
@@ -192,7 +192,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
         <button className="border-0 px-0 py-2 bg-none text-fd-quiet text-[12px] underline underline-offset-[3px] cursor-pointer" type="button" onClick={reset}>{t.restart}</button>
         <Link className="ml-auto no-underline text-[12px]" to="/ground/iss/agenda">{t.m1}<span aria-hidden="true"> ↗</span></Link>
       </section>
-      <div className={`grid grid-cols-[minmax(0,1fr)] ${chatOpen ? 'lg:grid-cols-[minmax(0,1fr)_350px]' : ''} min-h-0 max-w-[1600px] w-full mx-auto h-full`}>
+      <div className={`grid grid-cols-[minmax(0,1fr)] ${chatOpen ? 'lg:grid-cols-[minmax(0,1fr)_350px]' : ''} min-h-0 w-full mx-auto h-full`}>
         <main className="min-w-0 min-h-0 overflow-auto" id="fd-main" tabIndex={-1}>
           <div className="max-w-[1100px] mx-auto px-9 py-6">
             <div className="flex justify-between items-center gap-4 text-fd-quiet text-[11px] tracking-[.02em]"><span>{t.mission} <span className="mx-[9px] text-[#97a18e]" aria-hidden="true">/</span> {t.date}</span><time title={t.clock} className="text-fd-ink tabular-nums text-base whitespace-nowrap">{time} <small className="text-[10px] ml-1.5 text-fd-quiet">{t.clock}</small></time></div>
