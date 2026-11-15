@@ -17,6 +17,7 @@ import { CommanderView } from './CommanderView';
 import { WellbeingView } from './WellbeingView';
 import { RequestsView } from './RequestsView';
 import { OpsNavigation } from './OpsNavigation';
+import { FD30_PUBLIC_TEXT } from '../../demo/fd30PublicText';
 
 const at = (value: string) => Date.parse(`2027-03-10T${value}:00Z`);
 const time = at('10:41');
@@ -169,7 +170,7 @@ describe('OPS01 bilingual rendering and absence states', () => {
       const commander = html(createElement(OpsNavigation, { owner: COMMANDER, page: 'crew' }), locale);
       expect(ordinary).not.toContain('href="#/onboard/personal/crew"');
       expect(commander).toContain('href="#/onboard/personal/crew"');
-      expect(ordinary).toContain('href="#/demo/fd30/ground"');
+      expect(ordinary).not.toContain('href="#/demo/fd30/ground"');
     });
     it(`mounts Ground inside FD30 without private identity controls, chat, notices or source-event labels in ${locale}`, () => {
       let session = previewReduce(freshPreview(1000), { type: 'seek', target: time, now: 1000 });
@@ -180,6 +181,11 @@ describe('OPS01 bilingual rendering and absence states', () => {
         const out = renderToStaticMarkup(createElement(AppProvider, { children: createElement(I18nProvider, { locale,
           children: createElement(Fd30Preview, { page: 'ground' }) }) }));
         expect(out).toContain('data-surface="ground"');
+        const demo = out.split('<section class="fd-demo"')[1].split('<div class="fd-workspace"')[0];
+        expect(demo).toContain(FD30_PUBLIC_TEXT[locale].switchToOnboard);
+        expect(demo.match(/fd-perspective-switch/g)).toHaveLength(1);
+        expect(demo.match(/fd-secondary-link/g)).toHaveLength(1);
+        expect(out).not.toContain('ops-perspective');
         expect(out).toContain('10:41');
         expect(out.match(/data-ops-card=/g)).toHaveLength(3);
         expect(out).not.toMatch(/PRIVATE_CHAT|fd-view-as|fd-character|id="fd-ask"|role="status"|lab.sample|sample-lf|exercise.finished/);

@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { navigate, toHash } from '../app/routes';
-import { isGroundPage, isOperationalPage, LAST_OPERATIONAL_KEY, restoredOperationalPage } from '../app/publicRoutes';
-import type { OperationalPage } from '../app/publicRoutes';
+import { isGroundPage, isOnboardPage, LAST_ONBOARD_KEY, restoredOnboardPage } from '../app/publicRoutes';
+import type { OnboardFd30Page } from '../app/publicRoutes';
 import { FD30_PUBLIC_TEXT } from './fd30PublicText';
 import { Fd30GroundAgenda } from './Fd30GroundAgenda';
 import { useApp } from '../state/AppProvider';
@@ -58,14 +58,14 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
   const p = FD30_PUBLIC_TEXT[locale];
   const onGround = isGroundPage(page);
   const opsPage = page === 'ground' || page === 'crew' || page === 'wellbeing' || page === 'requests';
-  const [savedOperational] = useState(() => {
-    try { return restoredOperationalPage(sessionStorageOrNull()?.getItem(LAST_OPERATIONAL_KEY) ?? null); } catch { return 'today' as const; }
+  const [savedOnboard] = useState(() => {
+    try { return restoredOnboardPage(sessionStorageOrNull()?.getItem(LAST_ONBOARD_KEY) ?? null); } catch { return 'today' as const; }
   });
-  const lastOnboardPage = useRef<OperationalPage>(savedOperational);
-  if (isOperationalPage(page)) lastOnboardPage.current = page;
+  const lastOnboardPage = useRef<OnboardFd30Page>(savedOnboard);
+  if (isOnboardPage(page)) lastOnboardPage.current = page;
   useEffect(() => {
-    if (isOperationalPage(page)) {
-      try { sessionStorageOrNull()?.setItem(LAST_OPERATIONAL_KEY, page); } catch { /* Navigation memory is optional. */ }
+    if (isOnboardPage(page)) {
+      try { sessionStorageOrNull()?.setItem(LAST_ONBOARD_KEY, page); } catch { /* Navigation memory is optional. */ }
     }
   }, [page]);
   const [groundRole, setGroundRole] = useState<GroundRole>('mission_operator');
@@ -214,7 +214,7 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
       <a className="skip" href="#fd-main" onClick={e => { e.preventDefault(); document.getElementById('fd-main')?.focus(); }}>{messages.a11y.skipToContent}</a>
       <header className="fd-header">
         <a className="fd-brand" href={onGround ? '#/demo/fd30/ground' : '#/demo/fd30'}>{messages.common.appName}<span>{onGround ? o.ground : t.onboard}</span></a>
-        {onGround ? <nav className="fd-nav" aria-label={messages.a11y.missionNav}><a href="#/demo/fd30/ground" aria-current={page === 'ground' ? 'page' : undefined}>{p.overview}</a><a href="#/demo/fd30/ground/agenda" aria-current={page === 'ground-agenda' ? 'page' : undefined}>{p.agenda}</a><a href="#/demo/fd30/ground/catalog" aria-current={page === 'ground-catalog' ? 'page' : undefined}>{p.catalog}</a><a href={toHash({ view: 'fd30', page: lastOnboardPage.current })}>{p.onboard}</a></nav> : <nav className="fd-nav" aria-label={messages.a11y.missionNav}>
+        {onGround ? <nav className="fd-nav" aria-label={messages.a11y.missionNav}><a href="#/demo/fd30/ground" aria-current={page === 'ground' ? 'page' : undefined}>{p.overview}</a><a href="#/demo/fd30/ground/agenda" aria-current={page === 'ground-agenda' ? 'page' : undefined}>{p.agenda}</a><a href="#/demo/fd30/ground/catalog" aria-current={page === 'ground-catalog' ? 'page' : undefined}>{p.catalog}</a></nav> : <nav className="fd-nav" aria-label={messages.a11y.missionNav}>
           <a href="#/demo/fd30" aria-current={page === 'today' ? 'page' : undefined}>{t.today}</a>
           <a href="#/onboard/personal/agenda" aria-current={page === 'agenda' ? 'page' : undefined}>{t.agendaNav}</a>
           <a href="#/onboard/personal/sleep" aria-current={page === 'sleep' ? 'page' : undefined} onClick={e => { e.preventDefault(); openSleep(); }}>{t.sleep}</a>
@@ -222,8 +222,6 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
           <a href="#/onboard/personal/laboratory" aria-current={page === 'laboratory' ? 'page' : undefined} onClick={e => { e.preventDefault(); openLaboratory(); }}>{t.laboratory}</a>
           <a href="#/onboard/personal/catalog" aria-current={page === 'catalog' ? 'page' : undefined}>{t.catalog}</a>
         </nav>}
-        {/* Sources & evidence: a secondary access in both perspectives, same routes as before. */}
-        <a className="fd-secondary-link" href={onGround ? '#/demo/fd30/ground/evidence' : '#/onboard/personal/evidence'} aria-current={page === 'evidence' || page === 'ground-evidence' ? 'page' : undefined}>{t.evidence}</a>
         {!onGround && <div className="fd-identity"><span className="fd-profile-mark" aria-hidden="true">✳</span><span><strong>{crew.name}</strong><small>{t.crew}</small></span></div>}
         <div className="fd-languages" role="group" aria-label={messages.common.language}>
           {(['en', 'es'] as const).map(lang => <button key={lang} type="button" lang={lang} aria-pressed={locale === lang} onClick={() => appDispatch({ type: 'locale/set', locale: lang })}>{lang.toUpperCase()}</button>)}
@@ -231,6 +229,10 @@ export function Fd30Preview({ page }: { page: Fd30Page }) {
       </header>
       <section className="fd-demo" aria-label={t.demo}>
         <div><strong>{t.demo}</strong><span>{t.demoHint}</span></div>
+        <div className="fd-demo-navigation">
+          <button className="fd-perspective-switch" type="button" onClick={() => navigate({ view: 'fd30', page: onGround ? lastOnboardPage.current : 'ground' })}>{onGround ? p.switchToOnboard : p.switchToGround}</button>
+          <a className="fd-secondary-link" href={onGround ? '#/demo/fd30/ground/evidence' : '#/onboard/personal/evidence'} aria-current={page === 'evidence' || page === 'ground-evidence' ? 'page' : undefined}>{t.evidence}</a>
+        </div>
         {!onGround && <label className="fd-view-as"><span>{t.viewAs}</span><select aria-label={t.viewAs} value={owner} onChange={e => { setChatOpen(false); setShowing(false); setAnnouncement(''); dispatch({ type: 'select', crewId: e.target.value as CrewId }); }}>{CREW.map(c => <option key={c.id} value={c.id}>{c.name} · {c.character}</option>)}</select></label>}
         <button className="fd-next" type="button" disabled={!nextEvent} onClick={() => { const n = Date.now(); setNow(n); dispatch({ type: 'next', now: n }); }}>{!nextEvent ? t.end : t.next}<span>{!onGround && nextEvent && nextLabel}</span>{nextEvent && <Arrow />}</button>
         <button className="fd-reset" type="button" onClick={reset}>{t.restart}</button>

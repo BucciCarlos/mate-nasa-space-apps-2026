@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { publicHash, publicRoute, restoredOperationalPage } from './publicRoutes';
+import { publicHash, publicRoute, restoredOnboardPage } from './publicRoutes';
 import { parseRoute } from './routes';
 
 const aliases = {
@@ -28,9 +28,11 @@ describe('FD30 public routing boundary', () => {
     expect(parseRoute('#/onboard/today')?.view).toBe('onboard');
     expect(publicRoute('#/ground/iss/agenda')).toEqual({ view: 'fd30', page: 'ground-agenda' });
   });
-  it('keeps only a validated last operational page; catalogs and Evidence do not replace it', () => {
-    expect(restoredOperationalPage('exercise')).toBe('exercise');
-    expect(restoredOperationalPage('agenda')).toBe('agenda');
-    for (const raw of [null, 'catalog', 'evidence', 'ground', 'ground-agenda', '#/ground/iss/link', 'unknown']) expect(restoredOperationalPage(raw)).toBe('today');
+  it('restores the last visited Onboard section, including Catalog and Evidence', () => {
+    expect(restoredOnboardPage('exercise')).toBe('exercise');
+    expect(restoredOnboardPage('agenda')).toBe('agenda');
+    expect(restoredOnboardPage('catalog')).toBe('catalog');
+    expect(restoredOnboardPage('evidence')).toBe('evidence');
+    for (const raw of [null, 'ground', 'ground-agenda', '#/ground/iss/link', 'unknown']) expect(restoredOnboardPage(raw)).toBe('today');
   });
 });

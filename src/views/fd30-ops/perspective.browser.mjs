@@ -27,14 +27,16 @@ try {
     await page.locator('.fd-character').click(); await page.locator('#fd-ask').fill('private continuity draft');
     const saved = () => page.evaluate(key => JSON.parse(sessionStorage.getItem(key)), key);
     const before = await saved();
-    await page.locator('.ops-perspective').click(); await page.locator('[data-surface="ground"]').waitFor();
+    await page.locator('.fd-perspective-switch').click(); await page.locator('[data-surface="ground"]').waitFor();
     assert.equal(await page.getByRole('slider').inputValue(), String(target));
     assert.equal(await page.locator('.fd-chat,.fd-character,.fd-view-as,[role="status"]').count(), 0);
     await page.locator('.ops-role select').selectOption('medical_professional');
     await page.locator('[data-ops-card="iss:crew-mo"] button').click();
     assert.equal((await saved()).activeCrewId, before.activeCrewId);
     assert.equal(await page.locator('.ops-medical-empty').count(), 1);
-    await page.locator('.fd-nav a[href="#/onboard/personal/exercise"]').click();
+    await page.locator('.fd-demo .fd-secondary-link').click();
+    await page.locator('.evd[data-perspective="ground"] [data-chart="labs"]').waitFor();
+    await page.locator('.fd-perspective-switch').click();
     await page.locator('#fd-ask').waitFor();
     assert.equal(await page.getByRole('slider').inputValue(), String(target));
     assert.equal(await page.locator('#fd-ask').inputValue(), 'private continuity draft');
@@ -48,15 +50,30 @@ try {
     await page.locator('.fd-view-as select').selectOption('iss:crew-ti');
     await page.locator('.ops-navigation a[href$="/crew"]').click();
     await page.locator('[data-commander-person]').first().waitFor();
-    await page.locator('.ops-perspective').click(); await page.locator('[data-surface="ground"]').waitFor();
+    await page.locator('.fd-perspective-switch').click(); await page.locator('[data-surface="ground"]').waitFor();
     await page.locator('[data-ops-card="iss:crew-lf"] button').click();
     assert.equal((await saved()).activeCrewId, 'iss:crew-ti');
-    await page.locator('.fd-nav a[href="#/onboard/personal/crew"]').click();
+    await page.locator('.fd-perspective-switch').click();
     await page.locator('[data-commander-person]').first().waitFor();
     assert.equal(await page.getByRole('slider').inputValue(), String(target));
     assert.equal(await page.locator('.fd-view-as select').inputValue(), 'iss:crew-ti');
+    // Evidence is now a valid last-visited section; both links stay in Demo mode.
+    await page.locator('.fd-demo .fd-secondary-link').click();
+    await page.locator('.evd[data-perspective="onboard"] [data-chart="labs"]').waitFor();
+    await page.locator('.fd-perspective-switch').click();
+    await page.locator('[data-ops-card]').first().waitFor();
+    await page.locator('.fd-demo .fd-secondary-link').click();
+    await page.locator('.evd[data-perspective="ground"] [data-chart="labs"]').waitFor();
+    await page.locator('.fd-perspective-switch').click();
+    await page.locator('.evd[data-perspective="onboard"] [data-chart="labs"]').waitFor();
+    assert.equal(new URL(page.url()).hash, '#/onboard/personal/evidence');
+    assert.equal(await page.getByRole('slider').inputValue(), String(target));
+    assert.equal(await page.locator('.fd-view-as select').inputValue(), 'iss:crew-ti');
+    assert.equal(await page.locator('.fd-demo .fd-perspective-switch').count(), 1);
+    assert.equal(await page.locator('.fd-demo .fd-secondary-link').count(), 1);
+    assert.equal(await page.locator('.fd-header .fd-secondary-link,.ops-perspective').count(), 0);
     assert.deepEqual(errors, []);
-    results.push({ locale, width, preserved: 'clock, profile, private draft, position, open chat and Exercise table' });
+    results.push({ locale, width, preserved: 'clock, profile, private draft, position, open chat, Exercise table and Evidence return' });
     await context.close();
   }
 } finally { await browser.close(); }

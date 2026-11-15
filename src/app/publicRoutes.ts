@@ -3,11 +3,12 @@ import { parseRoute, toHash } from './routes';
 
 export type Fd30Route = Extract<Route, { view: 'fd30' }>;
 export type Fd30Page = Fd30Route['page'];
-const operational = ['today', 'sleep', 'exercise', 'laboratory', 'agenda', 'crew', 'wellbeing', 'requests'] as const;
-export type OperationalPage = typeof operational[number];
-export const LAST_OPERATIONAL_KEY = 'mate:fd30:last-operational:v1';
-export const isOperationalPage = (page: string): page is OperationalPage => operational.some(p => p === page);
-export const restoredOperationalPage = (raw: string | null): OperationalPage => raw && isOperationalPage(raw) ? raw : 'today';
+const onboardPages = ['today', 'sleep', 'exercise', 'laboratory', 'agenda', 'crew', 'wellbeing', 'requests', 'catalog', 'evidence'] as const;
+export type OnboardFd30Page = typeof onboardPages[number];
+// Retain the existing session key; it now also accepts reference sections.
+export const LAST_ONBOARD_KEY = 'mate:fd30:last-operational:v1';
+export const isOnboardPage = (page: string): page is OnboardFd30Page => onboardPages.some(p => p === page);
+export const restoredOnboardPage = (raw: string | null): OnboardFd30Page => raw && isOnboardPage(raw) ? raw : 'today';
 export const isGroundPage = (page: Fd30Page) => page === 'ground' || page.startsWith('ground-');
 
 /** Public boundary only. The legacy parser/contracts remain available to internal M1 tests. */

@@ -1,5 +1,6 @@
 export const FD30_PUBLIC_TEXT = {
   en: {
+    switchToGround: 'Switch to Ground', switchToOnboard: 'Switch to Onboard',
     ground: 'Ground', onboard: 'Onboard', overview: 'Overview', agenda: 'Crew schedule', catalog: 'Catalog',
     title: 'Crew schedule', intro: 'The three crew members share one FD30 mission clock. Browse the plan in a timeline or cards.',
     planning: 'Planned activities only. A reservation does not confirm attendance or exercise. No task editing or message delivery is available here.',
@@ -10,6 +11,7 @@ export const FD30_PUBLIC_TEXT = {
     affected: 'Planned for', planned: 'Planned · not confirmation of completion',
   },
   es: {
+    switchToGround: 'Cambiar a Tierra', switchToOnboard: 'Cambiar a A bordo',
     ground: 'Tierra', onboard: 'A bordo', overview: 'Portada', agenda: 'Agenda de tripulación', catalog: 'Catálogo',
     title: 'Agenda de tripulación', intro: 'Los tres tripulantes comparten un solo reloj de misión FD30. Consultá el plan en una línea de tiempo o en tarjetas.',
     planning: 'Solo actividades planificadas. Una reserva no confirma asistencia ni ejercicio. Esta vista no permite editar tareas ni entregar mensajes.',
