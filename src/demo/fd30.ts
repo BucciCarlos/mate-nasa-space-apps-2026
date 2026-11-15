@@ -13,8 +13,8 @@ export const CREW = [
   { id: 'iss:crew-mo', name: 'Mei Okada', character: 'Pip', shape: 'pip' },
 ] as const;
 /** MATE-CAP01: presentation-only profile for screenshots. Not operational crew (Ground, Crew dynamics and guided tours keep CREW);
- *  its data are Lucía's (see dataOwner) while name, companion (Luna), chat, draft, position and voice stay its own. */
-export const JOHN = { id: 'iss:crew-jd', name: 'John Doe', character: 'Luna', shape: 'luna' } as const;
+ *  its data are Lucía's (see dataOwner) while name, companion (the original Orbit, internal variant 'luna'), chat, draft, position and voice stay its own. */
+export const JOHN = { id: 'iss:crew-jd', name: 'John Doe', character: 'Orbit', shape: 'luna' } as const;
 export const ONBOARD_PROFILES = [...CREW, JOHN] as const;
 export type CrewId = typeof CREW[number]['id'];
 /** A selectable A bordo profile: operational crew or the screenshot profile. Records are always keyed by CrewId. */

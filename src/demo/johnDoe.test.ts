@@ -18,8 +18,8 @@ const as = (id: typeof ONBOARD_PROFILES[number]['id'], h: string) => {
 };
 
 describe('John Doe capture profile', () => {
-  it('is selectable with his own identity and the original Luna companion; the three crew profiles are unchanged', () => {
-    expect(JOHN).toMatchObject({ name: 'John Doe', character: 'Luna', shape: 'luna' });
+  it('is selectable with his own identity and the original Orbit companion; the three crew profiles are unchanged', () => {
+    expect(JOHN).toMatchObject({ name: 'John Doe', character: 'Orbit', shape: 'luna' });
     expect(CREW.map(c => c.shape)).toEqual(['lira', 'flop', 'pip']);
     expect(ONBOARD_PROFILES.map(c => c.id)).toEqual([...CREW.map(c => c.id), JOHN.id]);
     expect(as(JOHN.id, '08:00').activeCrewId).toBe(JOHN.id);

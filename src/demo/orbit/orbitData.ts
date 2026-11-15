@@ -1,6 +1,6 @@
 import layoutJson from './assets/layout.json';
 
-/** Orbit variants. Luna is the original and the default; Lira, Flop and Pip are the per-profile companions. */
+/** Orbit variants. The original (`luna`, shown as «Orbit») is the default; Lira, Flop and Pip are the per-profile companions. */
 export type OrbitVariant = 'luna' | 'lira' | 'flop' | 'pip';
 export type Pose = 'idle' | 'news' | 'interaction';
 export type Expression = 'rest' | 'happy' | 'alert' | 'attentive';
