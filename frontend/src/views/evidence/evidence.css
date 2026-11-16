@@ -1,6 +1,8 @@
 /* Evidence and Sources. Scoped to .evd; uses the shared tokens of the host surface (onboard light / ground dark).
    Series differ by marker shape, dash pattern and direct label, never by color alone. */
 .evd { color: var(--fg); max-width: 1120px; }
+.evd-data-status { padding: var(--sp-2) var(--sp-3); margin: 0 0 var(--sp-3); border-radius: var(--r-2); background: var(--bg-2); border: 1px solid var(--line); color: var(--fg-2); font-size: 14px; }
+.evd-data-status-error { border-left: 4px solid var(--crit, #a33a2a); color: var(--crit, #a33a2a); }
 .evd-head p, .evd-muted, .evd-meta { color: var(--fg-2); }
 .evd-historical { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r-2); padding: var(--sp-2) var(--sp-3); margin: var(--sp-3) 0; background: var(--bg-2); }
 .evd-historical p { margin: 2px 0 0; }

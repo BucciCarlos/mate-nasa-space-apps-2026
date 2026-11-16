@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "M.A.T.E. API",
+    "_postman_id": "3f6a9c2e-7b1d-4e5a-9c3f-2d8b6a1e0f45",
+    "description": "Backend FastAPI — scenario, sources, evidence and companion chat",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "List Scenarios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/scenarios",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "scenarios"]
+        }
+      }
+    },
+    {
+      "name": "Get Scenario",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/scenarios/iss",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "scenarios", "iss"]
+        }
+      }
+    },
+    {
+      "name": "List Sources",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/sources",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "sources"]
+        }
+      }
+    },
+    {
+      "name": "Get FD30",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/fd30",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "fd30"]
+        }
+      }
+    },
+    {
+      "name": "List Evidence",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/evidence",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "evidence"]
+        }
+      }
+    },
+    {
+      "name": "Get Evidence",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/evidence/labs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "evidence", "labs"]
+        }
+      }
+    },
+    {
+      "name": "Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Show me what changed in my agenda\",\n  \"lang\": \"en\",\n  \"context\": null\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat"]
+        }
+      }
+    },
+    {
+      "name": "Chat (es)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Mostrame qué cambio en mi agenda\",\n  \"lang\": \"es\",\n  \"context\": null\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat"]
+        }
+      }
+    },
+    {
+      "name": "Chat (with context)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"How will this affect my sleep?\",\n  \"lang\": \"en\",\n  \"context\": \"Day 12 of 30. Rest window moved from 22:30-06:30 to 23:15-07:15 due to a radiation watch. Planned exercise: 52 min ARED. Laboratory: 2 samples pending.\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "chat"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8002",
+      "type": "string"
+    }
+  ]
+}

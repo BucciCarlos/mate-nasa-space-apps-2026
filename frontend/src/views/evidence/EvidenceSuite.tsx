@@ -1,14 +1,15 @@
-// Evidence and Sources for M.A.T.E. Mount it with a perspective; it reads no mission, profile or FD30 state and grants no access.
-//   On board (FD30):  <EvidenceSuite perspective="onboard" profileName={crew.name} />
-//   On Ground:        <EvidenceSuite perspective="ground" />
-// Data come from `src/data/evidence/*.json` through `EVIDENCE_DATA`, or from the `data` prop. Absent or invalid inputs show their state.
+// Evidence and Sources for M.A.T.E. Presentational: it renders whatever
+// `data` it is given and reads no mission, profile or FD30 state. Mount it via
+// <EvidenceData> (which fetches from the backend) rather than directly.
+//   <EvidenceData perspective="onboard" profileName={crew.name} />
+//   <EvidenceData perspective="ground" />
+// Absent or invalid inputs show the view's own no-data state.
 import { useId, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useLocale } from '../../i18n/I18nProvider';
 import { EVIDENCE_TABS } from './evidenceTypes';
 import type { EvidenceSuiteProps, EvidenceTab } from './evidenceTypes';
 import { EVIDENCE_TEXT } from './evidenceText';
-import { EVIDENCE_DATA } from './evidenceData';
 import { EVIDENCE_SOURCES } from './evidenceSources';
 import { HistoricalNote } from './parts';
 import { LabsView } from './LabsView';
@@ -18,7 +19,7 @@ import { Co2View } from './Co2View';
 import { SourcesView } from './SourcesView';
 import './evidence.css';
 
-export function EvidenceSuite({ perspective, data = EVIDENCE_DATA, sources = EVIDENCE_SOURCES, tab: controlled, onTabChange, profileName }: EvidenceSuiteProps) {
+export function EvidenceSuite({ perspective, data, sources = EVIDENCE_SOURCES, tab: controlled, onTabChange, profileName }: EvidenceSuiteProps) {
   const locale = useLocale();
   const t = EVIDENCE_TEXT[locale];
   const base = useId();
@@ -60,5 +61,4 @@ export function EvidenceSuite({ perspective, data = EVIDENCE_DATA, sources = EVI
 }
 
 export { EVIDENCE_SOURCES } from './evidenceSources';
-export { EVIDENCE_DATA } from './evidenceData';
 export type { EvidenceData, EvidenceSource, EvidenceSuiteProps, EvidenceTab, I4Labs, TepcWindow, SleepAggregate, Co2Status } from './evidenceTypes';

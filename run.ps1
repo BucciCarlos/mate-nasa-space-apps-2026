@@ -1,9 +1,9 @@
 # M.A.T.E. — Medical & Astronaut Therapeutic Environment (NASA Space Apps 2026)
-# Levanta backend (FastAPI) en :8002 + frontend (Vite) en :5173.
+# Compila el frontend y levanta backend (FastAPI) en :8002 + frontend (Vite) en :5173.
 #
 # Uso:
-#   .\run.ps1            # backend :8002 + frontend :5173
-#   .\run.ps1 -NoBuild   # (el build de producción se hace con `pnpm build` en frontend/)
+#   .\run.ps1            # build del frontend + backend :8002 + frontend :5173
+#   .\run.ps1 -NoBuild   # salta el build del frontend
 #
 param(
     [switch]$NoBuild
@@ -31,9 +31,27 @@ foreach ($port in @(8002, 5173)) {
 }
 
 # ------------------------------------------------------------------
-# 1. Backend FastAPI (uvicorn) en :8002
+# 1. Build del frontend (emite en backend/app/static)
 # ------------------------------------------------------------------
-Write-Host "==> [1/2] Levantando backend FastAPI en http://localhost:8002 ..."
+if (-not $NoBuild) {
+    Write-Host "==> [1/3] Compilando frontend (Vite + Tailwind)..."
+    Push-Location $FRONTEND
+    try {
+        if (-not (Test-Path "node_modules")) {
+            pnpm install --silent
+        }
+        pnpm build
+    } finally {
+        Pop-Location
+    }
+} else {
+    Write-Host "==> [1/3] Build del frontend omitido (-NoBuild)"
+}
+
+# ------------------------------------------------------------------
+# 2. Backend FastAPI (uvicorn) en :8002
+# ------------------------------------------------------------------
+Write-Host "==> [2/3] Levantando backend FastAPI en http://localhost:8002 ..."
 
 $VENV_ACTIVATE = Join-Path $BACKEND ".venv\Scripts\Activate.ps1"
 
@@ -50,9 +68,9 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8002
 $BACKEND_JOB = Start-Job -ScriptBlock ([scriptblock]::Create($backendScript))
 
 # ------------------------------------------------------------------
-# 2. Frontend Vite dev en :5173 (API en http://localhost:8002)
+# 3. Frontend Vite dev en :5173 (API en http://localhost:8002)
 # ------------------------------------------------------------------
-Write-Host "==> [2/2] Levantando frontend Vite en http://localhost:5173 ..."
+Write-Host "==> [3/3] Levantando frontend Vite en http://localhost:5173 ..."
 $FRONTEND_JOB = Start-Job -ScriptBlock {
     param($dir)
     Set-Location $dir

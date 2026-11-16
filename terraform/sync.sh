@@ -8,7 +8,7 @@
 #    .pytest_cache, tests y .git. Vercel instala las dependencias por sí
 #    mismo a partir de requirements.txt.
 #
-# Uso:  ./sync.sh   (desde la carpeta terraform/)
+# Uso:  ./sync.sh   (desde la carpeta terraform/ o desde la raíz del repo)
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
@@ -19,7 +19,7 @@ FRONTEND="$ROOT/frontend"
 DEST="$ROOT/deploy/backend"
 
 # 1) Build del frontend → backend/app/static
-echo ">> Build del frontend (pnpm build) → backend/app/static"
+echo ">> [1/2] Build del frontend (pnpm build) → backend/app/static"
 (
   cd "$FRONTEND"
   pnpm install --frozen-lockfile
@@ -27,7 +27,7 @@ echo ">> Build del frontend (pnpm build) → backend/app/static"
 )
 
 # 2) Copia limpia para Vercel
-echo ">> Copiando $SRC -> $DEST (excluyendo .venv, __pycache__, .pytest_cache, tests)"
+echo ">> [2/2] Copiando $SRC -> $DEST (excluyendo .venv, __pycache__, .pytest_cache, tests)"
 
 rm -rf "$DEST"
 mkdir -p "$DEST"
@@ -41,8 +41,15 @@ rsync -a \
   --exclude '.git' \
   "$SRC"/ "$DEST"/
 
+# Verificación: ¿el build está presente?
+if [ ! -f "$DEST/app/static/index.html" ]; then
+  echo "ERROR: backend/app/static/index.html no existe después del build." >&2
+  echo "El frontend no se compiló correctamente. Revisa la salida de pnpm build." >&2
+  exit 1
+fi
+
 # Resumen
 COUNT="$(find "$DEST" -type f | wc -l | tr -d ' ')"
 SIZE="$(du -sh "$DEST" | cut -f1)"
 echo ">> Listo: $COUNT archivos, $SIZE"
-echo ">> Ahora ejecuta: terraform apply"
+echo ">> Ahora ejecuta: cd terraform && terraform apply"

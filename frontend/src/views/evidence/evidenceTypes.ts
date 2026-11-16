@@ -98,7 +98,8 @@ export interface EvidenceData { labs?: unknown; radiation?: unknown; sleep?: unk
 export interface EvidenceSuiteProps {
   /** Host perspective. It changes only the wording of the "not telemetry" note, never the content or the access. */
   perspective: 'onboard' | 'ground';
-  data?: EvidenceData;
+  /** Validated evidence subsets. Provided by <EvidenceData> (fetched from the backend). Absent fields show the view's no-data state. */
+  data: EvidenceData;
   sources?: readonly EvidenceSource[];
   /** Controlled tab (optional). Without it the suite keeps its own. */
   tab?: EvidenceTab;

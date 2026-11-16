@@ -5,6 +5,8 @@ import type { FailureCode } from './validate';
 const en = {
   title: 'Evidence and sources',
   intro: 'Published data and sources. They are kept apart from the FD30 scenario and from anyone’s profile.',
+  loading: 'Loading evidence data…',
+  loadError: 'Could not load the evidence data from the server. The sections below show their no-data state.',
   tabsLabel: 'Evidence sections',
   tabs: { labs: 'Inspiration4 labs', radiation: 'Ambient radiation', sleep: 'Sleep and schedules', co2: 'Cabin CO₂', sources: 'Sources' },
   historical: 'Historical evidence, not FD30 telemetry',
@@ -146,6 +148,8 @@ export type EvidenceMessages = typeof en;
 const es: EvidenceMessages = {
   title: 'Evidencia y fuentes',
   intro: 'Datos y fuentes publicados. Se mantienen separados del escenario FD30 y del perfil de cualquier persona.',
+  loading: 'Cargando datos de evidencia…',
+  loadError: 'No se pudieron cargar los datos de evidencia del servidor. Las secciones muestran su estado sin datos.',
   tabsLabel: 'Secciones de evidencia',
   tabs: { labs: 'Laboratorio Inspiration4', radiation: 'Radiación ambiental', sleep: 'Sueño y horarios', co2: 'CO₂ de cabina', sources: 'Fuentes' },
   historical: 'Evidencia histórica, no telemetría de FD30',

@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CompanionTurn, IntentId, InputMode, UiAction } from '../../state/types';
+import { useSpeechToText } from '../../demo/useSpeechToText';
+import { useTextToSpeech } from '../../demo/useTextToSpeech';
 import { ONBOARD_MISSION_ID } from '../../state/types';
 import { useApp } from '../../state/AppProvider';
-import { companionAsked, companionActionsExecuted, uiCompanionToggle, uiHighlightSet, uiObservationPrefill, uiRangeSet, uiSourceOpen } from '../../state/mateSlice';
+import { companionAsked, companionActionsExecuted, companionAgentReply, uiCompanionToggle, uiHighlightSet, uiObservationPrefill, uiRangeSet, uiSourceOpen } from '../../state/mateSlice';
+import { askAgent } from '../../state/api';
+import { makeId } from '../../domain/ids';
 import { selectOnboard } from '../../state/selectors';
+import { flightDay, missionTimeMs } from '../../domain/time';
+import { fmtInterval } from '../../i18n/format';
+import type { AppState } from '../../state/types';
 import { useLocale, useT } from '../../i18n/I18nProvider';
 import { renderReply } from '../../i18n/companionText';
 import { matchIntent } from '../../domain/companion/intents';
@@ -16,6 +23,52 @@ import { UserTextView } from '../shared/UserTextView';
 
 const chipBtn = 'inline-flex items-center gap-1 px-3 py-1 rounded-full border border-line bg-bg3 text-fs1 cursor-pointer hover:bg-bg';
 
+/**
+ * Builds a compact operational context string for the companion LLM, e.g.:
+ * "Day 12 of 30. Rest window 22:30–06:30 UTC. Planned exercise: 52 min.
+ *  Link: up. 3 observations logged today."
+ */
+function buildOnboardContext(state: AppState): string {
+  const m = state.missions[ONBOARD_MISSION_ID];
+  if (!m) return '';
+  const nowMs = Date.now();
+  const missionMs = missionTimeMs(m.clockStart, state.sessionStartMs, nowMs);
+  const day = flightDay(m.flightDayOne, missionMs);
+
+  // Current user's name
+  const user = m.crew.find((c) => c.id === m.onboardUserId);
+  const userName = user?.name ?? 'the astronaut';
+
+  const lines: string[] = [];
+  lines.push(`Crew member: ${userName}`);
+  lines.push(`Flight day: ${day}`);
+  lines.push(`Link status: ${m.link.status}`);
+
+  // Full agenda: all blocks that include the current user, sorted by start time.
+  const blocks = m.onboard.plan.blocks
+    .filter((b) => m.onboardUserId && b.crewIds.includes(m.onboardUserId))
+    .sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+
+  if (blocks.length > 0) {
+    lines.push('');
+    lines.push('Today\'s agenda:');
+    for (const b of blocks) {
+      const dur = Math.round((Date.parse(b.end) - Date.parse(b.start)) / 60000);
+      lines.push(`  ${fmtInterval(b, 'en')} — ${b.title.en} (${b.kind}, ${dur} min)`);
+    }
+  }
+
+  // Unseen notices
+  const unseen = m.onboard.notices.filter((n) => !n.seen).length;
+  if (unseen > 0) lines.push(`Unread schedule changes: ${unseen}`);
+
+  // Observations logged
+  const obsCount = m.onboard.observations.length;
+  if (obsCount > 0) lines.push(`Observations logged: ${obsCount}`);
+
+  return lines.join('\n');
+}
+
 export function CompanionPanel({ announce }: { announce: (text: string) => void }) {
   const { state, dispatch } = useApp();
   const t = useT();
@@ -24,6 +77,9 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
   const open = state.ui.companionOpen;
   const [text, setText] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const stt = useSpeechToText(() => locale);
+  const tts = useTextToSpeech();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const executedRef = useRef<Set<string>>(new Set());
@@ -33,12 +89,54 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
   const ask = (intent: IntentId, mode: InputMode, raw: string | null) => {
     dispatch(companionAsked(ONBOARD_MISSION_ID, { mode, text: raw ? { text: raw, lang: locale } : null, intent }, Date.now()));
   };
+
+  // Free-text and voice input go through the backend LLM (same as FD30).
+  // Chips use the local intent engine so actions (navigate, highlight, etc.)
+  // keep working without an LLM round-trip.
+  const askViaAgent = async (raw: string, mode: InputMode) => {
+    // companionAsked pushes a user turn (seq+1) and a companion placeholder
+    // (seq+2). The reply lives on the companion turn, so target seq+2.
+    // Compute it from the current seq so we don't read the stale conversation.
+    const seq = state.missions[ONBOARD_MISSION_ID]?.seq ?? 0;
+    const companionTurnId = makeId(ONBOARD_MISSION_ID, 'turn', seq + 2);
+    // Push user turn + placeholder reply so the UI shows the question immediately.
+    ask(matchIntent(raw), mode, raw);
+    try {
+      const context = buildOnboardContext(state);
+      const result = await askAgent(dispatch, { text: raw, lang: locale, context });
+      dispatch(companionAgentReply(ONBOARD_MISSION_ID, companionTurnId, result.reply, result.model));
+      // Auto-speak the reply (text-to-speech via runonweb, local synthesis).
+      void tts.speak(result.reply, locale);
+    } catch {
+      // LLM unreachable — the placeholder reply stays (demo mode).
+    }
+  };
+
   const submit = () => {
     const raw = text.trim();
     if (!raw) return;
-    ask(matchIntent(raw), 'text', raw);
     setText('');
+    void askViaAgent(raw, 'text');
   };
+
+  // Real speech-to-text (same flow as FD30): tap to record, tap again to
+  // transcribe in the browser (Whisper via runonweb), then ask with the
+  // transcript. Audio never leaves the tab.
+  const askVoice = async () => {
+    setVoiceError(null);
+    try {
+      if (stt.phase === 'recording') {
+        const transcript = await stt.transcribe();
+        if (transcript) void askViaAgent(transcript, 'simulated_voice');
+        return;
+      }
+      await stt.start();
+    } catch (e) {
+      setVoiceError(e instanceof Error ? e.message : t.companion.micError('unknown error'));
+    }
+  };
+  const micLabel = stt.phase === 'recording' ? t.companion.micRecording : stt.phase === 'transcribing' ? t.companion.micTranscribing : stt.phase === 'loading' ? t.companion.micLoading : stt.phase === 'ready' ? t.companion.micReady : t.companion.micHint;
+  const micDisabled = !stt.supported || stt.phase === 'loading' || stt.phase === 'transcribing';
 
   // Execute reply actions once, in order (02 §8.4)
   useEffect(() => {
@@ -83,7 +181,7 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
       return (
         <div key={c.id} className="border border-line border-l-4 border-l-accent rounded-md px-3 py-2 my-1 bg-bg3">
           <span className="font-semibold text-fs0 uppercase tracking-[0.06em] text-fg2">{t.companion.you}</span>
-          {c.input.mode === 'simulated_voice' && <span className="text-[11px] text-fg2">🎙 {t.companion.voiceTag}</span>}
+          {c.input.mode === 'simulated_voice' && <span className="text-[11px] text-fg2">🎙 {t.companion.voiceTranscription}</span>}
           {c.input.mode === 'chip' && <span className="text-[11px] text-fg2">{t.companion.chipTag}</span>}
           <p className="my-1">{c.input.text ? <UserTextView text={c.input.text} /> : t.intents[c.input.intent]}</p>
         </div>
@@ -140,15 +238,45 @@ export function CompanionPanel({ announce }: { announce: (text: string) => void 
             {chipButtons(chips, 'chip')}
             <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="flex gap-2 mt-1">
               <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t.companion.askPlaceholder({ name: state.companion.name })} aria-label={t.companion.askPlaceholder({ name: state.companion.name })} lang={locale} className="flex-1 font-inherit px-2 py-1 rounded border border-line bg-bg3 text-fg text-fs1" />
-              <button type="button" className="px-2 py-1 rounded border border-line bg-transparent cursor-pointer" aria-label={t.companion.micButton} aria-expanded={voiceOpen} onClick={() => setVoiceOpen(true)}><span aria-hidden="true">🎙</span></button>
+              {stt.supported && (
+                <button type="button" className="px-2 py-1 rounded border border-line bg-transparent cursor-pointer" aria-label={micLabel} disabled={micDisabled} onClick={() => { void askVoice(); }}>
+                  <span aria-hidden="true">🎙</span><span className="text-[11px]">{micLabel}</span>
+                </button>
+              )}
+              <button type="button" className="px-2 py-1 rounded border border-line bg-transparent cursor-pointer" aria-label={t.companion.micButton} aria-expanded={voiceOpen} onClick={() => setVoiceOpen(true)}><span aria-hidden="true">✳</span></button>
               <button type="submit" className="px-3 py-1 rounded-md font-bold bg-accent text-accent-fg border border-transparent cursor-pointer">{t.companion.send}</button>
             </form>
           </div>
+          {stt.supported && (
+            <p className={`text-fs0 mt-1 ${stt.error || voiceError ? 'text-danger' : 'text-fg2'}`} role={stt.error || voiceError ? 'alert' : undefined}>
+              {stt.error ?? voiceError ?? t.companion.micHint}
+            </p>
+          )}
+          {!stt.supported && <p className="text-fs0 mt-1 text-fg2">{t.companion.micUnsupported}</p>}
+          {tts.phase === 'speaking' && (
+            <p className="text-fs0 mt-1 text-accent" role="status">🔊 Speaking…</p>
+          )}
+          {tts.phase === 'error' && (
+            <p className="text-fs0 mt-1 text-danger" role="alert">TTS error: {tts.error}</p>
+          )}
+          {(tts.phase === 'downloading' || tts.phase === 'loading') && (
+            <div className="border border-line rounded-md px-3 py-2 my-1 bg-bg3" role="alertdialog" aria-label="Loading speech model">
+              <p className="text-fs1 font-semibold">🔊 Loading speech model…</p>
+              <p className="text-fg2 text-fs0 mt-0.5">This happens once (~365 MB). Subsequent replies are instant.</p>
+              {tts.progress && (
+                <div className="mt-2">
+                  <div className="w-full h-2 bg-bg rounded-full overflow-hidden">
+                    <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${tts.progress.percent}%` }} />
+                  </div>
+                  <p className="text-fg2 text-fs0 mt-1">{tts.progress.percent}% {tts.progress.label && `· ${tts.progress.label}`}</p>
+                </div>
+              )}
+            </div>
+          )}
           {voiceOpen && (
             <div className="border border-line rounded-md px-3 py-2 my-2 bg-bg3" role="dialog" aria-modal="true" aria-labelledby="voice-h">
               <h3 id="voice-h">{t.companion.voiceSheetTitle}</h3>
               <p className="text-fg2 text-fs0">{t.companion.voiceSheetBody}</p>
-              <div className="flex gap-1 h-6 items-end my-2" aria-hidden="true"><span /><span /><span /><span /><span /></div>
               {chipButtons(chips.slice(0, 4), 'simulated_voice', () => setVoiceOpen(false))}
               <button type="button" className="inline-flex items-center gap-1 px-2 py-1 text-fs0 rounded text-accent bg-transparent hover:underline" onClick={() => setVoiceOpen(false)}>{t.common.cancel}</button>
             </div>

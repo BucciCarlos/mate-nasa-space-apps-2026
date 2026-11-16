@@ -1,9 +1,12 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../state/AppProvider';
+import { askAgent } from '../state/api';
 import { localeSet } from '../state/mateSlice';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { CREW, HISTORY, OWNER, REST, WAKE_EVENT, EXERCISE_SESSION, clampMissionTime, exerciseSessions, latestPersonalEvent, latestNews, historyFor, previewReduce, previewTime, projectDomain, receivedPersonalEvents, restorePreview } from './fd30';
+import { CREW, HISTORY, OWNER, REST, WAKE_EVENT, EXERCISE_SESSION, clampMissionTime, exerciseSessions, latestPersonalEvent, latestNews, historyFor, previewReduce, previewTime, previewReply, projectDomain, receivedPersonalEvents, restorePreview } from './fd30';
+import { scriptedAnswer } from './fd30Chat';
+import { buildFd30Context } from './fd30Context';
 import { LaboratoryDetail, labHeadingId } from './LaboratoryDetail';
 import { BLOOD_SAMPLE, labSamples, labStatus } from './laboratory';
 import { ExerciseDetail } from './ExerciseDetail';
@@ -13,12 +16,13 @@ import { Fd30PersonalAgenda } from './Fd30PersonalAgenda';
 import { Fd30Conversation } from './Fd30Conversation';
 import { Fd30GroundAgenda } from './Fd30GroundAgenda';
 import { ModuleCatalog } from '../views/catalog/ModuleCatalog';
-import { EvidenceSuite } from '../views/evidence/EvidenceSuite';
+import { EvidenceData } from '../views/evidence/EvidenceData';
 import { OpsPanel } from '../views/fd30-ops/OpsPanel';
 import { useOpsJournal } from '../views/fd30-ops/useOpsJournal';
 import { FD30_PUBLIC_TEXT } from './fd30PublicText';
 import type { GroundRole } from '../state/types';
 import { FloatingCompanion } from './FloatingCompanion';
+import { useTextToSpeech } from './useTextToSpeech';
 import type { ChatDetail } from './fd30Chat';
 import type { CrewId } from './fd30';
 
@@ -57,6 +61,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
   const [announcement, setAnnouncement] = useState('');
   const [telemetryAsTable, setTelemetryAsTable] = useState(false);
   const [groundRole, setGroundRole] = useState<GroundRole>('mission_operator');
+  const tts = useTextToSpeech();
   const p = FD30_PUBLIC_TEXT[locale];
   const characterRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -173,6 +178,23 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
     setChatOpen(false); setShowing(false); setAnnouncement('');
     navigate(PAGE_PATHS.today);
   };
+  // FD30 companion agent: fresh conversation per question (system prompt set by
+  // the backend; context is the owner's current-day plan + receipts).
+  const askAgentCb = async (text: string, lang: 'en' | 'es', input: 'text' | 'voice'): Promise<string | null> => {
+    try {
+      const projected = { ...state, ...projectDomain(missionTime) };
+      const scenario = scriptedAnswer(projected, owner, missionTime, previewReply(projected, owner, text), lang).body;
+      // Always send the user/ground operational context, then the scenario detail.
+      const context = [buildFd30Context({ preview: projected, ownerCrewId: owner, ownerName: crew.name, lang, ops: journal.state }), scenario].filter(Boolean).join('\n\n');
+      const result = await askAgent(appDispatch, { text, lang, context });
+      dispatch({ type: 'ask', owner, text, lang, input, replyText: result.reply, now: missionTime });
+      // Speak the reply in the user's language.
+      if (result.reply) void tts.speak(result.reply, lang);
+      return result.reply;
+    } catch {
+      return null;
+    }
+  };
   const personalLink = (module: 'sleep' | 'exercise' | 'laboratory', label: string, className = 'fd-link') => <Link className={className} to={PAGE_PATHS[module]} onClick={e => { e.preventDefault(); openPersonal(module); }}>{label}<Arrow /></Link>;
   const sleepLink = (label: string, className = 'fd-link') => personalLink('sleep', label, className);
   const fdLink = 'inline-flex items-center gap-3 font-semibold text-fs1 no-underline underline underline-offset-[5px]';
@@ -234,7 +256,7 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
               <section className="border-b border-fd-rule py-6" aria-labelledby="fd-lab-card-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.laboratory} · {t.labBlood}</p><h2 id="fd-lab-card-h" className="font-serif text-[30px] font-normal my-2.5">{owner === OWNER ? labLabels[bloodStatus] : t.labEmpty}</h2><strong className="block text-fs1 text-fd-quiet leading-[1.65]">{t.labNoValues}</strong><p className="text-fs1 text-fd-quiet leading-[1.65]">{t.labFuture}</p>{personalLink('laboratory', t.openLaboratory)}</section>
               <section className="py-7 pb-[22px]"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.nextAction}</p><h2 className="font-serif font-normal text-[29px] my-2">{t.review}</h2><p className="text-fd-quiet text-[15px]">{t.reviewBody}</p>{sleepLink(t.openSleep, `${fdLink} mt-3`)}</section>
               <section className="flex items-baseline flex-wrap gap-y-2 gap-x-5 border-t border-fd-rule py-5"><h2 className="text-fs2 font-semibold m-0">{t.observations}</h2><p className="text-fs1 text-fd-quiet m-0">{t.noObservations}</p></section>
-            </> : page === 'laboratory' ? <LaboratoryDetail state={state} owner={owner} /> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} /> : page === 'catalog' ? <ModuleCatalog perspective="onboard" /> : page === 'evidence' ? <EvidenceSuite perspective="onboard" /> : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} /> : page === 'ground-catalog' ? <ModuleCatalog perspective="ground" role={groundRole} /> : page === 'ground-evidence' ? <EvidenceSuite perspective="ground" /> : page === 'ground' || page === 'crew' || page === 'wellbeing' || page === 'requests' ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate(PAGE_PATHS.today)} /> : <>
+            </> : page === 'laboratory' ? <LaboratoryDetail state={state} owner={owner} /> : page === 'exercise' ? <ExerciseDetail state={state} owner={owner} time={missionTime} asTable={telemetryAsTable} onToggle={() => setTelemetryAsTable(v => !v)} highlight={showing} /> : page === 'catalog' ? <ModuleCatalog perspective="onboard" /> : page === 'evidence' ? <EvidenceData perspective="onboard" /> : page === 'ground-agenda' ? <Fd30GroundAgenda time={missionTime} /> : page === 'ground-catalog' ? <ModuleCatalog perspective="ground" role={groundRole} /> : page === 'ground-evidence' ? <EvidenceData perspective="ground" /> : page === 'ground' || page === 'crew' || page === 'wellbeing' || page === 'requests' ? <OpsPanel page={page} session={state} time={missionTime} journal={journal.state} onAction={journal.dispatch} role={groundRole} onRole={setGroundRole} onSkip={() => navigate(PAGE_PATHS.today)} /> : <>
               <div className="mt-[34px] mb-7"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.personal} / {t.sleep}</p><h1 id="fd-view-h" tabIndex={-1} className="font-serif text-[clamp(32px,5vw,46px)] font-normal tracking-[-.035em] leading-[1.12] my-2 mb-3">{t.sleepTitle}</h1><p className="text-fd-quiet text-fs1">{t.sleepIntro}</p></div>
               <section className="bg-fd-sage p-[26px] rounded-[4px_40px_4px_4px]" aria-labelledby="fd-plan-h"><p className="text-fd-quiet text-[12px] font-semibold uppercase tracking-[.13em] leading-[1.6]">{t.planLane}</p><h2 id="fd-plan-h" className="text-lg font-[550] my-3">{t.planned}</h2><strong className="block font-serif text-[clamp(30px,4.5vw,40px)] font-normal tabular-nums tracking-[-.05em]">{t.planTime}</strong><p className="text-fd-quiet text-fs1">{t.planDates} <span aria-hidden="true">·</span> {t.planDuration}</p><div className="bg-fd-line h-1 relative mx-1 my-[23px]" aria-hidden="true"><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px]" /><span className="absolute w-2.5 h-2.5 rounded-full bg-fd-line-dark -top-[3px] right-0" /></div><p className="text-fd-quiet text-fs1">{t.calculated}</p><small className="block text-fd-quiet text-[12px] overflow-wrap-anywhere">{REST.sourceId} · {`iss:fd30:${owner.slice(-2)}:planned-rest`}</small></section>
               <section className="py-7" aria-labelledby="fd-record-h"><div className="flex flex-wrap items-center gap-3"><h2 id="fd-record-h" className="m-0 text-lg font-[550]">{t.recorded}</h2><span className="text-[12px] px-[7px] py-[3px] border border-[#c4cabb] rounded">{t.simulated}</span></div><p className="block font-serif font-normal text-[clamp(28px,4.5vw,38px)] my-3">{t.noRecord}</p><p className="text-fd-quiet text-[15px] max-w-[620px]">{t.noRecordBody}</p><div className="flex gap-3.5 py-[17px] mt-5 border-t border-fd-rule text-fs1"><span className="text-[20px] text-fd-rust" aria-hidden="true">{received ? '↳' : '—'}</span><div><strong className="font-[550]">{received ? t.received : t.waiting}</strong><p className="text-fd-quiet mt-1.5">{t.reportLimit}</p></div></div>
@@ -249,9 +271,10 @@ export function Fd30Preview({ page }: { page: 'today' | 'sleep' | 'exercise' | '
         </main>
         {chatOpen && <aside className="p-5 pb-6 pl-1.5 flex-col justify-end min-h-0 min-w-0 lg:p-4 lg:pl-0" aria-label={t.characterDescription}>
           <Fd30Conversation profile={profile} character={crew.character} logRef={logRef}
-            onAsk={text => dispatch({ type: 'ask', owner, text, lang: locale })}
+            onAsk={(text, input) => dispatch({ type: 'ask', owner, text, lang: locale, input, now: missionTime })}
             onDraft={text => dispatch({ type: 'draft', owner, text })}
-            onOpen={openDetail} />
+            onOpen={openDetail}
+            onAskAgent={askAgentCb} />
         </aside>}
         <FloatingCompanion key={owner} crew={crew} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
           onPosition={position => dispatch({ type: 'position', owner, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />

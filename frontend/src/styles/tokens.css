@@ -3,8 +3,26 @@
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
   --r-1: 4px; --r-2: 8px; --r-3: 14px;
   --fs-0: 13px; --fs-1: 15px; --fs-2: 17px; --fs-3: 20px; --fs-4: 26px;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  /* Design-system palette (ported from the pen.dev M.A.T.E. design). */
+  --app-bg: #070c14;
+  --panel: #0c1421;
+  --panel-2: #101b2c;
+  --panel-3: #152238;
+  --line-soft: #141f31;
+  --text: #e6edf6;
+  --text-2: #8fa1b8;
+  --text-3: #5a6b82;
+  --accent-dim: #0e2a42;
+  --teal: #2dd4bf;
+  --ok: #34d399;
+  --ok-dim: #0b2b22;
+  --warn: #fbbf24;
+  --warn-dim: #2b2210;
+  --crit: #f87171;
+  --crit-dim: #2b1214;
+  --violet: #a78bfa;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --amber: #d98b1e;
   --amber-bg: rgba(217, 139, 30, 0.14);
   --green: #1f8a5b;
@@ -14,19 +32,22 @@
 }
 
 [data-surface="ground"] {
-  --bg: #0f1620;
-  --bg-2: #161f2c;
-  --bg-3: #1f2a3a;
-  --fg: #e6edf5;
-  --fg-2: #a9b7c8;
-  --line: #2b3a4e;
-  --accent: #35c4e6;
-  --accent-fg: #06202a;
+  /* Ported from the pen.dev M.A.T.E. design (dark mission-control surface). */
+  --bg: var(--app-bg);
+  --bg-2: var(--panel);
+  --bg-3: var(--panel-2);
+  --fg: var(--text);
+  --fg-2: var(--text-2);
+  --line: #1c2a40;
+  --line-soft: var(--line-soft);
+  --accent: #38bdf8;
+  --accent-fg: #ffffff;
+  --accent-dim: var(--accent-dim);
   --base-fs: var(--fs-1);
-  --amber: #ffb347;
-  --amber-bg: rgba(255, 179, 71, 0.16);
-  --green: #4fd59a;
-  --red: #ff7b78;
+  --amber: var(--warn);
+  --amber-bg: var(--warn-dim);
+  --green: var(--ok);
+  --red: var(--crit);
   --focus: #ffd27a;
 }
 

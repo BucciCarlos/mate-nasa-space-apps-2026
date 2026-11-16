@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./base.css";
+@import "./components.css";
 @import "./ground.css";
 @import "./onboard.css";
 @import "./fd30.css";
@@ -43,6 +44,24 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-companion: var(--companion);
+  /* Design-system palette (ported from the pen.dev M.A.T.E. design) */
+  --color-app-bg: var(--app-bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-3: var(--panel-3);
+  --color-line-soft: var(--line-soft);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent-dim: var(--accent-dim);
+  --color-teal: var(--teal);
+  --color-ok: var(--ok);
+  --color-ok-dim: var(--ok-dim);
+  --color-warn: var(--warn);
+  --color-warn-dim: var(--warn-dim);
+  --color-crit: var(--crit);
+  --color-crit-dim: var(--crit-dim);
+  --color-violet: var(--violet);
   /* FD30 IMP02 surface palette (scoped to the .fd30 surface) */
   --color-fd-ink: #233d3e;
   --color-fd-quiet: #526461;

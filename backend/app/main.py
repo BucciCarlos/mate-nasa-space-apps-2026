@@ -8,23 +8,27 @@ Run:
 """
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .routers import data as data_router
+# Load .env from the repo root (one level above backend/) BEFORE importing the
+# routers: config.py reads os.environ at import time, so the variables must be
+# in place first. uvicorn is started with cwd=backend/, so the root .env is
+# never picked up automatically. Existing env vars (e.g. set by Vercel) win.
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+
+from . import config  # noqa: E402
+from .routers import data as data_router  # noqa: E402
+from .routers import chat as chat_router  # noqa: E402
 
 # Static build of the frontend (emitted by `pnpm build` in frontend/).
 # Present in production (Vercel) and after a local build; absent in dev.
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-
-# Comma-separated list of allowed origins; "*" allows all (local dev).
-_cors_raw = os.environ.get("MATE_CORS_ORIGINS", "*")
-CORS_ORIGINS = ["*"] if _cors_raw == "*" else [o.strip() for o in _cors_raw.split(",") if o.strip()]
 
 app = FastAPI(
     title="M.A.T.E. backend",
@@ -34,17 +38,24 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_methods=["GET"],
+    allow_origins=config.CORS_ORIGINS,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
-
-app.include_router(data_router.router, prefix="/api")
-
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# API routers — registered BEFORE the SPA catch-all so FastAPI matches them
+# first. The catch-all is GET-only; if it came before the routers, a
+# POST /api/chat would hit the fallback and return 405 (Method Not Allowed)
+# instead of reaching the chat endpoint.
+# ---------------------------------------------------------------------------
+app.include_router(data_router.router, prefix="/api")
+app.include_router(chat_router.router, prefix="/api")
 
 
 # ---------------------------------------------------------------------------

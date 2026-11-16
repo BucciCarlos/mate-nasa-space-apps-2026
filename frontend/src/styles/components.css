@@ -1,0 +1,290 @@
+/* Component styles ported from the pen.dev M.A.T.E. design (untitled.pen).
+   Values (colors, radii, spacing, typography) are taken 1:1 from the reusable
+   components in the design: Card, Pill, Sidebar, AppHeader, Companion.
+   Colors resolve through the design-system tokens in tokens.css. */
+
+/* ---- Card (chyXn) ---------------------------------------------------- */
+/* fill:$panel  radius:12  stroke:$line 1  pad:18  gap:14 (vertical) */
+.d-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.d-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.d-card-title {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.d-card-meta {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-3);
+}
+.d-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.d-card-text {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+/* ---- Pill (bhzIq) ---------------------------------------------------- */
+/* fill:$ok-dim  radius:999  stroke:$ok 1  pad:4/10  gap:6 */
+.d-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+}
+.d-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.d-pill-ok { color: var(--ok); background: var(--ok-dim); }
+.d-pill-warn { color: var(--warn); background: var(--warn-dim); }
+.d-pill-crit { color: var(--crit); background: var(--crit-dim); }
+.d-pill-accent { color: var(--accent); background: var(--accent-dim); }
+
+/* ---- Sidebar (kMo05) ------------------------------------------------- */
+/* fill:$panel  stroke:$line 1  pad:16/12  gap:2 (vertical) */
+.d-sidebar {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.d-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.d-sidebar-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  display: grid;
+  place-content: center;
+  color: var(--accent);
+}
+.d-sidebar-logo-name {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.d-sidebar-logo-sub {
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--text-3);
+}
+.d-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-2);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+.d-nav-item svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.d-nav-item.is-active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---- AppHeader (JjI3V) ---------------------------------------------- */
+/* fill:$panel  stroke:$line bottom 1  pad:0/20  gap:20  h:64 */
+.d-app-header {
+  height: 64px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.d-app-header-mission {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.d-app-header-mission-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text-2);
+}
+.d-app-header-met {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+.d-app-header-spacer { flex: 1; }
+.d-app-header-utc-label {
+  font-family: var(--font);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-3);
+}
+.d-app-header-utc-time {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.d-app-header-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--ok);
+  background: var(--ok-dim);
+  color: var(--ok);
+  font-family: var(--font);
+  font-size: 11px;
+}
+.d-app-header-sync .d-pill-dot { width: 7px; height: 7px; }
+.d-app-header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  display: grid;
+  place-content: center;
+  color: var(--text-2);
+}
+.d-app-header-icon svg { width: 16px; height: 16px; }
+.d-app-header-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.d-app-header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--panel-3);
+  display: grid;
+  place-content: center;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.d-app-header-profile-name {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.d-app-header-profile-role {
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+/* ---- Companion (yYbnG) ----------------------------------------------- */
+/* fill:$bg2  radius:8  stroke:$line 1 */
+.d-companion {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.d-companion-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+.d-companion-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--companion);
+  display: grid;
+  place-content: center;
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.d-companion-title {
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--fg);
+}
+.d-companion-body { flex: 1; display: flex; flex-direction: column; }
+.d-companion-log {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.d-companion-msg {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--companion);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--bg-2);
+}
+.d-companion-input {
+  border-top: 1px solid var(--line);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.d-companion-hint {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--fg-2);
+}

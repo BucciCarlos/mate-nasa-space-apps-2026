@@ -1,6 +1,21 @@
-import iss from '../data/scenario/iss.json';
+import { store } from '../state/store';
 import type { Bilingual, ScheduleBlock } from '../state/types';
 import type { CrewId } from './fd30';
+
+// The ISS scenario blocks now come from the Redux store (seeded by AppProvider
+// from the backend `/api/scenarios/iss`), not from a bundled JSON import. The
+// store is a singleton; we read it at call time so the plan always reflects the
+// authoritative backend data. Before the store is seeded (e.g. in unit tests
+// that don't mount AppProvider) the block list is empty and the demo-added
+// slots below still stand on their own.
+function issBlocks(): ScheduleBlock[] {
+  try {
+    const state = store.getState();
+    return state.mate.missions.iss.onboard.plan.blocks ?? [];
+  } catch {
+    return [];
+  }
+}
 
 export const PLAN_VERSION = 'fd30-plan.2';
 export const PLAN_SOURCE = 'demo-plan';
@@ -20,9 +35,10 @@ const evening: Fd30Block[] = (['iss:crew-lf', 'iss:crew-ti', 'iss:crew-mo'] as c
   slot(`${owner.slice(-2)}:bedtime`, owner, 'pre_sleep', '21:00', '21:30', { en: 'Sleep preparation', es: 'Preparación para dormir' }),
   { ...slot(`${owner.slice(-2)}:rest`, owner, 'sleep', '21:30', '24:00', { en: 'Planned rest', es: 'Descanso planificado' }), continuesAfterDay: true },
 ]);
-export const PLAN_FD30: Fd30Block[] = [
-  ...iss.blocks.filter(b => Date.parse(b.end) > Date.parse('2027-03-10T05:55:00Z'))
-    .map(b => ({ ...b, crewIds: [...b.crewIds], title: { ...b.title }, movable: false }) as Fd30Block),
+// The demo-added slots are static; the scenario blocks come from the store.
+// Built lazily on first access (after AppProvider has seeded the store) and
+// cached, because the scenario data is immutable for the lifetime of the app.
+const DEMO_SLOTS: Fd30Block[] = [
   slot('lf:planned-blood', 'iss:crew-lf', 'task', '09:15', '09:20', { en: 'Blood collection planned', es: 'Toma de sangre prevista' }),
   slot('lf:planned-urine', 'iss:crew-lf', 'task', '09:25', '09:30', { en: 'Secondary urine collection planned', es: 'Toma secundaria de orina prevista' }),
   slot('lf:planned-exercise', 'iss:crew-lf', 'exercise', '10:30', '11:30', { en: 'Ergometer reservation', es: 'Reserva de ergómetro' }, 'demo-ergometer'),
@@ -34,10 +50,22 @@ export const PLAN_FD30: Fd30Block[] = [
   slot('ti:planning', 'iss:crew-ti', 'task', '16:00', '17:00', { en: 'Operational planning review', es: 'Revisión de planificación operativa' }),
   ...evening,
   slot('mo:planned-exercise', 'iss:crew-mo', 'exercise', '13:00', '14:00', { en: 'Ergometer reservation', es: 'Reserva de ergómetro' }, 'demo-ergometer'),
-].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+];
+
+let planCache: Fd30Block[] | null = null;
+export function getPlanFd30(): Fd30Block[] {
+  if (!planCache) {
+    planCache = [
+      ...issBlocks().filter(b => Date.parse(b.end) > Date.parse('2027-03-10T05:55:00Z'))
+        .map(b => ({ ...b, crewIds: [...b.crewIds], title: { ...b.title }, movable: false }) as Fd30Block),
+      ...DEMO_SLOTS,
+    ].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
+  }
+  return planCache;
+}
 
 export function planFor(crewId: CrewId): Fd30Block[] {
-  return PLAN_FD30.filter(b => b.crewIds.includes(crewId));
+  return getPlanFd30().filter(b => b.crewIds.includes(crewId));
 }
 export function plannedExercise(crewId: CrewId) {
   return planFor(crewId).find(b => b.kind === 'exercise');

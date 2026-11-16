@@ -3,6 +3,15 @@
 .fd-chat-suggestions button, .fd-chat-voice button { display: block; width: 100%; padding: 7px 9px; text-align: left; font: inherit; color: var(--ink); background: #faf9f4; border: 1px solid var(--rule); border-radius: 5px; cursor: pointer; overflow-wrap: anywhere; }
 .fd-chat-voice summary { cursor: pointer; color: var(--quiet); }
 .fd-chat-voice button { margin-block: 6px; }
+.fd-chat-mic { margin-block: 10px; padding: 10px; background: #faf9f4; border: 1px solid var(--rule); border-radius: 5px; }
+.fd-chat-mic p { margin-block: 3px; font-size: 13px; font-weight: 600; }
+.fd-chat-mic-hint { font-size: 12px !important; font-weight: 400 !important; color: var(--quiet); overflow-wrap: anywhere; }
+.fd-chat-mic-btn { display: flex; align-items: center; gap: 8px; width: 100%; margin-block: 6px; padding: 8px 10px; font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--rule); border-radius: 5px; cursor: pointer; }
+.fd-chat-mic-btn:disabled { opacity: .55; cursor: default; }
+.fd-chat-mic-btn-recording { border-color: var(--ink); background: var(--ink); color: #fffdf5; animation: fd-mic-pulse 1.2s ease-in-out infinite; }
+.fd-chat-mic-error { color: #a33a2a; font-size: 12px; font-weight: 400 !important; }
+.fd-chat-agent { font-style: italic; }
+@keyframes fd-mic-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
 .fd-chat-answer { padding: 10px; }
 .fd-chat-answer p { margin-block: 5px; white-space: pre-line; }
 .fd-chat-tools button { padding-inline: 10px; }

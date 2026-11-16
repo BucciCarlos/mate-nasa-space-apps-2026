@@ -190,6 +190,14 @@ export const mateSlice = createSlice({
       if (!m || !turn?.reply || turn.reply.executed) return;
       turn.reply = { ...turn.reply, executed: true };
     },
+    companionAgentReply: (state, action: PayloadAction<{ missionId: MissionId; turnId: string; text: string; model: string | null }>) => {
+      const { missionId, turnId, text, model } = action.payload;
+      const m = state.missions[missionId];
+      const turn = m?.onboard.conversation.find((t) => t.id === turnId);
+      if (!m || !turn) return;
+      // Replace the placeholder reply with the LLM response.
+      turn.reply = { templateId: 'agent', params: { text, model: model ?? '' }, status: 'ok', sourceIds: [], actions: [], executed: true };
+    },
     observationSaved: (state, action: PayloadAction<{
       missionId: MissionId; crewId: string; topics: ObservationTopic[];
       privateNote: UserText | null; relatedChangeId: string | null;
@@ -268,6 +276,8 @@ export const companionAsked = (missionId: MissionId, input: CompanionInput, nowM
   (dispatch) => { dispatch(mateSlice.actions.companionAsked({ missionId, input, nowMs })); };
 export const companionActionsExecuted = (missionId: MissionId, turnId: string): Thunk =>
   (dispatch) => { dispatch(mateSlice.actions.companionActionsExecuted({ missionId, turnId })); };
+export const companionAgentReply = (missionId: MissionId, turnId: string, text: string, model: string | null): Thunk =>
+  (dispatch) => { dispatch(mateSlice.actions.companionAgentReply({ missionId, turnId, text, model })); };
 export const observationSaved = (p: { missionId: MissionId; crewId: string; topics: ObservationTopic[]; privateNote: UserText | null; relatedChangeId: string | null; share: { comment: UserText | null } | null; nowMs: number }): Thunk =>
   (dispatch) => { dispatch(mateSlice.actions.observationSaved(p)); };
 export const uiRangeSet = (range: Interval | null): Thunk => (dispatch) => { dispatch(mateSlice.actions.uiRangeSet(range)); };

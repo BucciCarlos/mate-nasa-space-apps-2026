@@ -112,7 +112,8 @@ export type UiAction =
 export type ReplyStatus = 'ok' | 'no_evidence' | 'not_understood' | 'unavailable';
 export type CompanionTemplateId =
   | 'changeSummary' | 'changeNone' | 'changeNoneLinkDown' | 'showChange' | 'restDelta' | 'restUnchanged'
-  | 'noComparableRecords' | 'whyItMatters' | 'observationStart' | 'whoSees' | 'linkUp' | 'linkDown' | 'help' | 'notUnderstood';
+  | 'noComparableRecords' | 'whyItMatters' | 'observationStart' | 'whoSees' | 'linkUp' | 'linkDown' | 'help' | 'notUnderstood'
+  | 'agent';
 export interface CompanionReply {
   templateId: CompanionTemplateId;
   params: Record<string, string | number>;

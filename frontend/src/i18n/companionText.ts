@@ -51,5 +51,6 @@ export function renderReply(reply: CompanionReply, state: AppState, missionId: M
     case 'linkUp': return tt.linkUp;
     case 'help': return tt.help;
     case 'notUnderstood': return tt.notUnderstood;
+    case 'agent': return String(p.text ?? '');
   }
 }

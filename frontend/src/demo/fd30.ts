@@ -128,7 +128,7 @@ export function previewReply(state: PreviewState, owner: CrewId, text: string): 
   }
   return 'fallback';
 }
-export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' }
+export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' | 'voice'; replyText?: string }
 export interface PreviewState {
   version: 6; playback: 'explore' | 'guided'; running: boolean;
   guidedRequest: { owner: CrewId; eventId: string } | null;
@@ -147,7 +147,7 @@ export type PreviewAction = { type: 'tick' | 'next'; now: number }
   | { type: 'exercise/view'; owner: CrewId; sessionId: string; eventId: string }
   | { type: 'seen'; owner: CrewId } | { type: 'draft'; owner: CrewId; text: string }
   | { type: 'position'; owner: CrewId; position: Position | null }
-  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' } | { type: 'reset'; now: number };
+  | { type: 'ask'; owner: CrewId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' | 'voice'; replyText?: string } | { type: 'reset'; now: number };
 export function freshPreview(now: number): PreviewState {
   const profile = (): ProfileState => ({ announcedIds: [], guidedOpenedIds: [], seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
   return { version: 6, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
@@ -238,7 +238,7 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
       const projected = { ...state, ...projectDomain(time) };
       const reply = previewReply(projected, owner, text);
       const answer = action.now === undefined ? {} : { answer: scriptedAnswer(projected, owner, time, reply, action.lang), input: action.input ?? 'text' as const };
-      return update({ draft: action.input === 'simulated_voice' ? profile.draft : '', turns: [...profile.turns, { text, lang: action.lang, reply, ...answer }] });
+      return update({ draft: action.input === 'simulated_voice' || action.input === 'voice' ? profile.draft : '', turns: [...profile.turns, { text, lang: action.lang, reply, ...(action.replyText !== undefined ? { replyText: action.replyText } : {}), ...answer }] });
     }
   }
 }
