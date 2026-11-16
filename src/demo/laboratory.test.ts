@@ -4,14 +4,14 @@ import { BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, LAB_EVENTS, LAB_HISTORY, URINE_S
 import { parseRoute, toHash } from '../app/routes';
 
 const wallAt = (time: string) => Date.parse(`2027-03-10T${time}:00Z`) - START + 1000;
-const tickAt = (time: string) => previewReduce(freshPreview(1000), { type: 'tick', now: wallAt(time) });
+const tickAt = (time: string) => previewReduce(freshPreview(1000, 1), { type: 'tick', now: wallAt(time) });
 
 describe('IMP04 laboratory — private sample workflow and source limits', () => {
   it('opens the canonical route and preloads only Lucía’s stored sample, never a new result', () => {
     const route = { view: 'fd30', page: 'laboratory' } as const;
     expect(toHash(route)).toBe('#/onboard/personal/laboratory');
     expect(parseRoute(toHash(route))).toEqual(route);
-    const state = freshPreview(1000);
+    const state = freshPreview(1000, 1);
     const samples = labSamples(state, OWNER);
     expect(samples).toHaveLength(1);
     expect(samples[0].id).toBe(HISTORICAL_BLOOD_SAMPLE);
@@ -49,7 +49,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     expect(previewReply(state, 'iss:crew-mo', 'Ver mi resumen')).toBe('sleep');
   });
   it('shares one ordered clock/journal with unchanged wake and 60-minute exercise event times', () => {
-    let state = freshPreview(1000);
+    let state = freshPreview(1000, 1);
     expect(DAY_EVENTS.map(e => e.occurredAt.slice(11, 16))).toEqual(['06:00', '09:15', '09:20', '09:25', '09:30', '10:30', '11:30', '11:45', '11:50', '13:15', '13:20', '15:45', '16:15', '16:20']);
     const preload = state.processedIds.length;
     for (const event of DAY_EVENTS) {
@@ -67,7 +67,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     expect(previewReduce(state, { type: 'next', now: 2000 })).toBe(state);
   });
   it('receives for an inactive owner without changing profile preferences or creating another owner’s news', () => {
-    const initial = previewReduce(freshPreview(1000), { type: 'position', owner: OWNER, position: { x: .2, y: .4 } });
+    const initial = previewReduce(freshPreview(1000, 1), { type: 'position', owner: OWNER, position: { x: .2, y: .4 } });
     const inactive = previewReduce(initial, { type: 'select', crewId: 'iss:crew-mo' });
     const state = previewReduce(inactive, { type: 'tick', now: wallAt('11:45') });
     expect(state.activeCrewId).toBe('iss:crew-mo');
@@ -96,7 +96,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     expect(latestPersonalEvent(tickAt('11:50'), OWNER)?.id).toBe(LAB_EVENTS[5].id);
   });
   it('deduplicates, rejects incorrect sources/missions/mappings/correlations and keeps content-free diagnostics', () => {
-    const state = freshPreview(1000), due = Date.parse(LAB_EVENTS[4].occurredAt);
+    const state = freshPreview(1000, 1), due = Date.parse(LAB_EVENTS[4].occurredAt);
     const collected = ingestLab(state, [LAB_EVENTS[0]], due);
     const rewriteHistory = ingestLab(state, [{ ...LAB_EVENTS[1], sampleId: HISTORICAL_BLOOD_SAMPLE }], due);
     expect(rewriteHistory.laboratory).toEqual(state.laboratory);
@@ -117,7 +117,7 @@ describe('IMP04 laboratory — private sample workflow and source limits', () =>
     }
   });
   it('keeps missing predecessors incomplete and source review distinct from usable values', () => {
-    const state = freshPreview(1000), due = Date.parse(LAB_EVENTS[4].occurredAt);
+    const state = freshPreview(1000, 1), due = Date.parse(LAB_EVENTS[4].occurredAt);
     const flaggedEvent = { ...LAB_EVENTS[4], sourceReview: 'flagged' as const };
     const flagged = ingestLab(state, [flaggedEvent], due);
     const sample = flagged.laboratory.find(s => s.id === BLOOD_SAMPLE)!;

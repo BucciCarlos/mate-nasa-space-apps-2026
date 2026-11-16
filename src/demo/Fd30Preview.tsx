@@ -43,6 +43,7 @@ function Arrow() {
 }
 
 
+const GROUND_ROLE_KEY = 'mate:fd30:ground-role:v1';
 type Fd30Page = Extract<Route, { view: 'fd30' }>['page'];
 export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab?: 'radiation' }) {
   const { dispatch: appDispatch } = useApp();
@@ -63,7 +64,12 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
       try { sessionStorageOrNull()?.setItem(LAST_ONBOARD_KEY, page); } catch { /* Navigation memory is optional. */ }
     }
   }, [page]);
-  const [groundRole, setGroundRole] = useState<GroundRole>('mission_operator');
+  // GND04: Ground opens as Medical Team unless the session already stored a role; a chosen role is kept for the whole session.
+  const [groundRole, setGroundRoleState] = useState<GroundRole>(() => {
+    try { const stored = sessionStorageOrNull()?.getItem(GROUND_ROLE_KEY); if (stored === 'mission_operator' || stored === 'medical_professional') return stored; } catch { /* Storage is optional. */ }
+    return 'medical_professional';
+  });
+  const setGroundRole = (role: GroundRole) => { setGroundRoleState(role); try { sessionStorageOrNull()?.setItem(GROUND_ROLE_KEY, role); } catch { /* Storage is optional. */ } };
   const [state, dispatch] = useReducer(previewReduce, undefined, () => {
     let raw: string | null = null;
     try { raw = sessionStorageOrNull()?.getItem(FD30_KEY) ?? null; } catch { /* In-memory preview remains usable. */ }
@@ -98,22 +104,25 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
   const newsText = labNewsText || (newsEvent?.kind === 'exercise.finished' ? t.exerciseCompleted : newsEvent?.kind === 'exercise.started' ? `${t.exerciseStart} · ${newsEvent.occurredAt.slice(11, 16)} · ${t.clock}` : profileId === JOHN.id ? t.newsText.replace('Lucía', crew.name) : t.newsText);
   // ALR01: automatic notices fire only when the simulated clock crosses an event time by normal advance for the active profile.
   // Loading, seeking, resetting, "Next event" and View as never fire one; seeking back before an event re-arms it.
+  // CLK01: normal advance is told from a manual jump by the reducer's `jump` counter (seek, Next event, reset), not by comparing
+  // simulated and real elapsed time, so it holds at any playback speed. Changing speed or pausing never moves the cursor and is not a jump.
   const [notice, setNotice] = useState<CompanionNotice | null>(null);
-  const noticeTrack = useRef({ profile: profileId, time: missionTime, wall: now, fired: new Set<string>() });
+  const noticeTrack = useRef({ profile: profileId, time: missionTime, wall: now, jump: state.jump, fired: new Set<string>() });
   useEffect(() => {
     const track = noticeTrack.current;
-    if (track.profile !== profileId) { noticeTrack.current = { profile: profileId, time: missionTime, wall: now, fired: new Set() }; setNotice(null); return; }
+    if (track.profile !== profileId) { noticeTrack.current = { profile: profileId, time: missionTime, wall: now, jump: state.jump, fired: new Set() }; setNotice(null); return; }
     const list = companionNotices(profileId);
     for (const id of [...track.fired]) { const n = list.find(x => x.id === id); if (!n || n.at > missionTime) track.fired.delete(id); }
-    const advance = missionTime - track.time, wall = now - track.wall;
+    const advance = missionTime - track.time, jumped = state.jump !== track.jump;
     if (onGround) setNotice(null);
-    else if (advance > 0 && state.running && advance <= wall + 1500) {
+    else if (jumped) setNotice(null);
+    else if (advance > 0) { // no jump: playback, or the instant a pause/speed change re-bases the cursor
       const due = list.filter(n => n.at > track.time && n.at <= missionTime && !track.fired.has(n.id));
       due.forEach(n => track.fired.add(n.id));
       if (due.length) setNotice(due[due.length - 1]);
     } else if (advance !== 0) setNotice(null);
-    track.time = missionTime; track.wall = now;
-  }, [missionTime, now, profileId, onGround, state.running]);
+    track.time = missionTime; track.wall = now; track.jump = state.jump;
+  }, [missionTime, now, profileId, onGround, state.running, state.jump]);
   const pose = chatOpen || showing ? 'interaction' : news || notice ? 'news' : 'idle';
   const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' }).format(missionTime);
 
@@ -313,7 +322,7 @@ export function Fd30Preview({ page, evidenceTab }: { page: Fd30Page; evidenceTab
               onOpen={detail => { if (detail === 'agenda') { navigate({ view: 'fd30', page: 'agenda' }); } else openPersonal(detail); }} />
           </section>
         </aside>}
-        {!onGround && <FloatingCompanion key={profileId} crew={crew} notice={noticeView} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
+        {!onGround && <FloatingCompanion key={profileId} crew={crew} notice={noticeView} noticeKey={notice} preference={profile.position} pose={pose} news={news} hasSummary={!!summaryEvent} newsText={newsText} chatOpen={chatOpen}
           onPosition={position => dispatch({ type: 'position', owner: profileId, position })} onChat={() => setChatOpen(true)} onSleep={openSleep} onExercise={openExercise} onLaboratory={openLaboratory} onSummary={openSummary} characterRef={characterRef} />}
       </div>
       {!onGround && <div className="sr-only" role="status">{announcement}</div>}

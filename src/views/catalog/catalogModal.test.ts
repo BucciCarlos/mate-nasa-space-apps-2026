@@ -13,7 +13,7 @@ import type { CatalogProps } from './catalogTypes';
 
 const TI = 'iss:crew-ti' as const, MO = 'iss:crew-mo' as const;
 const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
-const stateFor = (hhmm: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(1000), { type: 'seek', target: at(hhmm), now: 1000 }), { type: 'select', crewId: crew });
+const stateFor = (hhmm: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(1000, 1), { type: 'seek', target: at(hhmm), now: 1000 }), { type: 'select', crewId: crew });
 const onboard = (crew: CrewId, hhmm: string): CatalogProps => ({ perspective: 'onboard', data: { state: stateFor(hhmm, crew), owner: crew, time: at(hhmm) } });
 const ground = (role: 'mission_operator' | 'medical_professional', hhmm = '12:00'): CatalogProps => ({ perspective: 'ground', role, data: { state: stateFor(hhmm, OWNER), owner: OWNER, time: at(hhmm) } });
 const mod = (id: string) => CATALOG_MODULES.find(m => m.id === id)!;
@@ -39,7 +39,7 @@ describe('CAT08 catalog dialogs: content', () => {
   });
   it('reads the active profile on board: Lucía, Tomás and Mei see their own exercise, samples and plan', () => {
     for (const [crew, hhmm] of [[OWNER, '12:00'], [TI, '12:00'], [MO, '12:00']] as const) {
-      const props = onboard(crew, hhmm), view = exerciseHistory(props.perspective === 'onboard' ? props.data!.state : freshPreview(0), { perspective: 'onboard', owner: crew }, at(hhmm), 'last7')!;
+      const props = onboard(crew, hhmm), view = exerciseHistory(props.perspective === 'onboard' ? props.data!.state : freshPreview(0, 1), { perspective: 'onboard', owner: crew }, at(hhmm), 'last7')!;
       const msk = build('MOD-MSK', props);
       expect(msk.sections[0].lines[0]).toBe(`${view.records.length} sessions in 7 days`);
       expect(msk.sections[0].chart).toMatchObject({ kind: 'bars' });

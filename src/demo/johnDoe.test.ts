@@ -13,7 +13,7 @@ import { laboratoryHistory } from './history/laboratory';
 // MATE-CAP01: John Doe is a presentation-only profile that shows Lucía's simulated records under his own identity.
 const at = (h: string) => Date.parse(`2027-03-10T${h}:00Z`);
 const as = (id: typeof ONBOARD_PROFILES[number]['id'], h: string) => {
-  const seeked = previewReduce(freshPreview(1000), { type: 'seek', target: at(h), now: 1000 });
+  const seeked = previewReduce(freshPreview(1000, 1), { type: 'seek', target: at(h), now: 1000 });
   return previewReduce(seeked, { type: 'select', crewId: id });
 };
 

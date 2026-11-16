@@ -15,7 +15,7 @@ const TI = 'iss:crew-ti' as const, MO = 'iss:crew-mo' as const;
 const wall = 1000;
 const at = (iso: string) => Date.parse(iso.length === 5 ? `2027-03-10T${iso}:00Z` : `${iso}:00Z`);
 const turnAt = (when: string) => ({ reply: 'sleep' as const, answer: { at: at(when), body: '', detail: 'sleep' as const } });
-const stateAt = (when: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(wall), { type: 'seek', target: at(when), now: wall }), { type: 'select', crewId: crew });
+const stateAt = (when: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(wall, 1), { type: 'seek', target: at(when), now: wall }), { type: 'select', crewId: crew });
 const APPROVED: [CrewId, string, string, number][] = [[OWNER, 'lucia', '6:35', 71], [TI, 'tomas', '7:10', 82], [MO, 'mei', '7:25', 93]];
 
 describe('SLEEP-VOICE03 spoken Sleep dialogues', () => {

@@ -106,7 +106,7 @@ describe('VOICE06/07 laboratory dialogue eligibility', () => {
         voice: withVoice ? { state: { status: 'idle', stage: null, key: null, error: null }, toggle: () => {} } : undefined,
         logRef: { current: null }, onAsk: () => {}, onDraft: () => {}, onOpen: () => {} }) }));
     it('binds the spoken pair to the written answer at the query: control present, English audio label, no autoplay', () => {
-      const state = ask(seek(freshPreview(wall), '11:45'), lang);
+      const state = ask(seek(freshPreview(wall, 1), '11:45'), lang);
       expect(lastTurn(state).answer!.body).toContain(`${t.blood}: ${t.labResult}`);
       expect(lastTurn(state).answer!.body).toContain(`${t.urine}: ${t.labAnalyzing}`);
       const html = render(state);
@@ -117,10 +117,10 @@ describe('VOICE06/07 laboratory dialogue eligibility', () => {
       expect(render(state, false)).not.toContain(t.voiceNote); // no voice controller -> text only
     });
     it('shows the audio control for the four exact pairs and none for intermediate states, Tomás or Mei', () => {
-      for (const hhmm of ['05:55', '09:30', '11:45', '11:50']) expect(render(ask(seek(freshPreview(wall), hhmm), lang)), hhmm).toContain(t.voiceNote);
-      for (const hhmm of ['09:15', '09:20', '09:25']) expect(render(ask(seek(freshPreview(wall), hhmm), lang)), hhmm).not.toContain(t.voiceNote);
+      for (const hhmm of ['05:55', '09:30', '11:45', '11:50']) expect(render(ask(seek(freshPreview(wall, 1), hhmm), lang)), hhmm).toContain(t.voiceNote);
+      for (const hhmm of ['09:15', '09:20', '09:25']) expect(render(ask(seek(freshPreview(wall, 1), hhmm), lang)), hhmm).not.toContain(t.voiceNote);
       // Tomás and Mei: audio control only in their own compatible state; the written answer is their own (never Lucía's).
-      const own = (crew: typeof TI | typeof MO, hhmm: string) => ask(previewReduce(seek(freshPreview(wall), hhmm), { type: 'select', crewId: crew }), lang);
+      const own = (crew: typeof TI | typeof MO, hhmm: string) => ask(previewReduce(seek(freshPreview(wall, 1), hhmm), { type: 'select', crewId: crew }), lang);
       for (const [crew, hhmm, audio] of [[TI, '15:44', false], [TI, '15:45', true], [MO, '16:19', false], [MO, '16:20', true], [TI, '11:45', false], [MO, '11:45', false]] as const) {
         const state = own(crew, hhmm);
         expect(lastTurn(state).answer!.body, `${crew} ${hhmm}`).not.toContain(t.noLabs);
@@ -130,7 +130,7 @@ describe('VOICE06/07 laboratory dialogue eligibility', () => {
     });
     it('highlights the result access by the answer, not by rewriting the real player stage', () => {
       const html = (crew: typeof TI | typeof MO, hhmm: string, stage: 'question' | 'answer') => {
-        const state = ask(previewReduce(seek(freshPreview(wall), hhmm), { type: 'select', crewId: crew }), lang);
+        const state = ask(previewReduce(seek(freshPreview(wall, 1), hhmm), { type: 'select', crewId: crew }), lang);
         return renderToStaticMarkup(createElement(I18nProvider, { locale: lang,
           children: createElement(Fd30Conversation, { profile: state.profiles[crew], character: 'Mate', time: at('23:59'), owner: crew,
             voice: { state: { status: 'playing', stage, key: `${crew}:0`, error: null }, toggle: () => {} },
@@ -142,11 +142,11 @@ describe('VOICE06/07 laboratory dialogue eligibility', () => {
       expect(html(MO, '16:20', 'answer')).toContain(t.voiceStopAudio); // but the control reflects the real stage
     });
     it('does not use a rewound cursor: the pair is fixed by the query time', () => {
-      const state = seek(ask(seek(freshPreview(wall), '11:45'), lang), '09:00');
+      const state = seek(ask(seek(freshPreview(wall, 1), '11:45'), lang), '09:00');
       expect(labDialogueClips(OWNER, lastTurn(state))).not.toBeNull();
     });
     it('marks the existing laboratory access while Mate speaks and shows an error without losing the text', () => {
-      const state = ask(seek(freshPreview(wall), '11:45'), lang);
+      const state = ask(seek(freshPreview(wall, 1), '11:45'), lang);
       const key = `${OWNER}:0`;
       const html = (status: 'playing' | 'error', stage: 'question' | 'answer') => renderToStaticMarkup(createElement(I18nProvider, { locale: lang,
         children: createElement(Fd30Conversation, { profile: state.profiles[OWNER], character: 'Mate', time: at('11:45'), owner: OWNER,

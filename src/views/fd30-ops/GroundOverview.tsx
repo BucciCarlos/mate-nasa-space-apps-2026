@@ -5,12 +5,12 @@ import { SCHEDULE_TEXT } from '../../i18n/fd30Schedule';
 import { useLocale } from '../../i18n/I18nProvider';
 import type { CrewId } from '../../demo/fd30';
 import type { GroundRole } from '../../state/types';
-import type { OperationalBlock, OperationalCrew, groundView } from './opsSelectors';
+import type { OperationalBlock, groundView } from './opsSelectors';
 import { OPS_TEXT } from './opsText';
 import { GROUND_TRACKING_TEXT } from './groundTrackingText';
-import { nextOperationalBlock } from './groundTracking';
 import { GroundPlanTimeline } from './GroundPlanTimeline';
 import { GroundOrbit } from './GroundOrbit';
+import { GroundHeadline, GroundResources } from './GroundOpsPanels';
 import { CrewPortrait } from './CrewPortrait';
 import { GroundMedicalDashboard } from './GroundMedicalDashboard';
 import type { GroundMedicalPerson } from './groundMedical';
@@ -39,10 +39,8 @@ export function GroundOverview({ data, time, onRole, medical = null }: { data: R
   const closeOrbit = () => { setOrbitOpen(false); orbitButton.current?.focus(); };
   if (!data) return null;
   const person = data.crew.find(c => c.id === selected), shown = person ? [person] : data.crew;
-  const next = person ? nextOperationalBlock(person, time) : null;
   const medicalPerson = data.role === 'medical_professional' && person ? medical?.find(p => p.id === person.id) : null;
   const interval = (block: OperationalBlock) => `${scheduleInterval(block)} ${scheduleContinuation(block, SCHEDULE_TEXT[locale])}`.trim();
-  const reservation = (c: OperationalCrew) => c.reservation ? <><strong>{c.reservation.equipment![locale]}</strong><time>{interval(c.reservation)}</time></> : <span>{t.noReservation}</span>;
   return <div className="ops ops-ground gnd" ref={root} data-ops-ground-role={data.role} data-person={person?.id}>
     <header className="gnd-heading">
       <div><p className="fd-eyebrow">{o.ground}</p><h1 id="fd-view-h" tabIndex={-1}>{t.title}</h1><p>{t.intro}</p></div>
@@ -59,18 +57,16 @@ export function GroundOverview({ data, time, onRole, medical = null }: { data: R
           {data.crew.map((c, index) => <article key={c.id} data-ops-card={c.id}>
             <button type="button" className="gnd-crew-card" ref={index === 0 ? crewButton : undefined} aria-label={`${t.open} · ${c.name}`} onClick={() => choose(c.id)}>
               <CrewPortrait owner={c.id} /><span className="gnd-crew-name">{c.name}</span><span className="gnd-card-caption">{o.fictional}</span>
-              <strong>{c.current?.title[locale] ?? t.noActivity}</strong>{c.current && <time>{interval(c.current)}</time>}
-              <span className="gnd-card-reservation">{reservation(c)}</span>
-              <span className="gnd-tag">{t.planned}</span><span className="gnd-card-action">{t.open} →</span>
+              <GroundHeadline person={c} time={time} />
+              <span className="gnd-card-action">{t.open} →</span>
             </button>
           </article>)}
         </div>}
         {medicalPerson && <GroundMedicalDashboard data={medicalPerson} />}
         {person && <section className="gnd-person-summary" data-operational-summary aria-label={t.agenda}>
-          <div><h3>{t.activity}</h3><strong>{person.current?.title[locale] ?? t.noActivity}</strong>{person.current && <time>{interval(person.current)}</time>}<span className="gnd-tag">{t.planned}</span></div>
-          <div><h3>{t.next}</h3><strong>{next?.title[locale] ?? t.noNext}</strong>{next && <time>{interval(next)}</time>}</div>
-          <div><h3>{t.reservation}</h3>{reservation(person)}</div>
+          <GroundHeadline person={person} time={time} />
         </section>}
+        {!person && <GroundResources crew={data.crew} time={time} onInspect={inspect} />}
         <GroundPlanTimeline crew={shown} time={time} selectedId={reference?.id ?? null} onSelect={inspect} />
         <section className="gnd-block-detail" aria-label={t.block}>
           <h3 ref={referenceHeading} tabIndex={-1}>{reference?.title[locale] ?? t.block}</h3>

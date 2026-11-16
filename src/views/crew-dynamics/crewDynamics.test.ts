@@ -12,7 +12,7 @@ const [lucia, tomas, mei] = CREW.map(c => c.id);
 const at = (hour: number) => DAY_START + hour * 3_600_000;
 const slot = (id: string, owner: CrewSlot['owner'], start: number, end: number, rest = false): CrewSlot => ({ id, owner, start: at(start), end: at(end), rest });
 const render = (viewer: CrewViewer, locale: 'en' | 'es' = 'es', initialRange: 7 | 30 = 7) => renderToStaticMarkup(createElement(I18nProvider, { locale,
-  children: createElement(CrewDynamics, { state: freshPreview(0), viewer, initialRange }) }));
+  children: createElement(CrewDynamics, { state: freshPreview(0, 1), viewer, initialRange }) }));
 
 describe('CAT04 interval semantics', () => {
   it('counts a triple overlap once per person and computes non-overlap independently', () => {
@@ -53,7 +53,7 @@ describe('CAT04 interval semantics', () => {
 });
 describe('CAT04 permissions, ranges and rendering', () => {
   it('checks active onboard owner and rejects unknown ground roles', () => {
-    const state = freshPreview(0);
+    const state = freshPreview(0, 1);
     for (const c of CREW) {
       expect(crewDynamics({ ...state, activeCrewId: c.id }, { perspective: 'onboard', owner: c.id }, 7)).not.toBeNull();
     }
@@ -61,7 +61,7 @@ describe('CAT04 permissions, ranges and rendering', () => {
     expect(crewDynamics(state, { perspective: 'ground', role: 'invalid' as never }, 7)).toBeNull();
   });
   it('gives Ops and Medical identical projected rows and markup', () => {
-    const state = freshPreview(0);
+    const state = freshPreview(0, 1);
     const ops = { perspective: 'ground', role: 'mission_operator' } as const;
     const med = { perspective: 'ground', role: 'medical_professional' } as const;
     expect(crewDynamics(state, ops, 7)).toEqual(crewDynamics(state, med, 7));
@@ -69,7 +69,7 @@ describe('CAT04 permissions, ranges and rendering', () => {
     expect(render(ops)).not.toContain('Mi parte');
   });
   it('changes only window coverage, with no new plan, clock, profile or record writes', () => {
-    const state = freshPreview(0), before = JSON.stringify({ state, plan: PLAN_FD30 });
+    const state = freshPreview(0, 1), before = JSON.stringify({ state, plan: PLAN_FD30 });
     const viewer = { perspective: 'onboard', owner: lucia } as const;
     const seven = crewDynamics(state, viewer, 7)!, thirty = crewDynamics(state, viewer, 30)!;
     expect(seven.firstFd).toBe(24); expect(thirty.firstFd).toBe(1);

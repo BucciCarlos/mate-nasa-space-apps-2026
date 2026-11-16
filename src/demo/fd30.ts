@@ -140,15 +140,23 @@ export function previewReply(state: PreviewState, owner: CrewId, text: string): 
 export interface Turn { text: string; lang: 'en' | 'es'; reply: 'sleep' | 'exercise' | 'laboratory' | 'agenda' | 'fallback'; answer?: ChatAnswer; input?: 'text' | 'simulated_voice' }
 export interface PreviewState {
   version: 6; playback: 'explore' | 'guided'; running: boolean;
+  /** CLK01: mission seconds per real second while playing. `jump` counts manual cursor jumps (seek, Next event, reset), never normal advance. */
+  speed: ClockSpeed; jump: number;
   guidedRequest: { owner: ProfileId; eventId: string } | null;
   processedIds: string[]; exercise: ExerciseSession[]; laboratory: LabSample[];
   diagnostics: { eventId: string; sourceId: string; status: 'rejected' | 'unassigned' }[]; sessionStartMs: number; offsetMs: number; wakeReceived: boolean;
   activeCrewId: ProfileId; profiles: Record<ProfileId, ProfileState>;
 }
+export const CLOCK_SPEEDS = [1, 60, 300] as const;
+export type ClockSpeed = typeof CLOCK_SPEEDS[number];
+export const DEFAULT_SPEED: ClockSpeed = 300;
+/** Snapshots without a `speed` predate CLK01: their offset is relative to the old 05:55 entry and their clock ran at 1×. */
+const PRE_CLK01_ENTRY_SHIFT = Date.parse('2027-03-10T05:55:00Z') - ENTRY;
 export type PreviewAction = { type: 'tick' | 'next'; now: number }
   | { type: 'seek'; now: number; target: number }
   | { type: 'playback/set'; mode: 'explore' | 'guided' }
   | { type: 'running/set'; running: boolean; now: number }
+  | { type: 'speed/set'; speed: ClockSpeed; now: number }
   | { type: 'events/announce'; owner: ProfileId; ids: string[] }
   | { type: 'guided/consume'; owner: ProfileId; eventId: string }
   | { type: 'select'; crewId: ProfileId }
@@ -157,14 +165,14 @@ export type PreviewAction = { type: 'tick' | 'next'; now: number }
   | { type: 'seen'; owner: ProfileId } | { type: 'draft'; owner: ProfileId; text: string }
   | { type: 'position'; owner: ProfileId; position: Position | null }
   | { type: 'ask'; owner: ProfileId; text: string; lang: 'en' | 'es'; now?: number; input?: 'text' | 'simulated_voice' } | { type: 'reset'; now: number };
-export function freshPreview(now: number): PreviewState {
+export function freshPreview(now: number, speed: ClockSpeed = DEFAULT_SPEED): PreviewState {
   const profile = (): ProfileState => ({ announcedIds: [], guidedOpenedIds: [], seen: false, draft: '', turns: [], position: null, exerciseSeenIds: [], highlightedSessionId: null, labSeenIds: [], highlightedSampleId: null });
-  return { version: 6, playback: 'explore', running: true, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
+  return { version: 6, playback: 'explore', running: true, speed, jump: 0, guidedRequest: null, laboratory: initialLab(), processedIds: [...PRELOADED_IDS], diagnostics: [],
     exercise: [{ id: EXERCISE_HISTORY[0].sessionId, crewId: OWNER, start: EXERCISE_HISTORY[0], finish: EXERCISE_HISTORY[1] }], sessionStartMs: now, offsetMs: 0, wakeReceived: false, activeCrewId: OWNER,
     profiles: { [OWNER]: profile(), 'iss:crew-ti': profile(), 'iss:crew-mo': profile(), [JOHN.id]: profile() } };
 }
 export function previewTime(state: PreviewState, now: number) {
-  return clampMissionTime(START + (state.running ? Math.max(0, now - state.sessionStartMs) : 0) + state.offsetMs);
+  return clampMissionTime(START + (state.running ? Math.max(0, now - state.sessionStartMs) * state.speed : 0) + state.offsetMs);
 }
 function ingestDue(state: PreviewState, time: number): PreviewState {
   let result = state;
@@ -189,17 +197,22 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
   const update = (patch: Partial<ProfileState>): PreviewState => ({ ...state, profiles: { ...state.profiles, [owner]: { ...profile, ...patch } } });
   switch (action.type) {
     case 'select': return ONBOARD_PROFILES.some(c => c.id === action.crewId) ? { ...state, activeCrewId: action.crewId, guidedRequest: null } : state;
-    case 'reset': return freshPreview(action.now);
+    case 'reset': return { ...freshPreview(action.now, state.speed), jump: state.jump + 1 };
     case 'seek': {
       if (!Number.isFinite(action.target) || !Number.isFinite(action.now)) return state;
       const target = clampMissionTime(action.target);
-      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, running: target < END && state.running, guidedRequest: null };
+      return { ...state, ...projectDomain(target), sessionStartMs: action.now, offsetMs: target - START, running: target < END && state.running, guidedRequest: null, jump: state.jump + 1 };
     }
     case 'playback/set': return ['explore', 'guided'].includes(action.mode)
       ? { ...state, playback: action.mode, guidedRequest: null } : state;
     case 'running/set': {
       if (action.running === state.running || !Number.isFinite(action.now)) return state;
       return { ...state, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now, running: action.running && previewTime(state, action.now) < END };
+    }
+    case 'speed/set': {
+      // Re-base the cursor at `now` so the new rate applies from here on and the cursor does not move.
+      if (!CLOCK_SPEEDS.includes(action.speed) || action.speed === state.speed || !Number.isFinite(action.now)) return state;
+      return { ...state, speed: action.speed, offsetMs: previewTime(state, action.now) - START, sessionStartMs: action.now };
     }
     case 'events/announce': {
       const received = receivedPersonalEvents(state, owner).map(e => e.id);
@@ -214,7 +227,7 @@ export function previewReduce(state: PreviewState, action: PreviewAction): Previ
       const current = previewTime(state, action.now);
       const time = action.type === 'next' && next ? Math.max(current, Date.parse(next.receivedAt)) : current;
       let result = action.type === 'next' && next && time > current
-        ? { ...state, sessionStartMs: action.now, offsetMs: time - START } : state;
+        ? { ...state, sessionStartMs: action.now, offsetMs: time - START, jump: state.jump + 1 } : state;
       result = ingestDue(result, time);
       const start = EXERCISE_EVENTS[0];
       if (state.playback === 'guided' && owner === OWNER && !state.processedIds.includes(start.id)
@@ -306,13 +319,18 @@ export function restorePreview(raw: string | null, now: number): PreviewState {
     if (john) { const old = s.profiles[JOHN.id]; profiles[JOHN.id] = { ...profiles[JOHN.id], seen: old.seen, draft: old.draft, turns: old.turns, position: old.position,
       exerciseSeenIds: [...new Set<string>(old.exerciseSeenIds)], highlightedSessionId: null, labSeenIds: [...new Set<string>(old.labSeenIds)], highlightedSampleId: null,
       announcedIds: [...new Set<string>(old.announcedIds)], guidedOpenedIds: [] }; }
-    const restored: PreviewState = { ...fresh, profiles, activeCrewId: owner, offsetMs: s.offsetMs,
+    const chosen = (CLOCK_SPEEDS as readonly number[]).includes(s.speed); // an explicit choice, 1× included, is always respected
+    const restored: PreviewState = { ...fresh, profiles, activeCrewId: owner, offsetMs: s.offsetMs + (chosen ? 0 : PRE_CLK01_ENTRY_SHIFT), speed: chosen ? s.speed : 1, jump: Number.isSafeInteger(s.jump) && s.jump >= 0 ? s.jump : 0,
       playback: s.version >= 5 ? s.playback : 'explore', running: s.version >= 5 ? s.running : true };
     if (s.version < 6 && previewTime(restored, now) > Date.parse('2027-03-10T12:00:00Z')) {
       restored.sessionStartMs = now; restored.offsetMs = Date.parse('2027-03-10T12:00:00Z') - ENTRY;
     }
     if (previewTime(restored, now) >= END) {
       restored.running = false; restored.sessionStartMs = now; restored.offsetMs = END - ENTRY;
+    }
+    if (!chosen) { // adopt the default without moving the cursor: re-base a running clock at `now`; a paused one stays paused
+      if (restored.running) { restored.offsetMs = previewTime(restored, now) - START; restored.sessionStartMs = now; }
+      restored.speed = DEFAULT_SPEED;
     }
     // Never trust a stored receipt whose timestamp is beyond the restored clock.
     return { ...restored, ...projectDomain(previewTime(restored, now)) };

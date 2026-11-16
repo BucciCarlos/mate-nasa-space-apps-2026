@@ -29,14 +29,14 @@ export function GroundMedicalDashboard({ data }: { data: GroundMedicalPerson }) 
       </div>
       <div className="gmd-sleep" data-health-block="sleep">
         <p className="gmd-latest">{t.sleepLatest}: {latestNight ? <strong>{`FD${latestNight.fd} · ${nightDuration(latestNight.durationMinutes)}`}</strong> : t.sleepMissing}</p>
-        {!data.sleep.points.some(p => p.fd === 30) && <p className="gmd-empty">{t.fd30Missing}</p>}
+        {!data.sleep.points.some(p => p.fd === 30) && <p className="gmd-empty" data-gap="sleep">{data.scenario.sleep ? t.fd30Missing : t.fd30NotInScenario}</p>}
         <GroundSleepChart trend={data.sleep} compact />
       </div>
     </div>
     <div className="gmd-records">
       <section className="gmd-panel" data-health-block="laboratory" aria-labelledby="gmd-lab-h">
         <h3 id="gmd-lab-h">{t.laboratory}</h3>
-        {!data.labs.length ? <p className="gmd-empty">{t.noSamples}</p> : <ul>{data.labs.map(sample => <li key={sample.id}>
+        {!data.labs.length ? <p className="gmd-empty" data-gap="laboratory">{data.scenario.laboratory ? t.noSamples : t.noSamplesScenario}</p> : <ul>{data.labs.map(sample => <li key={sample.id}>
           <strong>{sample.sampleType === 'blood' ? t.blood : t.urine}</strong><span>{sample.stored ? t.stored : t[sample.stage]}</span>
           <time>{`${sample.occurredAt.slice(0, 10)} · ${scheduleClock(sample.occurredAt)} ${t.utc}`}</time>
           <small>{sample.stage === 'result' ? t.noValues : t.noResult}{sample.incomplete && ` · ${t.incomplete}`}</small>
@@ -44,9 +44,9 @@ export function GroundMedicalDashboard({ data }: { data: GroundMedicalPerson }) 
       </section>
       <section className="gmd-panel" data-health-block="exercise" aria-labelledby="gmd-exercise-h">
         <h3 id="gmd-exercise-h">{t.exercise}</h3>
-        {data.exercise.live ? <p><strong>{t.live}</strong> · <time>{scheduleClock(data.exercise.live.start)} {t.utc}</time><span>{number(data.exercise.live.elapsedMinutes)} {t.elapsed}</span></p> : <p className="gmd-empty">{t.noLive}</p>}
+        {data.exercise.live ? <p><strong>{t.live}</strong> · <time>{scheduleClock(data.exercise.live.start)} {t.utc}</time><span>{number(data.exercise.live.elapsedMinutes)} {t.elapsed}</span></p> : <p className="gmd-empty" data-gap="exercise-live">{data.scenario.exercise ? t.noLive : t.noLiveScenario}</p>}
         {latestExercise ? <p data-exercise-record={latestExercise.id}><strong>{t.completed} · {`FD${latestExercise.fd}`}</strong><time>{recordInterval(latestExercise)}</time>
-          <span>{number(latestExercise.durationMinutes)} {t.minutes} · {number(latestExercise.powerW)} {t.power} · {number(latestExercise.cadenceRpm)} {t.cadence}</span></p> : <p>{t.noSession}</p>}
+          <span>{number(latestExercise.durationMinutes)} {t.minutes} · {number(latestExercise.powerW)} {t.power} · {number(latestExercise.cadenceRpm)} {t.cadence}</span></p> : <p className="gmd-empty" data-gap="exercise-record">{data.scenario.exercise ? t.noSession : t.noSessionScenario}</p>}
         {data.exercise.reservation && <p className="gmd-reservation"><small>{t.reservation}</small><time>{scheduleInterval(data.exercise.reservation)}</time><span>{data.exercise.reservation.equipment?.[locale]}</span></p>}
       </section>
     </div>

@@ -72,20 +72,20 @@ try {
     assert.equal(await page.locator('[data-gnd-lane]').count(), 3);
     assert.equal(await page.locator('.gnd-plan-cursor').count(), 3);
     assert.ok((await page.locator('[data-ops-card="iss:crew-mo"]').innerText()).includes('13:00–14:00'));
-    assert.equal(await page.locator('[data-ops-card] [role="img"]').count(), 3);
+    assert.equal(await page.locator('[data-ops-card] svg.ops-portrait[role="img"]').count(), 3);
     assert.equal(await page.locator('.gnd-crew-table').count(), 0);
     await checkBoundary(); await shot('crew');
     // Judge the requested outcome: every medical block fits on the first desktop screen, before any agenda.
     await page.locator('.ops-role select').selectOption('medical_professional');
     const profiles = [];
     for (const [id, name, sleep, exerciseW, historyInterval] of [['iss:crew-lf', 'Lucía Ferraro', '6 h 25 min', '112', '10:30–11:30 UTC'], ['iss:crew-ti', 'Tomás Ibarra', '7 h 10 min', '182', '08:00–09:00 UTC'], ['iss:crew-mo', 'Mei Okada', '7 h 25 min', '137', '13:00–14:00 UTC']]) {
-      await page.locator(`[data-ops-card="${id}"] [role="img"]`).click();
+      await page.locator(`[data-ops-card="${id}"] svg.ops-portrait`).click();
       assert.equal(await page.locator('[data-ops-detail]').getAttribute('data-ops-detail'), id);
       assert.equal(await page.locator('.gnd-person-heading h2').innerText(), name);
       assert.ok((await page.locator('[data-health-block="sleep"]').innerText()).includes(sleep));
       assert.ok((await page.locator('[data-health-block="exercise"]').innerText()).includes(exerciseW));
       assert.equal(await page.locator('[data-exercise-record] time').innerText(), historyInterval);
-      if (id !== 'iss:crew-lf') assert.ok((await page.locator('[data-health-block="laboratory"]').innerText()).includes(locale === 'es' ? 'Sin muestras recibidas' : 'No samples received'));
+      if (id !== 'iss:crew-lf') assert.ok((await page.locator('[data-health-block="laboratory"]').innerText()).includes(locale === 'es' ? 'Aún no hay muestras disponibles' : 'No samples available yet'));
       await checkBoundary();
       const bounds = await page.evaluate(() => {
         const root = document.querySelector('.fd-main');

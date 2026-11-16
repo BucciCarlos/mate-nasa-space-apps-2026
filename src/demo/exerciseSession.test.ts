@@ -3,7 +3,7 @@ import { EXERCISE_SESSION, OWNER, freshPreview, previewReduce } from './fd30';
 import { exerciseSessionView } from './exerciseSession';
 
 const stamp = (time: string) => Date.parse(`2027-03-10T${time}Z`);
-const seek = (time: string) => previewReduce(freshPreview(1000), { type: 'seek', now: 1000, target: stamp(time) });
+const seek = (time: string) => previewReduce(freshPreview(1000, 1), { type: 'seek', now: 1000, target: stamp(time) });
 const view = (time: string) => exerciseSessionView(seek(time), OWNER, stamp(time));
 
 describe('Exercise panel follows confirmed session and mission cursor', () => {
@@ -39,7 +39,7 @@ describe('Exercise panel follows confirmed session and mission cursor', () => {
   });
   it('does not treat a reservation, unconfirmed owner or future receipt as a session start', () => {
     const time = stamp('10:41:00');
-    expect(exerciseSessionView(freshPreview(1000), OWNER, time).points).toEqual([]);
+    expect(exerciseSessionView(freshPreview(1000, 1), OWNER, time).points).toEqual([]);
     for (const patch of [
       { association: { status: 'unconfirmed' as const, crewId: OWNER } },
       { association: { status: 'confirmed' as const, crewId: 'iss:crew-ti' } },

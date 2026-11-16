@@ -11,14 +11,13 @@
 .gnd .gnd-layout.has-orbit { grid-template-columns: minmax(0, 1fr) 320px; }
 .gnd .gnd-content { min-width: 0; }
 .gnd .gnd-crew-card { display: flex; flex-direction: column; align-items: center; width: 100%; min-width: 0; padding: 22px 18px; border-radius: 5px 28px 5px 5px; background: var(--surface); text-align: center; }
+.gnd .gnd-crew-cards > article { display: flex; }
+.gnd .gnd-crew-card { height: 100%; }
 .gnd .gnd-crew-card:hover { border-color: var(--action); }
 .gnd .gnd-crew-card .ops-portrait { width: 128px; margin-bottom: 10px; }
 .gnd .gnd-crew-name { font: 400 26px/1.3 Georgia, serif; }
 .gnd .gnd-card-caption { color: var(--quiet); font-size: 10px; margin: 4px 0 18px; }
-.gnd .gnd-crew-card > strong { font-size: 14px; font-weight: 550; margin-bottom: 6px; }
 .gnd .gnd-card-action { color: var(--link); font-size: 12px; margin-top: 14px; }
-.gnd .gnd-card-reservation { display: block; border-top: 1px solid var(--rule); width: 100%; margin-top: 12px; padding-top: 12px; font-size: 12px; }
-.gnd .gnd-card-reservation strong { font-size: 12px; font-weight: 550; }
 .gnd[data-person] .gnd-heading { margin: 10px 0 14px; }
 .gnd[data-person] .gnd-heading h1 { font-size: 30px; }
 .gnd[data-person] .gnd-person { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; margin-bottom: 10px; }
@@ -69,11 +68,9 @@
 .gnd .gnd-person-heading span { font-size: 11px; color: var(--quiet); }
 .gnd .gnd-back { font-size: 12px; padding: 6px 10px; }
 .gnd .gnd-person-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); }
-.gnd .gnd-person-summary > div { padding: 16px; }
-.gnd .gnd-person-summary > div + div { border-left: 1px solid var(--rule); }
-.gnd .gnd-person-summary h3 { color: var(--quiet); font-size: 11px; }
-.gnd .gnd-person-summary strong { display: block; font-size: 14px; font-weight: 550; line-height: 1.5; }
-.gnd .gnd-person-summary time { margin-top: 6px; color: var(--quiet); }
+.gnd .gnd-person-summary > .gnd-headline { display: contents; }
+.gnd .gnd-person-summary .gnd-hl { padding: 16px; }
+.gnd .gnd-person-summary .gnd-hl + .gnd-hl { border-left: 1px solid var(--rule); }
 .gnd .gnd-medical { margin: 16px 0; padding: 12px 16px; }
 .gnd .gnd-medical h3 { margin-bottom: 6px; font-size: 13px; }
 .gnd .gnd-medical strong, .gnd .gnd-medical p { font-size: 12px; }
@@ -86,6 +83,9 @@
 .gnd .gnd-agenda time, .gnd .gnd-person-summary time { white-space: normal; }
 .gnd .gnd-orbit { position: sticky; top: 12px; border: 1px solid var(--rule-strong); background: var(--surface); border-radius: 6px; padding: 18px; }
 .gnd .gnd-orbit header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.gnd .gnd-orbit-avatar { flex: none; display: block; width: 48px; height: 56px; }
+.gnd .gnd-orbit-avatar .orbit { width: 48px; height: 56px; }
+.gnd .gnd-orbit header h2 { flex: 1; min-width: 0; margin: 0; }
 .gnd .gnd-orbit header button { padding: 3px 9px; font-size: 20px; }
 .gnd .gnd-predefined { color: var(--link); font-size: 11px; font-weight: 600; margin: 12px 0; }
 .gnd .gnd-orbit-context { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 11px; line-height: 1.6; margin: 16px 0; }
@@ -102,14 +102,42 @@
 .gnd .gnd-reference { display: block; width: 100%; text-align: left; border: 0; padding: 4px 0; color: var(--link); background: none; }
 .gnd .gnd-reference span, .gnd .gnd-reference code { display: block; }
 .gnd .gnd-reference span { font-size: 11px; }
+/* OPS02: shared plan summary (card + detail), resource view and shared blocks. */
+.gnd .gnd-headline { display: block; width: 100%; min-width: 0; }
+.gnd .gnd-hl { display: block; min-width: 0; text-align: left; overflow-wrap: anywhere; }
+.gnd .gnd-crew-card .gnd-hl { border-top: 1px solid var(--rule); padding: 10px 0; }
+.gnd .gnd-hl-label { display: block; color: var(--quiet); font-size: 11px; font-weight: 550; margin-bottom: 4px; }
+.gnd .gnd-hl strong { display: block; font-size: 13px; font-weight: 550; line-height: 1.5; }
+.gnd .gnd-hl time { margin-top: 3px; color: var(--quiet); white-space: normal; }
+.gnd .gnd-hl-inline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.gnd .gnd-hl-inline strong { display: inline; }
+.gnd .gnd-hl-inline time { display: inline; margin-top: 0; }
+.gnd .gnd-hl .gnd-tag { margin: 4px 0 0; }
+.gnd .gnd-elapsed { display: block; margin-top: 6px; }
+.gnd .gnd-elapsed-bar { display: block; height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+.gnd .gnd-elapsed-bar i { display: block; height: 100%; background: var(--quiet); }
+.gnd .gnd-elapsed small { display: block; font-size: 10px; color: var(--quiet); margin-top: 3px; }
+.gnd .gnd-resources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 22px 0 6px; }
+.gnd .gnd-resources .gnd-note { grid-column: 1 / -1; margin: 0; }
+.gnd .gnd-resource-panel { min-width: 0; border: 1px solid var(--rule); border-radius: 5px; background: var(--surface); padding: 14px 16px; }
+.gnd .gnd-resource-panel h2 { font-size: 15px; margin-bottom: 8px; }
+.gnd .gnd-resource-panel ul { list-style: none; padding: 0; margin: 0; }
+.gnd .gnd-resource-panel li { padding: 8px 0; border-top: 1px solid var(--rule); font-size: 12px; min-width: 0; overflow-wrap: anywhere; }
+.gnd .gnd-resource-panel li li { border-top: 0; padding: 3px 0; }
+.gnd .gnd-resource-panel li > strong { display: block; font-size: 13px; }
+.gnd .gnd-resource-panel li p { margin: 3px 0 0; color: var(--quiet); }
+.gnd .gnd-resource-panel li > span, .gnd .gnd-resource-panel li > button { display: block; }
+.gnd .gnd-resource-panel button { padding: 0; border: 0; background: none; text-align: left; color: var(--link); font-size: 13px; font-weight: 550; }
+.gnd .gnd-resource-panel time { color: var(--quiet); }
 @media (max-width: 1100px) {
   .gnd .gnd-heading { align-items: start; flex-wrap: wrap; }
   .gnd .gnd-layout.has-orbit { grid-template-columns: minmax(0, 1fr); }
   .gnd .gnd-orbit { position: static; grid-row: 1; }
 }
 @media (max-width: 650px) {
+  .gnd .gnd-resources { grid-template-columns: minmax(0, 1fr); }
   .gnd .gnd-controls { flex-wrap: wrap; }
   .gnd .gnd-person-summary { grid-template-columns: minmax(0, 1fr); }
-  .gnd .gnd-person-summary > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+  .gnd .gnd-person-summary .gnd-hl + .gnd-hl { border-left: 0; border-top: 1px solid var(--rule); }
   .gnd .gnd-heading h1 { max-width: none; font-size: 30px; }
 }

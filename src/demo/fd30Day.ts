@@ -1,6 +1,6 @@
 export const DAY_START = Date.parse('2027-03-10T00:00:00Z');
 export const DAY_END = Date.parse('2027-03-11T00:00:00Z'); // Exclusive visual boundary, never FD31 data.
-export const ENTRY = Date.parse('2027-03-10T05:55:00Z');
+export const ENTRY = Date.parse('2027-03-10T05:50:00Z');
 export const START = ENTRY; // Stable offset base for previous snapshots and elapsed-time consumers.
 export const END = DAY_END - 60_000; // DA-1: final selectable/running instant is 23:59:00 UTC.
 export const clampMissionTime = (time: number) => Math.max(DAY_START, Math.min(END, time));

@@ -1,7 +1,7 @@
-import { CREW } from '../../demo/fd30';
+import { CREW, DAY_EVENTS, EXERCISE_EVENTS } from '../../demo/fd30';
 import type { CrewId, PreviewState } from '../../demo/fd30';
 import { EXERCISE_RECORDS } from '../../demo/history/exercise';
-import { FLIGHT_DAY_ONE } from '../../demo/history/sleep';
+import { FLIGHT_DAY_ONE, SLEEP_RECORDS } from '../../demo/history/sleep';
 import { exerciseSessionView } from '../../demo/exerciseSession';
 import { TELEMETRY_SOURCE, TELEMETRY_VERSION } from '../../demo/exerciseTelemetry';
 import { RESTING_PULSE, SPO2, restingPulse, spo2 } from '../../demo/wellbeing';
@@ -17,6 +17,8 @@ export interface GroundExerciseRecord {
 }
 export interface GroundMedicalPerson {
   id: CrewId; time: number;
+  /** Whether the FD30 scenario contains this kind of record for the person at all, so a gap reads as "not yet" or "not in scenario". */
+  scenario: { sleep: boolean; laboratory: boolean; exercise: boolean };
   pulse: { value: number | null; kind: 'illustrative' | 'exercise'; sourceId: string; version: string; occurredAt: string; receivedAt: string | null };
   spo2: { value: number; kind: 'illustrative'; version: string };
   sleep: NonNullable<ReturnType<typeof groundSleepTrend>>;
@@ -70,7 +72,12 @@ export function groundMedicalView(state: PreviewState, role: GroundRole, time: n
         occurredAt: last.occurredAt, receivedAt: last.receivedAt, sourceId: last.sourceId, version: LAB_VERSION, values: null }];
     }).sort((a, b) => Date.parse(b.occurredAt) - Date.parse(a.occurredAt)).slice(0, 3);
     const plan = plannedExercise(owner);
-    return { id: owner, time, pulse, spo2: { value: spo2(owner, time), kind: 'illustrative' as const, version: SPO2.version },
+    const scenario = {
+      sleep: SLEEP_RECORDS.some(r => r.owner === owner && r.fd === 30),
+      laboratory: DAY_EVENTS.some(e => 'sampleId' in e && e.association.crewId === owner),
+      exercise: EXERCISE_EVENTS.some(e => e.association.crewId === owner) || EXERCISE_RECORDS.some(r => r.owner === owner && r.fd === 30),
+    };
+    return { id: owner, time, scenario, pulse, spo2: { value: spo2(owner, time), kind: 'illustrative' as const, version: SPO2.version },
       sleep: groundSleepTrend(state, role, time, owner)!, labs, exercise: {
         live: live ? { id: session.session!.id, start: session.session!.start!.occurredAt, receivedAt: session.session!.start!.receivedAt,
           elapsedMinutes: session.elapsedSeconds! / 60, powerW: session.current?.workload_w ?? null, cadenceRpm: session.current?.cadence_rpm ?? null } : null,

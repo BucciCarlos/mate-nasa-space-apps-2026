@@ -19,7 +19,7 @@ import type { SleepViewer } from './sleep';
 const at = (h: string) => Date.parse(`2027-03-10T${h}:00Z`);
 const seek = (s: ReturnType<typeof freshPreview>, h: string) => previewReduce(s, { type: 'seek', now: 1000, target: at(h) });
 const viewer = (owner: typeof CREW[number]['id'] = OWNER): SleepViewer => ({ perspective: 'onboard', owner });
-const own = (owner: typeof CREW[number]['id'], h = '05:55') => previewReduce(seek(freshPreview(1000), h), { type: 'select', crewId: owner });
+const own = (owner: typeof CREW[number]['id'], h = '05:55') => previewReduce(seek(freshPreview(1000, 1), h), { type: 'select', crewId: owner });
 
 describe('HIST01 canonical fictional sleep records', () => {
   it('has distinct, stable private records; omissions emit no rows and no clinical extras', () => {
@@ -60,7 +60,7 @@ describe('HIST01 canonical fictional sleep records', () => {
     expect(sleepHistory(s, viewer(), at('11:00'), 'all', [{ ...future, occurredAt: '2027-03-10T11:30:00Z', receivedAt: '2027-03-10T11:00:00Z' }])?.records).toEqual([]);
   });
   it('does not turn a planned end into a record; uses the existing received wake and preserves nine events', () => {
-    const raw = freshPreview(1000), plan = planFor(OWNER).find(b => b.kind === 'sleep')!;
+    const raw = freshPreview(1000, 1), plan = planFor(OWNER).find(b => b.kind === 'sleep')!;
     expect(plan.end).toBe('2027-03-10T06:00:00Z');
     expect(sleepHistory(raw, viewer(), at('06:00'), 'all')?.records.some(r => r.fd === 30)).toBe(false);
     let s = seek(raw, '06:00');
@@ -91,7 +91,7 @@ describe('HIST01 canonical fictional sleep records', () => {
     expect(sleepHistory(s, viewer('iss:crew-ti'), at('12:00'), 'all')).toBeNull();
     for (const role of ['mission_operator','medical_professional'] as const) {
       expect(sleepHistory(s, { perspective: 'ground', role }, at('12:00'), 'all')).toBeNull();
-      expect(groundView(s, role, at('12:00'))).toEqual(groundView(freshPreview(1000), role, at('12:00')));
+      expect(groundView(s, role, at('12:00'))).toEqual(groundView(freshPreview(1000, 1), role, at('12:00')));
       expect(groundView(s, role, at('12:00'))?.medicalSummaries).toEqual([]);
     }
     expect(JSON.stringify(commanderView(freshOps(), 'iss:crew-ti', at('12:00')))).not.toMatch(/durationMinutes|fd30-sleep|iss:sleep:|sleepRecords/);

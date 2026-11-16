@@ -8,7 +8,7 @@ import { CATALOG_MODULES } from './catalogModules';
 import type { CatalogProps } from './catalogTypes';
 
 const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
-const st = (hhmm: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(1000), { type: 'seek', target: at(hhmm), now: 1000 }), { type: 'select', crewId: crew });
+const st = (hhmm: string, crew: CrewId) => previewReduce(previewReduce(freshPreview(1000, 1), { type: 'seek', target: at(hhmm), now: 1000 }), { type: 'select', crewId: crew });
 const onboard = (crew: CrewId, hhmm: string): CatalogProps => ({ perspective: 'onboard', data: { state: st(hhmm, crew), owner: crew, time: at(hhmm) } });
 const ground = (role: 'mission_operator' | 'medical_professional'): CatalogProps => ({ perspective: 'ground', role, data: { state: st('12:00', OWNER), owner: OWNER, time: at('12:00') } });
 const msk = CATALOG_MODULES.find(m => m.id === 'MOD-MSK')!;

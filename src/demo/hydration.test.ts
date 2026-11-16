@@ -56,7 +56,7 @@ describe('MATE-HYD02 simulated water-intake records', () => {
     expect(hydrationCount(JOHN.id, at('11:40'))).toBe(hydrationCount(OWNER, at('11:40')));
     expect(hydrationCount(JOHN.id, at('11:40'))).toBe(3);
     // Seeking in the preview state never changes what the cursor yields.
-    const seeked = previewReduce(freshPreview(1000), { type: 'seek', target: at('17:26'), now: 1000 });
+    const seeked = previewReduce(freshPreview(1000, 1), { type: 'seek', target: at('17:26'), now: 1000 });
     expect(seeked.processedIds.some(id => id.includes('hydration'))).toBe(false);
     expect(hydrationCount(TI, at('17:26'))).toBe(5);
   });

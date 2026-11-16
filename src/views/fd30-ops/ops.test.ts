@@ -111,7 +111,7 @@ describe('OPS01 role projections, planned progress and rewind', () => {
     expect(JSON.stringify(projected)).not.toMatch(/pulse_bpm|checkins|laboratory|conversation|wellbeing/);
   });
   it('makes both Ground roles independent of all personal FD30 records, including source event existence', () => {
-    const baseline = freshPreview(1000), privateState = previewReduce(baseline, { type: 'seek', target: at('11:45'), now: 1000 });
+    const baseline = freshPreview(1000, 1), privateState = previewReduce(baseline, { type: 'seek', target: at('11:45'), now: 1000 });
     privateState.profiles[OWNER].draft = 'PRIVATE_CHAT';
     privateState.profiles[OWNER].turns = [{ text: 'PRIVATE_CHAT', lang: 'en', reply: 'laboratory' }];
     for (const role of ['mission_operator', 'medical_professional'] as const) {
@@ -131,7 +131,7 @@ describe('OPS01 role projections, planned progress and rewind', () => {
     expect(operationalCrew(at('09:16'))[0].current?.title.en).toBe('Planned personal activity');
   });
   it('projections preserve the single shared clock, selected profile, position and M1 snapshot', () => {
-    let state = previewReduce(freshPreview(1000), { type: 'seek', target: time, now: 1000 });
+    let state = previewReduce(freshPreview(1000, 1), { type: 'seek', target: time, now: 1000 });
     state = previewReduce(state, { type: 'select', crewId: COMMANDER });
     state = previewReduce(state, { type: 'position', owner: COMMANDER, position: { x: .2, y: .4 } });
     const snapshot = JSON.stringify(state), m1 = createInitialState(1000, 'es'), m1Snapshot = JSON.stringify(m1);
@@ -146,7 +146,7 @@ describe('OPS01 bilingual rendering and absence states', () => {
   for (const locale of ['en', 'es'] as const) {
     it(`renders three clickable portraits and only operational content in ${locale}`, () => {
       for (const role of ['mission_operator', 'medical_professional'] as const) {
-        const out = html(createElement(GroundOverview, { data: groundView(freshPreview(0), role, time), time, onRole: () => {} }), locale);
+        const out = html(createElement(GroundOverview, { data: groundView(freshPreview(0, 1), role, time), time, onRole: () => {} }), locale);
         expect(out.match(/data-ops-card=/g)).toHaveLength(3); expect(out.match(/data-gnd-lane=/g)).toHaveLength(3);
         expect(out.match(/class="ops-portrait"/g)).toHaveLength(3);
         expect(out).not.toMatch(/pulse_bpm|PRIVATE_|data-session|data-sample|Inspiration4|C001/);
@@ -174,7 +174,7 @@ describe('OPS01 bilingual rendering and absence states', () => {
       expect(ordinary).not.toContain('href="#/demo/fd30/ground"');
     });
     it(`mounts Ground inside FD30 without private identity controls, chat, notices or source-event labels in ${locale}`, () => {
-      let session = previewReduce(freshPreview(1000), { type: 'seek', target: time, now: 1000 });
+      let session = previewReduce(freshPreview(1000, 1), { type: 'seek', target: time, now: 1000 });
       session = previewReduce(session, { type: 'running/set', running: false, now: 1000 });
       session.profiles[OWNER].draft = 'PRIVATE_CHAT';
       vi.stubGlobal('window', { sessionStorage: { getItem: (key: string) => key === FD30_KEY ? JSON.stringify(session) : null } });

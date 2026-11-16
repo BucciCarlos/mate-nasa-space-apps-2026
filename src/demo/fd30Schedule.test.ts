@@ -6,7 +6,7 @@ import { BLOOD_SAMPLE, LAB_PLAN, URINE_SAMPLE } from './laboratory';
 import { SCHEDULE_END, SCHEDULE_START, scheduleBlockView, scheduleX } from './fd30Schedule';
 
 const stamp = (time: string) => Date.parse(`2027-03-10T${time}:00Z`);
-const seek = (time: string) => previewReduce(freshPreview(1000), { type: 'seek', now: 1000, target: stamp(time) });
+const seek = (time: string) => previewReduce(freshPreview(1000, 1), { type: 'seek', now: 1000, target: stamp(time) });
 const exerciseId = plannedExercise(OWNER)!.id;
 
 describe('personal FD30 Schedule: existing plans and exact received associations', () => {
@@ -26,7 +26,7 @@ describe('personal FD30 Schedule: existing plans and exact received associations
     expect(scheduleBlockView(finished, OWNER, exerciseId, stamp('11:30'))).toMatchObject({ module: 'exercise', event: { kind: 'exercise.finished' } });
     expect(scheduleBlockView(finished, OWNER, exerciseId, stamp('10:29'))).toMatchObject({ module: null, event: null });
     expect(scheduleBlockView(finished, OWNER, exerciseId, stamp('10:41'))?.event?.kind).toBe('exercise.started');
-    expect(scheduleBlockView(freshPreview(1000), OWNER, exerciseId, stamp('11:30'))?.module).toBeNull();
+    expect(scheduleBlockView(freshPreview(1000, 1), OWNER, exerciseId, stamp('11:30'))?.module).toBeNull();
   });
   it('uses distinct sample IDs, never a generic task title or a result from another sample', () => {
     expect(scheduleBlockView(seek('09:14'), OWNER, LAB_PLAN.blood.id, stamp('09:14'))?.module).toBeNull();

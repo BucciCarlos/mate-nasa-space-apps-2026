@@ -18,3 +18,35 @@ export function groundPlanReferences(crew: readonly OperationalCrew[], query: Gr
 export function nextOperationalBlock(person: OperationalCrew, time: number) {
   return person.blocks.filter(b => Date.parse(b.start) > time).sort((a, b) => Date.parse(a.start) - Date.parse(b.start))[0] ?? null;
 }
+
+export type ReservationPhase = 'current' | 'upcoming';
+const phaseOf = (block: OperationalBlock, time: number): ReservationPhase => Date.parse(block.start) <= time ? 'current' : 'upcoming';
+/** Summary shared by the card and the person detail. Everything is plan: no attendance, execution or equipment use is inferred. */
+export function crewHeadline(person: OperationalCrew, time: number) {
+  const reservation = person.blocks.find(b => b.equipment && Date.parse(b.end) > time) ?? null;
+  return { current: person.current, progress: person.progress, next: nextOperationalBlock(person, time),
+    reservation: reservation ? { block: reservation, phase: phaseOf(reservation, time) } : null };
+}
+
+/** One row per resource named in the projected plan; a resource with no remaining reservation keeps its row. */
+export function resourceReservations(crew: readonly OperationalCrew[], time: number) {
+  const rows = new Map<string, { name: OperationalBlock['equipment'] & {}; entries: { person: string; block: OperationalBlock; phase: ReservationPhase }[] }>();
+  for (const person of crew) for (const block of person.blocks) {
+    if (!block.equipment) continue;
+    const row = rows.get(block.equipment.en) ?? { name: block.equipment, entries: [] };
+    if (Date.parse(block.end) > time) row.entries.push({ person: person.name, block, phase: phaseOf(block, time) });
+    rows.set(block.equipment.en, row);
+  }
+  return [...rows.values()].map(row => ({ ...row, entries: row.entries.sort((a, b) => Date.parse(a.block.start) - Date.parse(b.block.start)) }));
+}
+
+/** Shared by canonical block identity (the same projected block id in two or more people), never by coincident times. */
+export function sharedBlocks(crew: readonly OperationalCrew[], time: number) {
+  const byId = new Map<string, { block: OperationalBlock; people: string[] }>();
+  for (const person of crew) for (const block of person.blocks) {
+    const entry = byId.get(block.id) ?? { block, people: [] };
+    entry.people.push(person.name); byId.set(block.id, entry);
+  }
+  return [...byId.values()].filter(e => e.people.length > 1 && Date.parse(e.block.end) > time)
+    .map(e => ({ ...e, phase: phaseOf(e.block, time) })).sort((a, b) => Date.parse(a.block.start) - Date.parse(b.block.start));
+}

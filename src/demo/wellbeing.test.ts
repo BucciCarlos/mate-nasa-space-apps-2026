@@ -7,7 +7,7 @@ import { restingPulse, sessionPulse, spo2, wellbeingIndex, wellbeingParts } from
 const wall = 1000;
 const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
 const world = (time: number, owner: CrewId): PreviewState =>
-  previewReduce(previewReduce(freshPreview(wall), { type: 'seek', target: time, now: wall }), { type: 'select', crewId: owner });
+  previewReduce(previewReduce(freshPreview(wall, 1), { type: 'seek', target: time, now: wall }), { type: 'select', crewId: owner });
 
 describe('MATE-WELL01 simulated resting pulse', () => {
   it('stays within 75–77 bpm over a full day and visits every value', () => {

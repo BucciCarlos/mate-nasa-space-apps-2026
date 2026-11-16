@@ -21,7 +21,7 @@ const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
 const wall = 1000;
 const seek = (s: ReturnType<typeof freshPreview>, hhmm: string) => previewReduce(s, { type: 'seek', target: at(hhmm), now: wall });
 const as = (s: ReturnType<typeof freshPreview>, crew: CrewId) => previewReduce(s, { type: 'select', crewId: crew });
-const at0 = (hhmm: string, crew: CrewId) => as(seek(freshPreview(wall), hhmm), crew);
+const at0 = (hhmm: string, crew: CrewId) => as(seek(freshPreview(wall, 1), hhmm), crew);
 const history = (s: ReturnType<typeof freshPreview>, hhmm: string, range: 'last7' | 'all' = 'last7') => laboratoryHistory(s, { perspective: 'onboard', owner: dataOwner(s.activeCrewId) }, at(hhmm), range)!;
 
 /** Expected state per (owner, time): the same four words every surface must agree on. */
@@ -121,7 +121,7 @@ describe('LAB04 own laboratory journeys for Tomás and Mei', () => {
   });
 
   it('keeps each profile isolated: no sample, news, history, Today or answer crosses to another profile', () => {
-    const s = seek(freshPreview(wall), '23:59');
+    const s = seek(freshPreview(wall, 1), '23:59');
     const ids = (crew: CrewId) => labSamples(s, crew).map(x => x.id).sort();
     expect(ids(OWNER)).toEqual([BLOOD_SAMPLE, HISTORICAL_BLOOD_SAMPLE, URINE_SAMPLE].sort());
     expect(ids(TI)).toEqual([TI_BLOOD_SAMPLE]);

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Orbit } from '../../demo/orbit/Orbit';
 import { scheduleClock, scheduleInterval } from '../../demo/fd30Day';
 import { useLocale } from '../../i18n/I18nProvider';
 import type { GroundRole } from '../../state/types';
@@ -19,7 +20,7 @@ export function GroundOrbit({ crew, selected, role, time, onClose, onReference }
   const references = query ? groundPlanReferences(crew, query, selected, time) : [];
   const person = crew.find(c => c.id === selected);
   return <aside className="gnd-orbit" id="gnd-orbit" aria-labelledby="gnd-orbit-h" onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } }}>
-    <header><h2 id="gnd-orbit-h" ref={heading} tabIndex={-1}>{t.orbit}</h2><button type="button" aria-label={t.closeOrbit} onClick={onClose}>{'×'}</button></header>
+    <header><span className="gnd-orbit-avatar"><Orbit variant="luna" pose="idle" /></span><h2 id="gnd-orbit-h" ref={heading} tabIndex={-1}>{t.orbit}</h2><button type="button" aria-label={t.closeOrbit} onClick={onClose}>{'×'}</button></header>
     <p className="gnd-predefined">{t.predefined}</p>
     <dl className="gnd-orbit-context"><dt>{t.context}</dt><dd>{person?.name ?? t.crew}</dd><dt>{t.role}</dt><dd>{role === 'medical_professional' ? o.medical : o.operator}</dd><dt>{o.now}</dt><dd>{scheduleClock(time)} {t.axis}</dd></dl>
     <div className="gnd-query-buttons">{(['equipment', 'maintenance'] as const).map(id => <button type="button" key={id} aria-pressed={query === id} onClick={() => setQuery(id)}>{id === 'equipment' ? t.equipmentQuery : t.maintenanceQuery}</button>)}</div>

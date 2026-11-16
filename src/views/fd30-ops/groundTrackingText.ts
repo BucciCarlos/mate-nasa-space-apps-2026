@@ -18,6 +18,10 @@ const en = {
   maintenanceAnswer: 'The plan assigns this maintenance block to:',
   noMaintenance: 'No shared maintenance block is available for this context in the projected plan.',
   reference: 'View plan block', equipmentLimit: 'These are reservations, not confirmation of equipment use.',
+  plannedNow: 'Planned now', elapsed: 'elapsed time of the planned block', reservationCurrent: 'Current reservation', reservationUpcoming: 'Upcoming reservation',
+  noReservationPlan: 'No reservation in the plan', resources: 'Reservations by resource', sharedTitle: 'Upcoming shared blocks',
+  sharedNow: 'In the plan now', sharedUpcoming: 'Upcoming', noShared: 'No shared block remains in this plan.', sharedWith: 'Shared by',
+  resourcesLimit: 'Plan and reservations only; they do not show real availability, attendance or equipment use.',
 };
 const es: typeof en = {
   title: 'Seguimiento de tripulación', intro: 'Plan operativo · escenario simulado FD30', crew: 'Tripulación',
@@ -39,5 +43,9 @@ const es: typeof en = {
   maintenanceAnswer: 'El plan asigna este bloque de mantenimiento a:',
   noMaintenance: 'No hay un bloque de mantenimiento compartido disponible para este contexto en el plan proyectado.',
   reference: 'Ver bloque del plan', equipmentLimit: 'Son reservas; no confirman el uso del equipo.',
+  plannedNow: 'Previsto ahora', elapsed: 'tiempo transcurrido del bloque previsto', reservationCurrent: 'Reserva vigente', reservationUpcoming: 'Próxima reserva',
+  noReservationPlan: 'Sin reserva en el plan', resources: 'Reservas por recurso', sharedTitle: 'Próximos bloques compartidos',
+  sharedNow: 'En el plan ahora', sharedUpcoming: 'Próximo', noShared: 'No quedan bloques compartidos en este plan.', sharedWith: 'Comparten',
+  resourcesLimit: 'Solo plan y reservas; no muestran disponibilidad real, asistencia ni uso de equipo.',
 };
 export const GROUND_TRACKING_TEXT = { en, es };

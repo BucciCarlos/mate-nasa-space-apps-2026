@@ -18,9 +18,9 @@ const at = (h: string) => Date.parse(`2027-03-10T${h}:00Z`);
 const seek = (s: ReturnType<typeof freshPreview>, target: number) => previewReduce(s, { type: 'seek', now: 1000, target });
 describe('DAY01 full FD30, independent plans and snapshot migration', () => {
   it('starts at entry, reaches both day bounds, stops at 23:59 and keeps running after the script ends', () => {
-    expect(previewTime(freshPreview(1000), 1000)).toBe(ENTRY);
-    expect(previewTime(seek(freshPreview(1000), DAY_START - 100), 1000)).toBe(DAY_START);
-    let s = seek(freshPreview(1000), at('11:50'));
+    expect(previewTime(freshPreview(1000, 1), 1000)).toBe(ENTRY);
+    expect(previewTime(seek(freshPreview(1000, 1), DAY_START - 100), 1000)).toBe(DAY_START);
+    let s = seek(freshPreview(1000, 1), at('11:50'));
     // After Lucía's nine events the next scripted event is Tomás's own sample collection (LAB04); Lucía's nine are all received.
     expect(nextPreviewEvent(s)).toMatchObject({ association: { crewId: 'iss:crew-ti' }, kind: 'lab.sample_taken' });
     expect(s.running).toBe(true);
@@ -34,7 +34,7 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
     expect(DAY_END - END).toBe(60000); // DA-1's last selectable instant, no scripted sub-minute final event.
   });
   for (const running of [true, false]) it(`migrates a v5 ${running ? 'running' : 'paused'} cursor without shifting time or private state`, () => {
-    let s = seek(freshPreview(1000), at('10:41'));
+    let s = seek(freshPreview(1000, 1), at('10:41'));
     s = previewReduce(s, { type: 'ask', owner: OWNER, text: 'my day', lang: 'es', now: 1000 });
     s = previewReduce(s, { type: 'draft', owner: OWNER, text: 'unfinished' });
     s = previewReduce(s, { type: 'position', owner: OWNER, position: { x: .25, y: .6 } });
@@ -52,7 +52,7 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
     expect(expired.profiles).toEqual(legacy.profiles);
   });
   it('round-trips signed v6 offsets and hides/restores only due events without repeated IDs/notices', () => {
-    let s = seek(freshPreview(1000), at('11:50'));
+    let s = seek(freshPreview(1000, 1), at('11:50'));
     s = previewReduce(s, { type: 'events/announce', owner: OWNER, ids: DAY_EVENTS.map(e => e.id) });
     const profiles = s.profiles;
     for (let i = 0; i < 3; i++) {
@@ -110,11 +110,11 @@ describe('DAY01 full FD30, independent plans and snapshot migration', () => {
     expect(visibleRequests(journal, 'iss:crew-ti', time-1)).toHaveLength(0);
     expect(opsReduce(journal, { type: 'wellbeing/draft', owner: OWNER, topic: 'day', text: 'late foreign' }, 'iss:crew-mo', time)).toBe(journal);
     for (const role of ['mission_operator', 'medical_professional'] as const) {
-      expect(groundView(seek(freshPreview(1000), time), role, time)).toEqual(groundView(freshPreview(1000), role, time));
+      expect(groundView(seek(freshPreview(1000, 1), time), role, time)).toEqual(groundView(freshPreview(1000, 1), role, time));
     }
   });
   for (const locale of ['en', 'es'] as const) it(`renders both midnight boundaries and planned continuation without FD31 records in ${locale}`, () => {
-    const state = seek(freshPreview(1000), DAY_START);
+    const state = seek(freshPreview(1000, 1), DAY_START);
     const html = (node: ReturnType<typeof createElement>) => renderToStaticMarkup(createElement(I18nProvider, { locale, children: node }));
     for (const owner of CREW.map(c => c.id)) {
       const personal = html(createElement(Fd30PersonalAgenda, { state, owner, time: DAY_START }));

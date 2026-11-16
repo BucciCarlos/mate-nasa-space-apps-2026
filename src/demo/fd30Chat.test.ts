@@ -15,7 +15,7 @@ const answer = (s: ReturnType<typeof freshPreview>) => s.profiles[s.activeCrewId
 for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
   const t = FD30_CHAT_TEXT[lang];
   it('renders translated suggestions, simulated transcription and a personal detail link, without exposing another conversation', () => {
-    const s = ask(seek(freshPreview(wall), '10:45'), t.exercise, lang, 'simulated_voice');
+    const s = ask(seek(freshPreview(wall, 1), '10:45'), t.exercise, lang, 'simulated_voice');
     const render = (profile: typeof s.profiles[typeof OWNER]) => renderToStaticMarkup(createElement(I18nProvider, { locale: lang,
       children: createElement(Fd30Conversation, { profile, character: 'Mate', logRef: { current: null }, onAsk: () => {}, onDraft: () => {}, onOpen: () => {} }) }));
     const html = render(s.profiles[OWNER]);
@@ -30,7 +30,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     expect(render(s.profiles['iss:crew-ti'])).not.toContain(t.exerciseLive);
   });
   it('answers the same typed exercise query before, during and after this owner’s current-day session', () => {
-    let s = seek(freshPreview(wall), '10:00');
+    let s = seek(freshPreview(wall, 1), '10:00');
     s = ask(s, t.exercise, lang);
     expect(answer(s).body).toContain(t.exerciseWaiting);
     expect(answer(s).body).not.toContain(t.exerciseDone); // FD29 history is not today’s session
@@ -44,7 +44,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     expect(s.profiles[OWNER].turns[0].answer!.at).toBe(at('10:00'));
   });
   it('distinguishes no receipt, analysis and result availability without inventing values, including rewind', () => {
-    let s = ask(seek(freshPreview(wall), '09:00'), t.laboratory, lang);
+    let s = ask(seek(freshPreview(wall, 1), '09:00'), t.laboratory, lang);
     expect(answer(s).body).toContain(t.labWaiting);
     expect(answer(s).body).not.toContain(t.labResult);
     s = ask(seek(s, '10:00'), t.laboratory, lang);
@@ -61,7 +61,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     children: createElement(Fd30Conversation, { profile: state.profiles[state.activeCrewId], character: 'Mate', time: previewTime(state, wall),
       logRef: { current: null }, onAsk: () => {}, onDraft: () => {}, onOpen: () => {} }) }));
   for (const queryTime of ['11:45', '11:50']) it(`hides the ${queryTime} laboratory reply on rewind and restores it once at the query cursor`, () => {
-    let state = ask(seek(freshPreview(wall), queryTime), t.laboratory, lang);
+    let state = ask(seek(freshPreview(wall, 1), queryTime), t.laboratory, lang);
     const turns = state.profiles[OWNER].turns;
     const snapshot = JSON.stringify(turns);
     expect(answer(state).body).toContain(`${t.blood}: ${t.labResult}`);
@@ -80,7 +80,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     expect(previewTime(state, wall)).toBe(at(queryTime));
   });
   it('keeps Lucia laboratory results out of Tomas and Mei conversations at 11:50', () => {
-    let state = ask(seek(freshPreview(wall), '11:50'), t.laboratory, lang, 'simulated_voice');
+    let state = ask(seek(freshPreview(wall, 1), '11:50'), t.laboratory, lang, 'simulated_voice');
     const lucia = state.profiles[OWNER];
     for (const crew of CREW.slice(1)) {
       state = previewReduce(state, { type: 'select', crewId: crew.id });
@@ -103,7 +103,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     expect(state.profiles[OWNER].turns).toHaveLength(1);
   });
   it('uses the same answer path for simulated voice, retains a typed draft, and round-trips persistence', () => {
-    let s = seek(freshPreview(wall), '10:45');
+    let s = seek(freshPreview(wall, 1), '10:45');
     s = previewReduce(s, { type: 'draft', owner: OWNER, text: 'private draft' });
     const before = s;
     const voice = ask(s, t.exercise, lang, 'simulated_voice');
@@ -116,7 +116,7 @@ for (const lang of ['en', 'es'] as const) describe(`CHAT01 ${lang}`, () => {
     expect(restorePreview(JSON.stringify(voice), wall).profiles).toEqual(voice.profiles);
   });
   it('answers only the active profile’s agenda, preserves private histories and the common clock', () => {
-    let s = seek(freshPreview(wall), '10:45');
+    let s = seek(freshPreview(wall, 1), '10:45');
     s = ask(s, t.exercise, lang);
     const lucia = s.profiles[OWNER];
     const clock = previewTime(s, wall);

@@ -9,7 +9,7 @@ import { groundMedicalView } from './groundMedical';
 import { groundView } from './opsSelectors';
 import { groundPlanReferences } from './groundTracking';
 const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
-const stateAt = (hhmm: string) => previewReduce(freshPreview(1000), { type: 'seek', target: at(hhmm), now: 1000 });
+const stateAt = (hhmm: string) => previewReduce(freshPreview(1000, 1), { type: 'seek', target: at(hhmm), now: 1000 });
 const medical = (hhmm: string) => groundMedicalView(stateAt(hhmm), 'medical_professional', at(hhmm))!;
 
 describe('GND02 explicit medical projection for the three operational crew', () => {
@@ -85,5 +85,16 @@ describe('GND02 explicit medical projection for the three operational crew', () 
         expect(html).not.toContain('00:00–');
       }
     }
+  });
+  it('tells a gap at this hour apart from a record the scenario never includes, in both languages', () => {
+    const render = (locale: 'es' | 'en', index: number) => renderToStaticMarkup(createElement(I18nProvider, { locale, children: createElement(GroundMedicalDashboard, { data: medical('03:00')[index] }) }));
+    for (const person of medical('03:00')) expect(person.scenario.laboratory).toBe(true);
+    expect(medical('03:00').map(p => p.scenario.exercise)).toEqual([true, false, false]);
+    expect(render('en', 0)).toContain('not available yet at this hour');
+    expect(render('en', 0)).toContain('no session in progress at this hour');
+    expect(render('en', 1)).toContain('the scenario includes no recorded session');
+    expect(render('es', 1)).toContain('el escenario no incluye una sesión registrada');
+    expect(render('es', 0)).toContain('aún no disponible a esta hora');
+    expect(render('en', 1)).toContain('Illustrative clock pattern · not received telemetry');
   });
 });

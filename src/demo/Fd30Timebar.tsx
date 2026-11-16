@@ -1,7 +1,7 @@
 import type { Dispatch } from 'react';
 import { useLocale, useT } from '../i18n/I18nProvider';
-import { DAY_EVENTS, DAY_START, END, ENTRY } from './fd30';
-import type { PreviewAction, PreviewState } from './fd30';
+import { CLOCK_SPEEDS, DAY_EVENTS, DAY_START, END, ENTRY } from './fd30';
+import type { ClockSpeed, PreviewAction, PreviewState } from './fd30';
 
 export function Fd30Timebar({ state, time, dispatch, onSeek }: {
   state: PreviewState; time: number; dispatch: Dispatch<PreviewAction>; onSeek: (target: number) => void;
@@ -26,11 +26,14 @@ export function Fd30Timebar({ state, time, dispatch, onSeek }: {
       <button type="button" disabled={time >= END} onClick={() => onSeek(time + 15 * 60_000)}>{t.timeForward}</button>
       <button type="button" disabled={time >= END} aria-pressed={state.running}
         onClick={() => dispatch({ type: 'running/set', now: Date.now(), running: !state.running })}>{state.running ? t.timePause : t.timePlay}</button>
+      <label><span>{t.timeSpeed}</span><select aria-label={t.timeSpeed} value={state.speed} onChange={e => dispatch({ type: 'speed/set', now: Date.now(), speed: Number(e.target.value) as ClockSpeed })}>
+        {CLOCK_SPEEDS.map(speed => <option key={speed} value={speed}>{speed}×</option>)}
+      </select></label>
       <label><span>{t.timeMode}</span><select aria-label={t.timeMode} value={state.playback} onChange={e => dispatch({ type: 'playback/set', mode: e.target.value as PreviewState['playback'] })}>
         <option value="explore">{t.timeExplore}</option><option value="guided">{t.timeGuided}</option>
       </select></label>
       <button type="button" onClick={() => onSeek(ENTRY)}>{t.timeEntry}</button>
-      <span>{time >= END ? t.timeFinished : state.running ? t.timeRunning : t.timePaused}</span>
+      <span>{time >= END ? t.timeFinished : state.running ? t.timeRunning(state.speed) : t.timePaused}</span>
     </div>
     <p>{t.timeHint}</p>
   </fieldset>;

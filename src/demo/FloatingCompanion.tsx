@@ -12,12 +12,16 @@ interface Props {
   crew: Character; preference: Position | null; pose: Pose; news: boolean; hasSummary: boolean; newsText: string; chatOpen: boolean;
   /** ALR01: automatic notice bubble. Shown even with the chat closed; it never opens chat or navigates by itself. */
   notice?: { text: string; actionLabel: string; onAction: () => void; onClose: () => void } | null;
+  /** ALR02: identity of the current arrival. A new value (a replacement notice) restarts the temporary centre presentation. */
+  noticeKey?: unknown;
   onPosition: (position: Position | null) => void; onChat: () => void; onSleep?: () => void; onExercise?: () => void; onLaboratory?: () => void; onSummary: () => void;
   characterRef: React.RefObject<HTMLButtonElement>;
 }
 const asBox = (r: DOMRect): Box => ({ x: r.x, y: r.y, width: r.width, height: r.height });
 
-export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, notice, onPosition, onChat, onSummary, characterRef }: Props) {
+export const NOTICE_CENTER_MS = 5000;
+
+export function FloatingCompanion({ crew, preference, pose, news, hasSummary, newsText, chatOpen, notice, noticeKey, onPosition, onChat, onSummary, characterRef }: Props) {
   const t = useT().fd30;
   const frame = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
@@ -34,6 +38,16 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
     return () => window.clearTimeout(timer);
   }, [chatOpen]);
   const [dragPoint, setDragPoint] = useState<Point | null>(null);
+  // ALR02: an automatic notice first appears with the companion in the centre for five real seconds, then the companion returns to its
+  // own position (the stored preference is never touched) and the notice stays open beside it. Only this flag is temporary.
+  const [centered, setCentered] = useState(false);
+  const hasNotice = !!notice;
+  useEffect(() => {
+    if (!hasNotice) { setCentered(false); return; }
+    setInfoOpen(false); setCentered(true);
+    const timer = window.setTimeout(() => setCentered(false), NOTICE_CENTER_MS);
+    return () => window.clearTimeout(timer);
+  }, [noticeKey, hasNotice]);
   const initialBounds = { x: 8, y: 180, width: window.innerWidth - 16, height: Math.max(0, window.innerHeight - 188) };
   // Geometry lives in a ref and is read at render. A measurement overwrites it (latest wins) and bumps a counter to re-render.
   // A functional setState replaying an older DOM snapshot after a newer one made measure and render chase each other.
@@ -97,12 +111,17 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   }, [infoOpen, moving]);
   // Only viewport/chat constraints affect the resting anchor. Scroll changes bubble placement,
   // while main controls have paint/hit-test priority if they pass underneath the character.
-  const point = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size, geometry.floats);
+  const staged = centered && hasNotice && !dragPoint && !moving;
+  const restPoint = fitPosition(dragPoint ?? fromPreference(preference, geometry.preferenceBounds, geometry.size), geometry.bounds, geometry.size, geometry.floats);
+  const centre = geometry.preferenceBounds, group = geometry.notice.height + 8 + geometry.size.height;
+  const point = staged
+    ? fitPosition({ x: centre.x + (centre.width - geometry.size.width) / 2, y: centre.y + (centre.height - group) / 2 + geometry.notice.height + 8 }, geometry.bounds, geometry.size)
+    : restPoint;
   const noticePoint = fitPosition({ x: point.x - geometry.notice.width - 12, y: point.y }, geometry.bounds, geometry.notice,
     [...geometry.obstacles, ...geometry.floats, { ...point, ...geometry.size }]);
   // The automatic notice sits right above the companion (a speech bubble), clear of the companion and the Demo controls only.
-  const alertPoint = fitPosition({ x: point.x + geometry.size.width - geometry.notice.width, y: point.y - geometry.notice.height - 8 }, geometry.bounds, geometry.notice,
-    [...geometry.floats, { ...point, ...geometry.size }]);
+  const alertPoint = fitPosition({ x: staged ? point.x + (geometry.size.width - geometry.notice.width) / 2 : point.x + geometry.size.width - geometry.notice.width, y: point.y - geometry.notice.height - 8 }, geometry.bounds, geometry.notice,
+    [...(staged ? [] : geometry.floats), { ...point, ...geometry.size }]);
   const dropAt = (p: Point) => fitPosition(p, geometry.bounds, geometry.size, [...geometry.obstacles, ...geometry.floats]);
   const commit = (p: Point) => onPosition(toPreference(dropAt(p), geometry.preferenceBounds, geometry.size));
   const release = (e: PointerEvent<HTMLButtonElement>, cancel: boolean) => {
@@ -122,12 +141,13 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
   const action = news && hasSummary;
   const act = (action: () => void) => () => { action(); setInfoOpen(false); };
   return (
-    <div className={`fd-floating fd-pose-${actualPose}${moving ? ' fd-key-moving' : ''}`} ref={frame} style={{ left: point.x, top: point.y }} data-owner={crew.id}>
+    <div className={`fd-floating fd-pose-${actualPose}${moving ? ' fd-key-moving' : ''}${!dragPoint && !moving ? ' fd-glide' : ''}${staged ? ' fd-staged' : ''}`} ref={frame} style={{ left: point.x, top: point.y }} data-owner={crew.id}>
       <span className="sr-only" id="fd-keyboard-help">{t.keyboardHint} {t.moveInstructions}</span>
       <button className="fd-character" ref={characterRef} type="button" aria-label={`${t.openChat} · ${crew.character}`} aria-expanded={chatOpen} aria-describedby="fd-keyboard-help" aria-keyshortcuts="m Home" aria-controls={chatOpen ? 'fd-chat-panel' : undefined}
         onPointerDown={e => {
           if (moving || e.button !== 0 || !e.isPrimary) return;
           suppressClick.current = false;
+          setCentered(false);
           gesture.current = { id: e.pointerId, start: { x: e.clientX, y: e.clientY }, base: point, moved: false };
           e.currentTarget.setPointerCapture(e.pointerId);
         }}
@@ -143,7 +163,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
         onClick={e => { if (moving || (suppressClick.current && e.detail !== 0)) { e.preventDefault(); suppressClick.current = false; return; } onChat(); }}
         onKeyDown={e => {
           if (e.key === 'Home') { e.preventDefault(); onPosition(null); setDragPoint(null); setMoving(false); return; }
-          if (!moving && e.key.toLowerCase() === 'm') { e.preventDefault(); setMoving(true); setDragPoint(point); return; }
+          if (!moving && e.key.toLowerCase() === 'm') { e.preventDefault(); setCentered(false); setMoving(true); setDragPoint(point); return; }
           if (!moving) return;
           if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Escape', ' '].includes(e.key)) e.preventDefault();
           const step = e.shiftKey ? 32 : 8;
@@ -159,7 +179,7 @@ export function FloatingCompanion({ crew, preference, pose, news, hasSummary, ne
         {news && !infoOpen && <span className="fd-info-badge" aria-hidden="true">!</span>}
       </button>
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{news ? `${t.news}. ${newsText}` : ''}</span>
-      {notice && !cardOpen && <div className="fd-floating-notice fd-auto-notice" ref={bubble} role="status" aria-live="polite" aria-label={t.noticeLabel} data-auto-notice style={{ left: alertPoint.x, top: alertPoint.y, maxHeight: geometry.bounds.height, width: 'max-content', maxWidth: Math.min(220, geometry.bounds.width) }}>
+      {notice && !cardOpen && <div className="fd-floating-notice fd-auto-notice" ref={bubble} role="status" aria-live="polite" aria-label={t.noticeLabel} data-auto-notice data-staged={staged ? 'center' : 'rest'} style={{ left: alertPoint.x, top: alertPoint.y, maxHeight: geometry.bounds.height, width: 'max-content', maxWidth: Math.min(staged ? 300 : 220, geometry.bounds.width) }}>
         <p>{notice.text}</p>
         <div className="fd-notice-actions">
           <button className="fd-link fd-summary-action" type="button" onClick={notice.onAction}>{notice.actionLabel}<span aria-hidden="true">→</span></button>

@@ -10,7 +10,7 @@ import { GroundOverview } from './GroundOverview';
 import { groundView } from './opsSelectors';
 
 const at = (hhmm: string) => Date.parse(`2027-03-10T${hhmm}:00Z`);
-const seek = (hhmm: string) => previewReduce(freshPreview(1000), { type: 'seek', target: at(hhmm), now: 1000 });
+const seek = (hhmm: string) => previewReduce(freshPreview(1000, 1), { type: 'seek', target: at(hhmm), now: 1000 });
 const trend = (hhmm: string, role: 'medical_professional' | 'mission_operator' = 'medical_professional') => groundSleepTrend(seek(hhmm), role, at(hhmm));
 
 describe('GND03 default Lucía sleep projection, extended by the GND02 medical dashboard', () => {

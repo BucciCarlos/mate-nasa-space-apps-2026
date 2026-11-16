@@ -10,7 +10,7 @@ import { SleepScore } from '../../views/history/sleep/SleepScore';
 import { SleepProvenance } from '../../views/history/sleep/SleepProvenance';
 import { SLEEP_SCORE_TEXT } from '../../views/history/sleep/sleepScoreText';
 const cursor = Date.parse('2027-03-10T12:00:00Z');
-const own = (owner: typeof CREW[number]['id']) => previewReduce(previewReduce(freshPreview(1000), {type:'seek',target:cursor,now:1000}), {type:'select',crewId:owner});
+const own = (owner: typeof CREW[number]['id']) => previewReduce(previewReduce(freshPreview(1000, 1), {type:'seek',target:cursor,now:1000}), {type:'select',crewId:owner});
 const render = (node: ReturnType<typeof createElement>, locale: 'en'|'es') => renderToStaticMarkup(createElement(I18nProvider,{locale,children:node}));
 describe('SLEEP03 formula',()=>{
   it.each([[330,340,68.75],[300,305,62.5],[240,240,50],[420,480,79.625],[450,520,84.23076923076923],[480,480,100],[600,600,100],[0,480,0]])('audit %s/%s', (d,b,expected)=>{

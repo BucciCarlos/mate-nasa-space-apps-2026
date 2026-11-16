@@ -18,7 +18,7 @@ import { Fd30Conversation } from '../Fd30Conversation';
 
 const at = (h: string) => Date.parse(`2027-03-10T${h}:00Z`);
 const seek = (s: ReturnType<typeof freshPreview>, h: string) => previewReduce(s, { type: 'seek', now: 1000, target: at(h) });
-const own = (owner: typeof CREW[number]['id'] = OWNER, h = '05:55') => previewReduce(seek(freshPreview(1000), h), { type: 'select', crewId: owner });
+const own = (owner: typeof CREW[number]['id'] = OWNER, h = '05:55') => previewReduce(seek(freshPreview(1000, 1), h), { type: 'select', crewId: owner });
 const viewer = (owner: typeof CREW[number]['id'] = OWNER): ExerciseViewer => ({ perspective: 'onboard', owner });
 
 describe('HIST02 private exercise history', () => {
